@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order-items', function (Blueprint $table) {
+        Schema::create('shipping_adresses', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('order_id');
-            $table->unsignedBigInteger('car_id');
-            $table->string('price');
-            $table->string('shipping_fees');
-            $table->foreign('car_id')->references('id')->on('cars')->onDelete('cascade');
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            $table->string('adress_name');
+            $table->string('weight_range');
+            $table->string('tarif_per_tone');
+            $table->unsignedBigInteger('country_id')->index();
+            $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade');
             $table->timestamps();
         });
     }

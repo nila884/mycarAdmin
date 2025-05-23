@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('company-bank', function (Blueprint $table) {
+        Schema::create('sellers', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('company_id')->index();
-            $table->string('bank_name');
-            $table->string('account_number');
-            $table->string('account_name');
+            $table->string('seller_name');
+            $table->string('phone');
+            $table->string('email')->unique();
+            $table->string('country');
             $table->string('adress');
-            $table->foreign('company_id')->references('id')->on('company')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('sellers');
     }
 };

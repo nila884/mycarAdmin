@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('shipping-adress', function (Blueprint $table) {
+        Schema::create('images', function (Blueprint $table) {
             $table->id();
-            $table->string('adress_name');
-            $table->string('weight_range');
-            $table->string('tarif_per_tone');
-            $table->unsignedBigInteger('country_id')->index();
-            $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade');
+            $table->unsignedBigInteger('car_id')->index();
+            $table->boolean('is_main')->default(false);
+            $table->string('image_path');
             $table->timestamps();
+
+            $table->foreign('car_id')->references('id')->on('cars')->onDelete('cascade');
         });
     }
 
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('images');
     }
 };

@@ -18,6 +18,7 @@ class CarModel extends Model
 
     protected $fillable = [
         'model_name',
+        'brand_id',
     ];
 
 }

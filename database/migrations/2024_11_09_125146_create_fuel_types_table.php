@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('car-feature', function (Blueprint $table) {
+        Schema::create('fuel_types', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('car_id')->index();
-            $table->unsignedBigInteger('feature_id')->index();
-            $table->foreign('car_id')->references('id')->on('cars')->onDelete('cascade');
-            $table->foreign('feature_id')->references('id')->on('features')->onDelete('cascade');
+            $table->string('fuel_type');
             $table->timestamps();
         });
     }
@@ -29,3 +26,4 @@ return new class extends Migration
         //
     }
 };
+ 

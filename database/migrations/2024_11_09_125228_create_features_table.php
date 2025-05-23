@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('features', function (Blueprint $table) {
             $table->id();
             $table->string('feature_name');
+            $table->string('description');
+            $table->string('icon')->nullable();
             $table->timestamps();
         });
     }

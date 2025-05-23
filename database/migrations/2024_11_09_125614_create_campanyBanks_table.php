@@ -11,10 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('brands', function (Blueprint $table) {
+        Schema::create('company_banks', function (Blueprint $table) {
             $table->id();
-            $table->string('brand_name');
-             $table->string('logo')->nullable();
+            $table->unsignedBigInteger('company_id')->index();
+            $table->string('bank_name');
+            $table->string('account_number');
+            $table->string('account_name');
+            $table->string('adress');
+            $table->foreign('company_id')->references('id')->on('company')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -24,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('brands');
+        //
     }
 };

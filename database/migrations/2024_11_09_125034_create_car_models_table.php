@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('versions', function (Blueprint $table) {
+        Schema::create('car_models', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('model_id')->index();
-            $table->string('version_year');
+            $table->unsignedBigInteger('brand_id')->index();
+            $table->string('model_name');
+            $table->foreign('brand_id')->references('id')->on('brands')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('versions');
+        Schema::dropIfExists('models');
     }
 };

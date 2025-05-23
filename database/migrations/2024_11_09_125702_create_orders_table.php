@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('customer_country');
             $table->string('customer_adress');
             $table->unsignedBigInteger('shipping_id')->index();
-            $table->foreign('shipping_id')->references('id')->on('shipping-adress')->onDelete('cascade');
+            $table->foreign('shipping_id')->references('id')->on('shipping_adresses')->onDelete('cascade');
             $table->string('total_amount');
             $table->enum('order_status', ['pending', 'completed', 'canceled'])->default('pending');
             $table->enum('delivery_status', ['not_shipped', 'shipped', 'delivered'])->default('not_shipped');

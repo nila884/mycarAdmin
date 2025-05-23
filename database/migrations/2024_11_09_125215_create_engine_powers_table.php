@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('car-pictures', function (Blueprint $table) {
+        Schema::create('engine_powers', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('car_id')->index();
-            $table->string('is_primary');
-            $table->string('image_url');
-            $table->foreign('car_id')->references('id')->on('cars')->onDelete('cascade');
+            $table->string('power');
             $table->timestamps();
         });
     }

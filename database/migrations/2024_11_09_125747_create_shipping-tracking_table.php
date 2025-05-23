@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('order_id')->index();
             $table->unsignedBigInteger('shipping_id')->index();
-            $table->foreign('shipping_id')->references('id')->on('shipping-adress')->onDelete('cascade');
+            $table->foreign('shipping_id')->references('id')->on('shipping_adresses')->onDelete('cascade');
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
             $table->string('current_location');
             $table->timestamps();
