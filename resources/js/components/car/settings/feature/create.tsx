@@ -8,6 +8,7 @@ import {Form,FormControl,FormDescription,FormField,FormItem,FormLabel,FormMessag
 import { useDropzone } from "react-dropzone";
 import React from 'react';
 import { ImagePlus } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 const create = () => {
 
@@ -15,13 +16,15 @@ const create = () => {
   const [preview, setPreview] = React.useState<string | ArrayBuffer | null>("");
 
   const formSchema = z.object({
-    image: z
+    logo: z
       //Rest of validations done via react dropzone
       .instanceof(File)
       .refine((file) => file.size !== 0, "Please upload an image"),
-    brand_name: z
-    .string({
-      required_error: "brand name is required.",
+    feature_name: z.string().min(2, {
+    message: "Feature name must be at least 2 characters.",
+    }),
+    description: z.string().min(10, {
+    message: "Feature description must be at least 10 characters.",
     }),
   });
 
@@ -29,8 +32,8 @@ const create = () => {
     resolver: zodResolver(formSchema),
     mode: "onBlur",
     defaultValues: {
-      image: new File([""], "filename"),
-      brand_name: "",
+      logo: new File([""], "filename"),
+      feature_name: "",
     },
   });
 
@@ -40,11 +43,11 @@ const create = () => {
       try {
         reader.onload = () => setPreview(reader.result);
         reader.readAsDataURL(acceptedFiles[0]);
-        form.setValue("image", acceptedFiles[0]);
-        form.clearErrors("image");
+        form.setValue("logo", acceptedFiles[0]);
+        form.clearErrors("logo");
       } catch (error) {
         setPreview(null);
-        form.resetField("image");
+        form.resetField("logo");
       }
     },
     [form],
@@ -69,9 +72,9 @@ const create = () => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>New Brand</DialogTitle>
+          <DialogTitle>New Feature</DialogTitle>
           <DialogDescription>
-            Create a new car brand .
+            Create a new car Feature .
           </DialogDescription>
         </DialogHeader>
 
@@ -80,16 +83,32 @@ const create = () => {
 
 <FormField
           control={form.control}
-          name="brand_name"
+          name="feature_name"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Brand name</FormLabel>
               <FormControl>
-                <Input placeholder="Brand name" {...field} />
+                <Input placeholder="Feature name" {...field} />
               </FormControl>
-              <FormDescription>
-                This is car brand name.
-              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+ <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Bio</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Describe the feature"
+                  rows={3}
+                  className="resize-none"
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -97,7 +116,7 @@ const create = () => {
 
         <FormField
           control={form.control}
-          name="image"
+          name="logo"
           render={() => (
             <FormItem className="w-1/2">
               <FormLabel
@@ -109,7 +128,7 @@ const create = () => {
                   Upload your image
                   <span
                     className={
-                      form.formState.errors.image || fileRejections.length !== 0
+                      form.formState.errors.logo || fileRejections.length !== 0
                         ? "text-destructive"
                         : "text-muted-foreground"
                     }
@@ -123,7 +142,7 @@ const create = () => {
                   {preview && (
                     <img
                       src={preview as string}
-                      alt="Uploaded Brand logo"
+                      alt="Uploaded Feature image"
                       className="max-h-[400px] rounded-lg"
                     />
                   )}

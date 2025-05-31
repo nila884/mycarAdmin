@@ -4,18 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Inertia\Response;
-use App\Models\FuelType as Fuel;
+use App\Models\Feature;
 
-class FuelController extends Controller
+
+class FeatureController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Inertia::render('car/settings/fuel', [
-            'fuels' =>Fuel::all() ,
+            return Inertia::render('car/settings/feature', [
+            'feature' =>Feature::all() ,
         ]);
     }
 

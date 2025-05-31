@@ -5,6 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\FuelController;
 use App\Http\Controllers\ModelController;
+use App\Http\Controllers\FeatureController;
 
 
 Route::get('/', function () {
@@ -23,6 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('car/settings/brand', [BrandController::class, 'index'])->name('carbrand');
      Route::get('car/settings/fuel', [FuelController::class, 'index'])->name('carfuel');
     Route::get('car/settings/model', [ModelController::class, 'index'])->name('carmodel');
+    Route::get('car/settings/feature', [FeatureController::class, 'index'])->name('carfeature');
 
 });
 

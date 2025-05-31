@@ -22,6 +22,11 @@ const sidebarNavItems: NavItem[] = [
         href: '/car/settings/fuel',
         icon: null,
     },
+        {
+        title: 'feature',
+        href: '/car/settings/feature',
+        icon: null,
+    },
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {

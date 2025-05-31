@@ -2,7 +2,7 @@ import { Head } from '@inertiajs/react';
 
 import HeadingSmall from '@/components/heading-small';
 import { type BreadcrumbItem } from '@/types';
-import Create  from '@/components/car/settings/brand/create';
+import Create  from '@/components/car/settings/feature/create';
 
 import AppLayout from '@/layouts/app-layout';
 import CarSettingLayout from '@/layouts/car/settings/layout';
@@ -10,25 +10,25 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Car Brand settings',
-        href: '/car/settings',
+        title: 'Car Feature settings',
+        href: '/car/settings/feature',
     },
 ];
 
 export default function Brand() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="brand settings" />
+            <Head title="Feature settings" />
 
             <CarSettingLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Car Brand settings" description="Add new ,Update and delete car brands name" />
+                    <HeadingSmall title="Car Feature settings" description="Add new ,Update and delete car features name" />
 
 
  <Create/>
 
 <Table>
-  <TableCaption>A list of your recent invoices.</TableCaption>
+  <TableCaption>A list of car Features.</TableCaption>
   <TableHeader>
     <TableRow>
       <TableHead className="w-[100px]">Brand name</TableHead>
