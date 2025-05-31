@@ -9,8 +9,8 @@ import {
 
 const FormSchema = z.object({
 
-    fuel_name: z.string().min(2, {
-    message: "fuel name must be at least 2 characters.",
+    category_name: z.string().min(2, {
+    message: "category name must be at least 2 characters.",
   }),
 })
 const create = () => {
@@ -19,7 +19,7 @@ const create = () => {
     resolver: zodResolver(FormSchema),
     mode: "onBlur",
     defaultValues: {
-      fuel_name: "",
+      category_name: "",
     }
   })
    function onSubmit(data: z.infer<typeof FormSchema>) {
@@ -34,9 +34,9 @@ const create = () => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>New fuel</DialogTitle>
+          <DialogTitle>New category</DialogTitle>
           <DialogDescription>
-            Create a new car fuel .
+            Create a new car category .
           </DialogDescription>
         </DialogHeader>
 <Form {...form}>
@@ -44,15 +44,15 @@ const create = () => {
 
 <FormField
           control={form.control}
-          name="fuel_name"
+          name="category_name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Car fuel</FormLabel>
+              <FormLabel>Car category</FormLabel>
               <FormControl>
-                <Input placeholder="fuel name" {...field} />
+                <Input placeholder="category name" {...field} />
               </FormControl>
               <FormDescription>
-                This is car fuel name.
+                This is car category name.
               </FormDescription>
               <FormMessage />
             </FormItem>

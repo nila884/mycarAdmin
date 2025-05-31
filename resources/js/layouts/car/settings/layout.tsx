@@ -8,6 +8,11 @@ import { type PropsWithChildren } from 'react';
 
 const sidebarNavItems: NavItem[] = [
     {
+        title: 'Category',
+        href: '/car/settings/category',
+        icon: null,
+    },
+    {
         title: 'Brand',
         href: '/car/settings/brand',
         icon: null,
