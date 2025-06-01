@@ -1,6 +1,6 @@
 import AppLayout from "@/layouts/app-layout";
-import { columns, Payment } from "./columns"
-import { DataTable } from "./data-table"
+import { columns, Payment } from "@/components/car/columns"
+import { DataTable } from "@/components/car/data-table"
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 
@@ -21,8 +21,8 @@ let data: Payment[] = [
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Car settings',
-        href: '/car/settings',
+        title: 'Cars listings',
+        href: '/car/list',
     },
 ];
 export default function list() {
