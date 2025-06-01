@@ -27,9 +27,14 @@ const sidebarNavItems: NavItem[] = [
         href: '/car/settings/fuel',
         icon: null,
     },
-        {
+    {
         title: 'feature',
         href: '/car/settings/feature',
+        icon: null,
+    },
+    {
+        title: 'seller',
+        href: '/car/settings/seller',
         icon: null,
     },
 ];

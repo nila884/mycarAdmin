@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid,CarFront } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid,CarFront,Settings2,Users,Wrench } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -13,11 +13,21 @@ const mainNavItems: NavItem[] = [
         href: '/dashboard',
         icon: LayoutGrid,
     },
-
-        {
+    {
+        title: 'Users',
+        href: '/users',
+        icon: Users,
+    },
+    {
+        title: 'Cars',
+        href: '/car/list',
+        icon: CarFront,
+    },
+    
+    {
         title: 'Car settings',
         href: '/car/settings',
-        icon: CarFront,
+        icon: Wrench,
     },
 
 ];

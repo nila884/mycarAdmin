@@ -4,17 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Category;
+use App\Models\Seller;
 
-class CategoryController extends Controller
+
+class SellerController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-    return Inertia::render('car/settings/category', [
-            'categories' =>Category::all() ,
+        return Inertia::render('car/settings/seller', [
+            'sellers' =>Seller::all() ,
         ]);
     }
 
