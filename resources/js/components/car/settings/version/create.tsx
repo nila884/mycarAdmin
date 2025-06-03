@@ -11,12 +11,12 @@ import {
 } from "@/components/ui/select"
 
 const FormSchema = z.object({
-  brand_name: z
+  model_name: z
     .string({
       required_error: "Please select an email to display.",
     }),
-    model_name: z.string().min(2, {
-    message: "Model name must be at least 2 characters.",
+    version_name: z.string().min(2, {
+    message: "version name must be at least 2 characters.",
   }),
 })
 const create = () => {
@@ -25,7 +25,7 @@ const create = () => {
     resolver: zodResolver(FormSchema),
     mode: "onBlur",
     defaultValues: {
-      model_name: "",
+      version_name: "",
     }
   })
    function onSubmit(data: z.infer<typeof FormSchema>) {
@@ -40,9 +40,9 @@ const create = () => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>New Model</DialogTitle>
+          <DialogTitle>New version</DialogTitle>
           <DialogDescription>
-            Create a new car model .
+            Create a new car version .
           </DialogDescription>
         </DialogHeader>
 <Form {...form}>
@@ -52,14 +52,14 @@ const create = () => {
 
         <FormField
           control={form.control}
-          name="brand_name"
+          name="model_name"
           render={({ field }) => (
             <FormItem >
-              <FormLabel>Brand names</FormLabel>
+              <FormLabel>model names</FormLabel>
               <Select  onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select Brand name" />
+                    <SelectValue placeholder="Select model name" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent >
@@ -69,24 +69,23 @@ const create = () => {
                 </SelectContent>
               </Select>
               <FormDescription>
-                This is car brand name.
+                This is car model name.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
-          name="model_name"
+          name="version_name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Car model</FormLabel>
+              <FormLabel>Car model version</FormLabel>
               <FormControl>
-                <Input placeholder="Model name" {...field} />
+                <Input placeholder="car model version name" {...field} />
               </FormControl>
               <FormDescription>
-                This is car model name.
+                This is car version name.
               </FormDescription>
               <FormMessage />
             </FormItem>
