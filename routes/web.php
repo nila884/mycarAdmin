@@ -31,6 +31,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('car/settings/category', [CategoryController::class, 'index'])->name('carcategory');
     Route::get('car/settings/seller',[SellerController::class, 'index'])->name('carseller');
     Route::get('car/list',[CarController::class, 'index'])->name('carlist');
+    Route::get('car/create', [CarController::class, 'create'])->name('carcreate');
 
 });
 

@@ -9,6 +9,11 @@ use App\Models\Version;
 use App\Models\carModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\CarPrice;
+use App\Models\Category;
+use App\Models\EnginePower;
+use App\Models\FuelType;
+use App\Models\Seller;
 
 class Car extends Model
 {
@@ -86,5 +91,15 @@ class Car extends Model
     {
         return $this->belongsToMany(Feature::class,'carfeatures','car_id','feature_id');
     }
+
+    public function prices()
+{
+    return $this->hasMany(CarPrice::class);
+}
+
+public function currentPrice()
+{
+    return $this->hasOne(CarPrice::class)->where('is_current', true);
+}
 
 }

@@ -23,7 +23,7 @@ class CarController extends Controller
      */
     public function create()
     {
-                     return Inertia::render('car/create');
+    return Inertia::render('car/create');
     }
 
     /**
