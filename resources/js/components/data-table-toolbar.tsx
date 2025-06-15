@@ -42,7 +42,7 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-        <div>
+        <div className="flex items-center space-x-2 flex-1/4 justify-end">
                 <DataTableViewOptions table={table} />
     <Link href="/car/create">
          <Button className="h-8 px-2 lg:px-3 ml-1">

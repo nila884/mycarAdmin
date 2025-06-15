@@ -13,12 +13,6 @@ import {
        VisibilityState,
 } from "@tanstack/react-table"
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
   Table,
   TableBody,
   TableCell,
@@ -26,11 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
 import React from "react"
 import { Input } from "@/components/ui/input"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { DataTableViewOptions } from "@/components/data-table-view-options"
 import { DataTableToolbar } from "@/components/data-table-toolbar"
 
 interface DataTableProps<TData, TValue> {

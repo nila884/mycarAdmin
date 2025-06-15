@@ -6,8 +6,7 @@ import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Checkbox } from "../ui/checkbox";
-import { ImagePlus } from 'lucide-react';
-import React, { useState } from "react";
+import  { useState } from "react";
 import { useDropzone } from "react-dropzone";
 
 const createForm = () => {
@@ -174,7 +173,7 @@ const createForm = () => {
   });
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto py-10 px-2">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {[selectFieldsGroup1, selectFieldsGroup2,selectFieldsGroup3, selectFieldsGroup4, selectFieldsGroup5].map((group, idx) => (
@@ -209,11 +208,6 @@ const createForm = () => {
               ))}
             </div>
           ))}
-
-         
-
-
-       
 
           {[inputFieldsGroup1, inputFieldsGroup2,inputFieldsGroup3].map((group, idx) => (
             <div key={`input-group-${idx}`} className="grid grid-cols-1 gap-x-3 sm:grid-cols-4">

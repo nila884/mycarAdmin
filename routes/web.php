@@ -26,7 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('carsettings');
     
     Route::get('car/settings/brand', [BrandController::class, 'index'])->name('carbrand');
-     Route::get('car/settings/fuel', [FuelController::class, 'index'])->name('carfuel');
+    Route::get('car/settings/fuel', [FuelController::class, 'index'])->name('carfuel');
     Route::get('car/settings/model', [ModelController::class, 'index'])->name('carmodel');
     Route::get('car/settings/feature', [FeatureController::class, 'index'])->name('carfeature');
     Route::get('car/settings/category', [CategoryController::class, 'index'])->name('carcategory');

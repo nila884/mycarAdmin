@@ -5,18 +5,30 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Category;
+use App\Classes\Services\CategoryService;
+use Inertia\Response;
 
 class CategoryController extends Controller
 {
+    private CategoryService $categoryService;
+    public function __construct(CategoryService $categoryService)
+    {
+        $this->categoryService = new CategoryService();
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-    return Inertia::render('car/settings/category', [
-            'categories' =>Category::all() ,
+        // Fetch categories using the service
+        $categories = $this->categoryService->Index();
+        // Return the Inertia response with the categories
+        return Inertia::render('car/settings/category', [
+            'categories' => $categories,
         ]);
     }
+   
+   
 
     /**
      * Show the form for creating a new resource.
@@ -31,7 +43,9 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->categoryService->create($request);
+        return redirect()->back()->with('success', 'Category created successfully');
+        
     }
 
     /**
@@ -53,9 +67,21 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Category $category)
     {
-        //
+                try {
+            // Validate the request data using the service
+            $validator = $this->categoryService->DataValidation($request, 'patch', $category);
+            if ($validator->fails()) {
+                throw ValidationException::withMessages($validator->errors()->toArray());
+            }
+
+            $this->categoryService->Update($request, $category);
+            return redirect()->back()->with('success', 'Category updated successfully');
+
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        }
     }
 
     /**
