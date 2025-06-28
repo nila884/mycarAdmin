@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Models\Category;
 use App\Classes\Services\CategoryService;
 use Inertia\Response;
+use Illuminate\Validation\ValidationException;
 
 class CategoryController extends Controller
 {
@@ -43,9 +44,18 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $this->categoryService->create($request);
-        return redirect()->back()->with('success', 'Category created successfully');
-        
+          try {
+            // Validate the request data using the service
+            $validator = $this->categoryService->DataValidation($request, 'post'); // Call validation for 'post' method
+            if ($validator->fails()) {
+                throw ValidationException::withMessages($validator->errors()->toArray());
+            }
+
+            $this->categoryService->create($request);
+            return redirect()->back()->with('success', 'Category created successfully');
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        }  
     }
 
     /**
@@ -89,6 +99,14 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $category = Category::findOrFail($id);
+            $this->categoryService->Delete($category);
+            return redirect()->back()->with('success', 'Category deleted successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Category not found or could not be deleted.']);
+        }
+        
+
     }
 }

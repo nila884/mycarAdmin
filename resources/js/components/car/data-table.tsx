@@ -21,7 +21,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import React from "react"
-import { Input } from "@/components/ui/input"
 import { DataTablePagination } from "@/components/data-table-pagination"
 import { DataTableToolbar } from "@/components/data-table-toolbar"
 

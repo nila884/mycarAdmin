@@ -28,13 +28,11 @@ const create = () => {
       },
       onError: (errors) => {
         console.error('Submission error:', errors);
-        // Inertia's useForm automatically populates the 'errors' object,
-        // so you don't need to manually set them here.
+       
       },
       onFinish: () => {
-        // Any logic to run after success or error (e.g., stop loading indicator if not handled by processing)
+       
 
-        
       }
     });
   };

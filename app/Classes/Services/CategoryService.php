@@ -54,11 +54,11 @@ Class CategoryService
         switch (strtolower($method)) {
             case 'post':
                 return Validator::make($request->all(), [
-                    "category_name" => ["required", "unique:categories,category_name"],
+                    "category_name" => ["required", "unique:categories,category_name",'regex:/^[a-z0-9\s]*$/', 'max:255'],
                 ]);
             case 'patch':
                 return Validator::make($request->all(), [
-                    "category_name" => ["required", Rule::unique("categories", "category_name")->ignore($category->id)],
+                    "category_name" => ["required", Rule::unique("categories", "category_name")->ignore($category->id), 'regex:/^[a-z0-9\s]*$/', 'max:255'],
                 ]);
             default:
                 return null;

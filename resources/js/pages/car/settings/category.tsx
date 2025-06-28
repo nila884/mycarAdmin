@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 
 import HeadingSmall from '@/components/heading-small';
 import { type BreadcrumbItem } from '@/types';
@@ -8,6 +8,10 @@ import Update from '@/components/car/settings/category/update';
 import AppLayout from '@/layouts/app-layout';
 import CarSettingLayout from '@/layouts/car/settings/layout';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { timeFormat } from '@/lib/utils'; // Import the timeFormat function
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { MoreHorizontal } from 'lucide-react';
 
 // Define the type for a single category item
 interface CategoryItem {
@@ -31,8 +35,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 // Update the component to accept props
 export default function category({ categories }: CategoryProps) { // Destructure categories from props
-  console.log(categories); // Log categories to check if data is passed correctly  
 
+  function handleDelete(id: number) {
+  if (!window.confirm('Are you sure you want to delete this category?')) return;
+
+  router.delete(`/car/settings/category/${id}`, {
+    preserveScroll: true,
+    onSuccess: () => {
+      // optional: toast or reload logic
+    },
+  });
+}
   return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Car Category settings" />
@@ -58,15 +71,16 @@ export default function category({ categories }: CategoryProps) { // Destructure
                             {categories.length > 0 ? (
                                 categories.map((category) => (
                                     <TableRow key={category.id}>
-                                        <TableCell className="font-medium">{category.category_name}</TableCell>
-                                        <TableCell>{category.created_at}</TableCell>
-                                        <TableCell>{category.updated_at}</TableCell>
+                                        <TableCell className="font-medium">{category.category_name.toUpperCase()}</TableCell>
+                                        <TableCell>{timeFormat(category.created_at)}</TableCell>
+                                        <TableCell>{timeFormat(category.updated_at)}</TableCell>
                                                                             <TableCell className="text-right">
-                                            {/* Render the EditCategory component for each row */}
-                                            <Update category={category} />
-                                            {/* You can add a delete button here too */}
-                                            {/* <Button variant="destructive" size="sm" onClick={() => handleDelete(category.id)}>Delete</Button> */}
-                                        </TableCell>
+                                                                          
+      
+    <Update category={category} />
+    <Button className='ml-2' variant="destructive" onClick={() => handleDelete(category.id)}>delete</Button>
+      
+                                         </TableCell>
                                     </TableRow>
                                 ))
                             ) : (

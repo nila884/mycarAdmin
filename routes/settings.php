@@ -23,4 +23,5 @@ Route::middleware('auth')->group(function () {
 
     Route::post('car/settings/category', [CategoryController::class, 'store'])->name('carcategory.store');
     Route::patch('/car/settings/category/{category}', [CategoryController::class, 'update'])->name('carcategory.update');
+    Route::delete('/car/settings/category/{category}', [CategoryController::class, 'destroy'])->name('carcategory.destroy');
 });

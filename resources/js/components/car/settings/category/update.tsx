@@ -18,7 +18,7 @@ interface EditCategoryProps {
 }
 
 const Update = ({ category }: EditCategoryProps) => {
-
+console.log('Update component initialized with category:', category);
 
     const { data, setData, patch, processing, errors, reset } = useForm({
         category_name: category.category_name, // Initialize with the existing category name
@@ -26,8 +26,6 @@ const Update = ({ category }: EditCategoryProps) => {
 
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Use Inertia's patch method to send the update request
         patch(route('carcategory.update', category.id), {
             onSuccess: () => {
                 reset(); // Optionally reset if dialog remains open, but usually close
