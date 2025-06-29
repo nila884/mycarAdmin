@@ -3,6 +3,7 @@
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\FuelController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -24,4 +25,10 @@ Route::middleware('auth')->group(function () {
     Route::post('car/settings/category', [CategoryController::class, 'store'])->name('carcategory.store');
     Route::patch('/car/settings/category/{category}', [CategoryController::class, 'update'])->name('carcategory.update');
     Route::delete('/car/settings/category/{category}', [CategoryController::class, 'destroy'])->name('carcategory.destroy');
+    Route::get('car/settings/category', [CategoryController::class, 'index'])->name('carcategory.index');
+
+    Route::post('car/settings/fuel', [FuelController::class, 'store'])->name('carfuel.store');
+    Route::patch('/car/settings/fuel/{fuelType}', [FuelController::class, 'update'])->name('carfuel.update');
+    Route::delete('/car/settings/fuel/{fuelType}', [FuelController::class, 'destroy'])->name('carfuel.destroy');
+    Route::get('car/settings/fuel', [FuelController::class, 'index'])->name('carfuel.index');
 });

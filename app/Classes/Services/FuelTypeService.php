@@ -11,8 +11,17 @@ Class FuelTypeService
 {
     public function Index()
     {
-        $fuelType =  FuelType::paginate(15);
-        return $fuelType;
+        $fuels = FuelType::all();
+      
+             $fuels->map(function ($fuel) {
+            return [
+                'id' => $fuel->id,
+                'fuel_type' => $fuel->name,
+                'created_at' => $fuel->created_at->format('Y-m-d'), // Format for display
+                'updated_at' => $fuel->updated_at->format('Y-m-d'), // Format for display
+            ];
+        });
+        return $fuels;
     }
 
     public function Create(Request $request)
@@ -43,11 +52,11 @@ Class FuelTypeService
         switch (strtolower($method)) {
             case 'post':
                 return Validator::make($request->all(), [
-                    "fuel_type" => ["required", "unique:fuel_types,fuel_type"],
+                    "fuel_type" => ["required", "unique:fuel_types,fuel_type", 'regex:/^[a-z0-9\s]*$/', 'max:255'],
                 ]);
             case 'patch':
                 return Validator::make($request->all(), [
-                    "fuel_type" => ["required", Rule::unique("fuel_types", "fuel_type")->ignore($fuelType->id)],
+                    "fuel_type" => ["required", Rule::unique("fuel_types", "fuel_type")->ignore($fuelType->id), 'regex:/^[a-z0-9\s]*$/', 'max:255'],
                 ]);
             default:
                 return null;

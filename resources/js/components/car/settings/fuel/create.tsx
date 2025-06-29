@@ -1,34 +1,44 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import {
-  Form,FormControl,FormDescription,FormField,FormItem,FormLabel,FormMessage,} from "@/components/ui/form"
+import { Label } from '@/components/ui/label'; // You might need Label for basic input elements
+import InputError from '@/components/input-error'; // Assuming you have an InputError component for Inertia errors
+import { useForm } from '@inertiajs/react'; // Import useForm from Inertia
 
-const FormSchema = z.object({
+// Define the type for your form data
+type CreateFuelForm = {
+    fuel_type: string;
+};
 
-    fuel_name: z.string().min(2, {
-    message: "fuel name must be at least 2 characters.",
-  }),
-})
 const create = () => {
+  // Initialize Inertia's useForm
+  const { data, setData, post, processing, errors, reset } = useForm<CreateFuelForm>({
+    fuel_type: "",
+  });
 
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
-    mode: "onBlur",
-    defaultValues: {
-      fuel_name: "",
-    }
-  })
-   function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log(data);
-    // Handle form submission here
-  }
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent default form submission
+
+    // Send the data using Inertia's post method
+    post(route('carfuel.store'), { // Assuming a route named 'car.settings.fuel.store'
+      onSuccess: () => {
+        reset(); // Reset form fields on successful submission
+        // You might want to close the dialog here or show a success message
+        
+      },
+      onError: (errors) => {
+        console.error('Submission error:', errors);
+       
+      },
+      onFinish: () => {
+       
+
+      }
+    });
+  };
 
   return (
-<Dialog>
+    <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline">Add New</Button>
       </DialogTrigger>
@@ -36,37 +46,32 @@ const create = () => {
         <DialogHeader>
           <DialogTitle>New fuel</DialogTitle>
           <DialogDescription>
-            Create a new car fuel .
+            Create a new car fuel.
           </DialogDescription>
         </DialogHeader>
-<Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
 
-<FormField
-          control={form.control}
-          name="fuel_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Car fuel</FormLabel>
-              <FormControl>
-                <Input placeholder="fuel name" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is car fuel name.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Use a standard form element with onSubmit */}
+        <form onSubmit={onSubmit} className="w-2/3 space-y-6">
+          <div className="grid gap-2">
+            <Label htmlFor="fuel_type">Car fuel</Label>
+            <Input
+              id="fuel_type"
+              placeholder="fuel name"
+              value={data.fuel_type}
+              onChange={(e) => setData('fuel_type', e.target.value)}
+              disabled={processing} // Disable input while processing
+            />
+            {/* Display Inertia validation errors */}
+            <InputError message={errors.fuel_type} className="mt-2" />
+          </div>
 
-
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
-
+          <Button type="submit" disabled={processing}>
+            {processing ? 'Submitting...' : 'Submit'}
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
-export default create
+export default create;
