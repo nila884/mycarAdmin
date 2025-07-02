@@ -38,8 +38,8 @@ Class BrandService
         }
         
         return Brand::create([
-            "brand_name" => $name,
-            "logo" => $logoPath // Save the relative path
+            "brand_name" => strtolower($name),
+            "logo" => $logoPath
         ]);
     }
 
@@ -94,7 +94,7 @@ Class BrandService
                 ]);
             case 'patch': // Use 'patch' for update operations
                 return Validator::make($request->all(), [
-                    "brand_name" => ["required", "string", "max:255", Rule::unique("brands", "brand_name")->ignore($brand->id)],
+                    "brand_name" => ["required", "string", "max:255", Rule::unique("brands", "brand_name")->ignore($brand->id), "regex:/^[a-zA-Z0-9\s]+$/"], // Allow alphanumeric and spaces only
                     "logo" => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:1024']
                 ]);
             default:

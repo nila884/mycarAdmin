@@ -167,7 +167,7 @@ const Update: React.FC<EditBrandProps> = ({ brand }) => { // Renamed for clarity
               </p>
             </div>
             {/* Corrected InputError usage for image field */}
-            <InputError message={errors.logo || fileRejectionError} className="mt-2" />
+            <InputError message={errors.logo || fileRejectionError || undefined} className="mt-2" />
           </div>
 
           <Button type="submit" disabled={processing}>
