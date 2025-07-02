@@ -22,7 +22,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('car/settings/settings');
     })->name('carsettings');
     
-    Route::get('car/settings/model', [ModelController::class, 'index'])->name('carmodel');
     Route::get('car/settings/feature', [FeatureController::class, 'index'])->name('carfeature');
     Route::get('car/settings/seller',[SellerController::class, 'index'])->name('carseller');
     Route::get('car/settings/version', [VersionController::class, 'index'])->name('carversion');

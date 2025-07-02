@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FuelController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\ModelController;
 use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
@@ -37,4 +38,9 @@ Route::middleware('auth')->group(function () {
     Route::post('car/settings/brand', [BrandController::class, 'store'])->name('carbrand.store');
     Route::patch('car/settings/brand/{brand}', [BrandController::class, 'update'])->name('carbrand.update');
     Route::delete('car/settings/brand/{brand}', [BrandController::class, 'destroy'])->name('carbrand.destroy');
+
+    Route::get('car/settings/model', [ModelController::class, 'index'])->name('carmodel.index');
+    Route::post('car/settings/model', [ModelController::class, 'store'])->name('carmodel.store');
+    Route::patch('car/settings/model/{carModel}', [ModelController::class, 'update'])->name('carmodel.update');
+    Route::delete('car/settings/model/{carModel}', [ModelController::class, 'destroy'])->name('carmodel.destroy');
 });

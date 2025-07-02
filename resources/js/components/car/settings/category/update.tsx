@@ -55,8 +55,6 @@ console.log('Update component initialized with category:', category);
                     Create a new car category.
                   </DialogDescription>
                 </DialogHeader>
-        
-                {/* Use a standard form element with onSubmit */}
                 <form onSubmit={onSubmit} className="w-2/3 space-y-6">
                   <div className="grid gap-2">
                     <Label htmlFor="category_name">Car category</Label>
@@ -65,9 +63,8 @@ console.log('Update component initialized with category:', category);
                       placeholder="category name"
                       value={data.category_name}
                       onChange={(e) => setData('category_name', e.target.value)}
-                      disabled={processing} // Disable input while processing
+                      disabled={processing}
                     />
-                    {/* Display Inertia validation errors */}
                     <InputError message={errors.category_name} className="mt-2" />
                   </div>
         

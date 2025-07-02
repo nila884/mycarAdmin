@@ -5,26 +5,31 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Models\CarModel;
+use App\Models\CarModel; // Ensure correct casing for CarModel
+use App\Classes\Services\carModelService; // Import your service
+use App\Classes\Services\BrandService; // Import BrandService to get brands
+use Illuminate\Validation\ValidationException;
 
 class ModelController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    protected $carModelService;
+    protected $brandService; // Inject BrandService
+
+    public function __construct(carModelService $carModelService, BrandService $brandService)
     {
-        return Inertia::render('car/settings/model', [
-            'models' =>CarModel::all() ,
-        ]);
+        $this->carModelService = $carModelService;
+        $this->brandService = $brandService; // Initialize BrandService
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the resource.
      */
-    public function create()
+    public function index(): Response
     {
-        //
+        return Inertia::render('car/settings/model', [
+            'models' => $this->carModelService->Index(), // Get paginated models
+            'brands' => $this->brandService->Index(), // Pass all brands for dropdowns
+        ]);
     }
 
     /**
@@ -32,38 +37,49 @@ class ModelController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $validator = $this->carModelService->DataValidation($request, 'post');
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        try {
+            $this->carModelService->create($request);
+            return redirect()->route('carmodel.index')->with('success', 'Car model created successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['general' => 'Failed to create car model. Please try again.']);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, CarModel $carModel)
     {
-        //
+        $validator = $this->carModelService->DataValidation($request, 'patch', $carModel);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+
+        try {
+            $this->carModelService->update($request, $carModel);
+            return redirect()->route('carmodel.index')->with('success', 'Car model updated successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['general' => 'Failed to update car model. Please try again.']);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(CarModel $carModel)
     {
-        //
+        try {
+            $this->carModelService->delete($carModel);
+            return redirect()->route('carmodel.index')->with('success', 'Car model deleted successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['general' => 'Failed to delete car model. Please try again.']);
+        }
     }
 }
