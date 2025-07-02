@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ModelController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\SellerController;
@@ -23,7 +22,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('car/settings/settings');
     })->name('carsettings');
     
-    Route::get('car/settings/brand', [BrandController::class, 'index'])->name('carbrand');
     Route::get('car/settings/model', [ModelController::class, 'index'])->name('carmodel');
     Route::get('car/settings/feature', [FeatureController::class, 'index'])->name('carfeature');
     Route::get('car/settings/seller',[SellerController::class, 'index'])->name('carseller');

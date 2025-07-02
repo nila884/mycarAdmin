@@ -1,69 +1,87 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import {Form,FormControl,FormDescription,FormField,FormItem,FormLabel,FormMessage,} from "@/components/ui/form"
 import { useDropzone } from "react-dropzone";
 import React from 'react';
-import { ImagePlus } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import InputError from '@/components/input-error';
+import { useForm } from '@inertiajs/react'; // Import useForm from Inertia
+import { ImagePlus } from 'lucide-react'; // Assuming you have lucide-react installed for icons
 
-const create = () => {
+// Define the type for your form data, now including the image
+type CreateBrandForm = {
+    brand_name: string;
+    logo: File | null; // Add image field, can be null initially
+};
 
+const Create = () => { // Renamed the component to 'CreateBrand' for better naming conventions
 
-  const [preview, setPreview] = React.useState<string | ArrayBuffer | null>("");
+  const [preview, setPreview] = React.useState<string | ArrayBuffer | null>(null);
+  const [fileRejectionError, setFileRejectionError] = React.useState<string | null>(null);
 
-  const formSchema = z.object({
-    image: z
-      //Rest of validations done via react dropzone
-      .instanceof(File)
-      .refine((file) => file.size !== 0, "Please upload an image"),
-    brand_name: z
-    .string({
-      required_error: "brand name is required.",
-    }),
+  // Initialize Inertia's useForm with the new 'image' field
+  const { data, setData, post, processing, errors, reset } = useForm<CreateBrandForm>({
+    brand_name: "",
+    logo: null,
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    mode: "onBlur",
-    defaultValues: {
-      image: new File([""], "filename"),
-      brand_name: "",
-    },
-  });
-
+  // Callback for when files are dropped or selected
   const onDrop = React.useCallback(
-    (acceptedFiles: File[]) => {
-      const reader = new FileReader();
-      try {
-        reader.onload = () => setPreview(reader.result);
-        reader.readAsDataURL(acceptedFiles[0]);
-        form.setValue("image", acceptedFiles[0]);
-        form.clearErrors("image");
-      } catch (error) {
+    (acceptedFiles: File[], fileRejections: any[]) => {
+      // Handle accepted files
+      if (acceptedFiles.length > 0) {
+        const file = acceptedFiles[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+          setPreview(reader.result); // Set image preview
+          setData('logo', file); // Set the file in Inertia's form data
+          setFileRejectionError(null); // Clear any previous file rejection errors
+        };
+        reader.readAsDataURL(file);
+      } else if (fileRejections.length > 0) {
+        // Handle file rejections (e.g., wrong type, too large)
         setPreview(null);
-        form.resetField("image");
+        setData('logo', null);
+        // You can customize this error message based on fileRejections[0].errors
+        setFileRejectionError("Image must be less than 1MB and of type png, jpg, or jpeg.");
       }
     },
-    [form],
+    [setData],
   );
 
-  const { getRootProps, getInputProps, isDragActive, fileRejections } =
-    useDropzone({
-      onDrop,
-      maxFiles: 1,
-      maxSize: 1000000,
-      accept: { "image/png": [], "image/jpg": [], "image/jpeg": [] },
-    });
+  // Configure react-dropzone
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    maxFiles: 1,
+    maxSize: 1000000, // 1MB
+    accept: { "image/png": [], "image/jpg": [], "image/jpeg": [] },
+  });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+ const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent default form submission
+
+    // Send the data using Inertia's post method
+    // Inertia automatically handles multipart/form-data when a File object is present
+    post(route('carbrand.store'), { // Ensure this route is correctly defined in Laravel
+      onSuccess: () => {
+        reset(); // Reset Inertia form fields
+        setPreview(null); // Clear image preview
+        setFileRejectionError(null); // Clear any file rejection errors
+        // You might want to close the dialog here or show a success message
+        alert('Brand created successfully!'); // Simple success alert
+      },
+      onError: (submissionErrors) => {
+        console.error('Submission error:', submissionErrors);
+        // Inertia's `errors` object will automatically update
+      },
+      onFinish: () => {
+        // Any cleanup or final actions after success or error
+      }
+    });
   };
 
   return (
-<Dialog>
+    <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline">Add New</Button>
       </DialogTrigger>
@@ -71,98 +89,61 @@ const create = () => {
         <DialogHeader>
           <DialogTitle>New Brand</DialogTitle>
           <DialogDescription>
-            Create a new car brand .
+            Create a new car brand.
           </DialogDescription>
         </DialogHeader>
 
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
+        <form onSubmit={onSubmit} className="w-full space-y-6"> {/* Adjusted width for better dialog fit */}
+          <div className="grid gap-2">
+            <Label htmlFor="brand_name">Car brand</Label>
+            <Input
+              id="brand_name"
+              placeholder="brand name"
+              value={data.brand_name}
+              onChange={(e) => setData('brand_name', e.target.value)}
+              disabled={processing} // Disable input while processing
+            />
+            <InputError message={errors.brand_name} className="mt-2" />
+          </div>
 
-<FormField
-          control={form.control}
-          name="brand_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Brand name</FormLabel>
-              <FormControl>
-                <Input placeholder="Brand name" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is car brand name.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          {/* Image Upload Section */}
+          <div className="grid gap-2">
+            <Label htmlFor="logo">Brand Logo</Label>
+            <div
+              {...getRootProps()}
+              className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg cursor-pointer
+                ${isDragActive ? 'border-primary' : 'border-gray-300'}
+                ${(errors.logo || fileRejectionError) ? 'border-destructive' : ''}
+              `}
+            >
+              <Input 
+              id='logo'
+              type="file"
+              accept="image/png, image/jpg, image/jpeg"
+               {...getInputProps()} />
+              {preview ? (
+                <img src={preview as string} alt="Brand Logo Preview" className="max-h-[200px] w-auto object-contain rounded-lg mb-2" />
+              ) : (
+                <ImagePlus className="size-20 text-gray-400 mb-2" />
+              )}
+              <p className="text-sm text-center text-gray-500">
+                {isDragActive ? "Drop the image here..." : "Drag 'n' drop an image here, or click to select one"}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                (PNG, JPG, JPEG up to 1MB)
+              </p>
+            </div>
+            {/* Display Inertia validation errors for image */}
+            {/* <InputError message={errors.image || fileRejectionError} className="mt-2" /> */}
+          </div>
 
-        <FormField
-          control={form.control}
-          name="image"
-          render={() => (
-            <FormItem className="w-1/2">
-              <FormLabel
-                className={`${
-                  fileRejections.length !== 0 && "text-destructive"
-                }`}
-              >
-                
-                  Upload your image
-                  <span
-                    className={
-                      form.formState.errors.image || fileRejections.length !== 0
-                        ? "text-destructive"
-                        : "text-muted-foreground"
-                    }
-                  ></span>
-              </FormLabel>
-              <FormControl>
-                <div
-                  {...getRootProps()}
-                  className="mx-auto flex cursor-pointer flex-col items-center justify-center gap-y-2 "
-                >
-                  {preview && (
-                    <img
-                      src={preview as string}
-                      alt="Uploaded Brand logo"
-                      className="max-h-[400px] rounded-lg"
-                    />
-                  )}
-                  <ImagePlus
-                    className={`size-40 ${preview ? "hidden" : "block"}`}
-                  />
-                  <Input {...getInputProps()} type="file" />
-              <FormDescription>
-                {isDragActive ? (
-                    "Drop the image!"
-                  ) : (
-                    "Click here or drag an image to upload it"
-                  )}
-              </FormDescription>
-                 
-                </div>
-              </FormControl>
-              <FormMessage>
-                {fileRejections.length !== 0 && (
-               
-                   " Image must be less than 1MB and of type png, jpg, or jpeg"
-                 
-                )}
-              </FormMessage>
-            </FormItem>
-          )}
-        />
-        <Button
-          type="submit"
-          disabled={form.formState.isSubmitting}
-        >
-          Submit
-        </Button>
-      </form>
-    </Form>
-
+          <Button type="submit" disabled={processing}>
+            {processing ? 'Submitting...' : 'Submit'}
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
   )
 }
 
-export default create
+export default Create; // Ensure the export name matches the component name
