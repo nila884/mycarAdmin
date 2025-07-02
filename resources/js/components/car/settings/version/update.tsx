@@ -1,3 +1,4 @@
+// src/components/car/settings/version/update.tsx
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -7,44 +8,69 @@ import {
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
 import { useForm } from '@inertiajs/react';
+import { useEffect } from 'react'; // Import useEffect for setting initial data
 
-// Define the type for a single model item
+// Define types for VersionItem and ModelItem
+interface VersionItem {
+    id: number;
+    car_model_id: number;
+    car_model_name: string;
+    version_name: string;
+    version_year: string;
+    created_at: string;
+    updated_at: string;
+}
+
 interface ModelItem {
     id: number;
     model_name: string;
 }
 
-// Define the type for your form data
-type CreateVersionForm = {
+// Define form data type for update, including _method for PATCH request
+type EditVersionForm = {
     version_name: string;
     version_year: string;
     model_name: string; // We'll send model_name and convert to car_model_id in backend
+    _method?: 'patch'; // For Inertia's PUT/PATCH requests
 };
 
-// Define the props for this component
-interface CreateProps {
-    models: ModelItem[]; // Expecting an array of car model items
+// Define props for the UpdateVersion component
+interface UpdateVersionProps {
+    version: VersionItem;
+    models: ModelItem[];
 }
 
-const Create = ( {models}:CreateProps) => {
-// Use Inertia's useForm for handling form state, submission, and errors
-  const { data, setData, post, processing, errors, reset } = useForm<CreateVersionForm>({
-    version_name: "",
-    version_year: "",
-    model_name: "", // Initialize model_name
+const Update: React.FC<UpdateVersionProps> = ({ version, models }) => {
+  // Use Inertia's useForm for handling form state, submission, and errors
+  const { data, setData, post, processing, errors, reset } = useForm<EditVersionForm>({
+    version_name: version.version_name,
+    version_year: version.version_year,
+    model_name: version.car_model_name, // Set initial model name
+    _method: 'patch', // Explicitly set the method for Inertia
   });
+
+  // Effect to reset form data if the 'version' prop changes
+  useEffect(() => {
+    setData({
+      version_name: version.version_name,
+      version_year: version.version_year,
+      model_name: version.car_model_name,
+      _method: 'patch',
+    });
+    reset('model_name', 'version_name', 'version_year'); 
+  }, [version]);
+
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault(); // Prevent default form submission
 
-    // Send the data using Inertia's post method
-    post(route('carversion.store'), { // Target the carversion.store route
+    // Send the data using Inertia's post method, which will correctly handle the _method: 'patch'
+    post(route('carversion.update', version.id), {
       onSuccess: () => {
-        reset(); // Reset form fields on successful submission
-        alert('Car version created successfully!'); // Or use a toast notification
+        alert('Car version updated successfully!');
       },
       onError: (submissionErrors) => {
-        console.error('Submission error:', submissionErrors);
+        console.error('Validation Errors:', submissionErrors);
       },
       onFinish: () => {
         // Any cleanup logic after submission attempt
@@ -55,13 +81,13 @@ const Create = ( {models}:CreateProps) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Add New</Button>
+        <Button variant="outline" size="sm">Edit</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>New Version</DialogTitle>
+          <DialogTitle>Edit Version</DialogTitle>
           <DialogDescription>
-            Create a new car version.
+            Edit an existing car version.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="w-full space-y-6">
@@ -120,7 +146,7 @@ const Create = ( {models}:CreateProps) => {
           </div>
 
           <Button type="submit" disabled={processing}>
-            {processing ? 'Submitting...' : 'Submit'}
+            {processing ? 'Updating...' : 'Update Version'}
           </Button>
         </form>
       </DialogContent>
@@ -128,4 +154,4 @@ const Create = ( {models}:CreateProps) => {
   );
 }
 
-export default Create;
+export default Update;

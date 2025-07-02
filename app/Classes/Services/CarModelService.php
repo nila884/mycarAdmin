@@ -15,22 +15,21 @@ class carModelService
 {
     public function Index()
     {
-        // Eager load the 'brand' relationship to get brand names
+       
         $carModels = carModel::with('brand')->paginate(15);
-
-        // Map the collection to format data for frontend, including brand name
+        
         $carModels->getCollection()->transform(function ($model) {
             return [
                 'id' => $model->id,
                 'model_name' => $model->model_name,
                 'brand_id' => $model->brand_id,
-                'brand_name' => $model->brand->brand_name ?? 'N/A', // Get brand name, handle if brand is null
+                'brand_name' => $model->brand->brand_name ?? 'N/A',
                 'created_at' => $model->created_at->format('Y-m-d'),
                 'updated_at' => $model->updated_at->format('Y-m-d'),
             ];
         });
 
-        return $carModels; // Return the paginated collection
+        return $carModels;
     }
 
     public function create(Request $request)

@@ -4,26 +4,29 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 use App\Models\Version;
+use App\Classes\Services\VersionService; // Import your service
+use Illuminate\Validation\ValidationException;
 
 class VersionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    protected $versionService;
+
+    public function __construct(VersionService $versionService)
     {
-        return Inertia::render('car/settings/version', [
-            'version' =>Version::all() ,
-        ]);
+        $this->versionService = $versionService;
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the resource.
      */
-    public function create()
+    public function index(): Response
     {
-        //
+        return Inertia::render('car/settings/version', [
+            'versions' => $this->versionService->Index(), // Get paginated versions
+            'carModels' => $this->versionService->getAllCarModels(), // Pass all car models for dropdowns
+        ]);
     }
 
     /**
@@ -31,38 +34,49 @@ class VersionController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $validator = $this->versionService->DataValidation($request, 'post');
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        try {
+            $this->versionService->create($request);
+            return redirect()->route('carversion.index')->with('success', 'Car version created successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['general' => 'Failed to create car version. Please try again.']);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Version $version)
     {
-        //
+        $validator = $this->versionService->DataValidation($request, 'patch', $version);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+
+        try {
+            $this->versionService->update($request, $version);
+            return redirect()->route('carversion.index')->with('success', 'Car version updated successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['general' => 'Failed to update car version. Please try again.']);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Version $version)
     {
-        //
+        try {
+            $this->versionService->delete($version);
+            return redirect()->route('carversion.index')->with('success', 'Car version deleted successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['general' => 'Failed to delete car version. Please try again.']);
+        }
     }
 }
