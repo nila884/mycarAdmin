@@ -4,27 +4,28 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 use App\Models\Feature;
-
+use App\Classes\Services\FeatureService; // Import your service
+use Illuminate\Validation\ValidationException;
 
 class FeatureController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    protected $featureService;
+
+    public function __construct(FeatureService $featureService)
     {
-            return Inertia::render('car/settings/feature', [
-            'feature' =>Feature::all() ,
-        ]);
+        $this->featureService = $featureService;
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the resource.
      */
-    public function create()
+    public function index(): Response
     {
-        //
+        return Inertia::render('car/settings/feature', [
+            'features' => $this->featureService->Index(), // Get paginated features
+        ]);
     }
 
     /**
@@ -32,38 +33,49 @@ class FeatureController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $validator = $this->featureService->DataValidation($request, 'post');
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        try {
+            $this->featureService->Create($request);
+            return redirect()->route('carfeature.index')->with('success', 'Car feature created successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['general' => 'Failed to create car feature. Please try again.']);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Feature $feature)
     {
-        //
+        $validator = $this->featureService->DataValidation($request, 'patch', $feature);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+
+        try {
+            $this->featureService->update($request, $feature);
+            return redirect()->route('carfeature.index')->with('success', 'Car feature updated successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['general' => 'Failed to update car feature. Please try again.']);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Feature $feature)
     {
-        //
+        try {
+            $this->featureService->delete($feature);
+            return redirect()->route('carfeature.index')->with('success', 'Car feature deleted successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['general' => 'Failed to delete car feature. Please try again.']);
+        }
     }
 }

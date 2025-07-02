@@ -1,26 +1,45 @@
+// src/components/car/settings/feature/update.tsx
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm as useHookForm } from "react-hook-form" // Renamed to avoid conflict with Inertia's useForm
+import { useForm as useHookForm } from "react-hook-form"
 import { z } from "zod"
-import {Form,FormControl,FormField,FormItem,FormLabel,FormMessage,} from "@/components/ui/form"
+import {Form,FormControl,FormDescription,FormField,FormItem,FormLabel,FormMessage,} from "@/components/ui/form"
 import { useDropzone } from "react-dropzone";
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ImagePlus, XCircle } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { useForm as useInertiaForm } from '@inertiajs/react'; // Import Inertia's useForm
+import { useForm as useInertiaForm } from '@inertiajs/react';
 
-// Define the form data type
-type CreateFeatureForm = {
+// Define types for FeatureItem
+interface FeatureItem {
+    id: number;
     feature_name: string;
     description: string;
-    icon: File | null; // File type for upload
+    icon: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+// Define form data type for update, including _method for PATCH request
+type EditFeatureForm = {
+    feature_name: string;
+    description: string;
+    icon: File | null;
+    _method?: 'patch'; // For Inertia's PUT/PATCH requests
+    clear_icon?: boolean; // To explicitly tell backend to clear icon
 };
 
-const Create = () => {
+// Define props for the UpdateFeature component
+interface UpdateFeatureProps {
+    feature: FeatureItem;
+}
+
+const UpdateFeature: React.FC<UpdateFeatureProps> = ({ feature }) => {
   const [preview, setPreview] = React.useState<string | ArrayBuffer | null>(null);
   const [fileRejectionError, setFileRejectionError] = React.useState<string | null>(null);
+  const [currenticonPath, setCurrenticonPath] = React.useState<string | null>(null);
 
   const formSchema = z.object({
     feature_name: z.string().min(2, {
@@ -30,7 +49,7 @@ const Create = () => {
         message: "Feature description must be at least 10 characters.",
     }),
     icon: z
-      .any() // Use any for initial validation, refine later
+      .any()
       .nullable()
       .refine((file) => !file || file instanceof File, "icon must be a file or null")
       .refine((file) => !file || file.size <= 1000000, "Image size must be less than 1MB"),
@@ -41,18 +60,41 @@ const Create = () => {
     resolver: zodResolver(formSchema),
     mode: "onBlur",
     defaultValues: {
-      feature_name: "",
-      description: "",
-      icon: null,
+      feature_name: feature.feature_name,
+      description: feature.description,
+      icon: null, // Always start with null for file input
     },
   });
 
   // Use Inertia's useForm for handling submission and Inertia-specific state
-  const { data, setData, post, processing, errors, reset: inertiaReset } = useInertiaForm<CreateFeatureForm>({
-    feature_name: "",
-    description: "",
+  const { data, setData, post, processing, errors, reset: inertiaReset } = useInertiaForm<EditFeatureForm>({
+    feature_name: feature.feature_name,
+    description: feature.description,
     icon: null,
+    _method: 'patch',
+    clear_icon: false,
   });
+
+  // Set initial image preview and current icon path from props
+  useEffect(() => {
+    if (feature.icon) {
+      setPreview(feature.icon); // Use the full URL from backend
+      setCurrenticonPath(feature.icon);
+    } else {
+      setPreview(null);
+      setCurrenticonPath(null);
+    }
+    // Reset Inertia's form data when the feature prop changes (e.g., editing a different feature)
+    setData({
+        feature_name: feature.feature_name,
+        description: feature.description,
+        icon: null,
+        _method: 'patch',
+        clear_icon: false,
+    });
+    inertiaReset(); // Reset Inertia's internal state
+  }, [feature]);
+
 
   const onDrop = React.useCallback(
     (acceptedFiles: File[], fileRejections: any[]) => {
@@ -62,19 +104,22 @@ const Create = () => {
         reader.onload = () => {
           setPreview(reader.result);
           setData('icon', file); // Set the file in Inertia's form data
+          setData('clear_icon', false); // Ensure clear_icon is false if new file is uploaded
           form.setValue("icon", file); // Set in react-hook-form as well for validation
           form.clearErrors("icon");
           setFileRejectionError(null);
         };
         reader.readAsDataURL(file);
       } else if (fileRejections.length > 0) {
-        setPreview(null);
+        // Revert preview to current icon if new file is rejected
+        setPreview(currenticonPath ? currenticonPath : null);
         setData('icon', null); // Clear Inertia form data
+        setData('clear_icon', false); // Don't clear icon if rejection happened
         form.resetField("icon"); // Clear react-hook-form field
         setFileRejectionError("Image must be less than 1MB and of type png, jpg, or jpeg.");
       }
     },
-    [setData, form],
+    [setData, form, currenticonPath],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -84,23 +129,25 @@ const Create = () => {
     accept: { "image/png": [], "image/jpg": [], "image/jpeg": [] },
   });
 
+  const handleClearicon = () => {
+    setPreview(null);
+    setData('icon', null);
+    setData('clear_icon', true); // Signal backend to clear the icon
+    setCurrenticonPath(null);
+    form.resetField("icon"); // Clear react-hook-form field
+    setFileRejectionError(null);
+  };
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log("Form data submitted:", values);
+    console.log("Form data submitted for update:", values);
     // Use Inertia's post method with the data from its state
-    post(route('carfeature.store'), {
+    post(route('carfeature.update', feature.id), {
       onSuccess: () => {
-        alert('Car feature created successfully!');
-        form.reset(); // Reset react-hook-form fields
-        inertiaReset(); // Reset Inertia form state
-        setPreview(null); // Clear preview
-        setFileRejectionError(null);
+        alert('Car feature updated successfully!');
+        // No need to reset react-hook-form or inertia form here, as dialog will close or re-render
       },
       onError: (submissionErrors) => {
         console.error('Validation Errors:', submissionErrors);
-        // Inertia automatically passes errors to its `errors` object.
-        // You might need to manually map them to react-hook-form if you want
-        // react-hook-form's error display to pick them up, e.g.:
-        // if (submissionErrors.feature_name) form.setError('feature_name', { message: submissionErrors.feature_name });
       },
     });
   };
@@ -108,18 +155,18 @@ const Create = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Add New</Button>
+        <Button variant="outline" size="sm">Edit</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>New Feature</DialogTitle>
+          <DialogTitle>Edit Feature</DialogTitle>
           <DialogDescription>
-            Create a new car Feature.
+            Edit an existing car Feature.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6"> {/* Changed w-2/3 to w-full */}
+          <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
 
             <FormField
               control={form.control}
@@ -131,15 +178,15 @@ const Create = () => {
                     <Input
                       placeholder="Feature name"
                       {...field}
-                      value={data.feature_name} // Bind to Inertia's data
+                      value={data.feature_name}
                       onChange={(e) => {
-                        field.onChange(e); // Update react-hook-form
-                        setData('feature_name', e.target.value); // Update Inertia's data
+                        field.onChange(e);
+                        setData('feature_name', e.target.value);
                       }}
-                      disabled={processing} // Disable when processing
+                      disabled={processing}
                     />
                   </FormControl>
-                  <FormMessage>{errors.feature_name}</FormMessage> {/* Display Inertia error */}
+                  <FormMessage>{errors.feature_name}</FormMessage>
                 </FormItem>
               )}
             />
@@ -156,15 +203,15 @@ const Create = () => {
                       rows={3}
                       className="resize-none"
                       {...field}
-                      value={data.description} // Bind to Inertia's data
+                      value={data.description}
                       onChange={(e) => {
-                        field.onChange(e); // Update react-hook-form
-                        setData('description', e.target.value); // Update Inertia's data
+                        field.onChange(e);
+                        setData('description', e.target.value);
                       }}
-                      disabled={processing} // Disable when processing
+                      disabled={processing}
                     />
                   </FormControl>
-                  <FormMessage>{errors.description}</FormMessage> {/* Display Inertia error */}
+                  <FormMessage>{errors.description}</FormMessage>
                 </FormItem>
               )}
             />
@@ -173,7 +220,7 @@ const Create = () => {
               control={form.control}
               name="icon"
               render={() => (
-                <FormItem className="w-full"> {/* Changed w-1/2 to w-full */}
+                <FormItem className="w-full">
                   <FormLabel
                     className={`${
                       (errors.icon || fileRejectionError) && "text-destructive"
@@ -195,27 +242,21 @@ const Create = () => {
                           <img
                             src={preview as string}
                             alt="Uploaded Feature image"
-                            className="max-h-[200px] w-auto object-contain rounded-lg mb-2" // Max height 200px for better fit
+                            className="max-h-[200px] w-auto object-contain rounded-lg mb-2"
                           />
                           <Button
                             type="button"
                             variant="destructive"
                             size="icon"
                             className="absolute top-2 right-2 rounded-full"
-                            onClick={(e) => {
-                              e.stopPropagation(); // Prevent dropzone from activating
-                              setPreview(null);
-                              setData('icon', null); // Clear Inertia form data
-                              form.resetField("icon"); // Clear react-hook-form field
-                              setFileRejectionError(null);
-                            }}
+                            onClick={handleClearicon}
                           >
                             <XCircle className="h-4 w-4" />
                           </Button>
                         </>
                       ) : (
                         <ImagePlus
-                          className={`size-20 text-gray-400 mb-2 ${preview ? "hidden" : "block"}`} // Size 20 for better fit
+                          className={`size-20 text-gray-400 mb-2 ${preview ? "hidden" : "block"}`}
                         />
                       )}
                       <p className="text-sm text-center text-gray-500">
@@ -226,15 +267,15 @@ const Create = () => {
                       </p>
                     </div>
                   </FormControl>
-                  <FormMessage>{errors.icon || fileRejectionError}</FormMessage> {/* Display Inertia error or local error */}
+                  <FormMessage>{errors.icon || fileRejectionError}</FormMessage>
                 </FormItem>
               )}
             />
             <Button
               type="submit"
-              disabled={processing} // Use Inertia's processing state
+              disabled={processing}
             >
-              {processing ? 'Submitting...' : 'Submit'}
+              {processing ? 'Updating...' : 'Update Feature'}
             </Button>
           </form>
         </Form>
@@ -243,4 +284,4 @@ const Create = () => {
   );
 }
 
-export default Create;
+export default UpdateFeature;

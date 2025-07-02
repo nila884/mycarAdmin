@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ModelController;
 use App\Http\Controllers\VersionController;
+use App\Http\Controllers\FeatureController;
 use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
@@ -49,4 +50,9 @@ Route::middleware('auth')->group(function () {
     Route::post('car/settings/version', [VersionController::class, 'store'])->name('carversion.store');
     Route::patch('car/settings/version/{version}', [VersionController::class, 'update'])->name('carversion.update');
     Route::delete('car/settings/version/{version}', [VersionController::class, 'destroy'])->name('carversion.destroy');
+
+    Route::get('car/settings/feature', [FeatureController::class, 'index'])->name('carfeature.index');
+    Route::post('car/settings/feature', [FeatureController::class, 'store'])->name('carfeature.store');
+    Route::patch('car/settings/feature/{feature}', [FeatureController::class, 'update'])->name('carfeature.update');
+    Route::delete('car/settings/feature/{feature}', [FeatureController::class, 'destroy'])->name('carfeature.destroy');
 });

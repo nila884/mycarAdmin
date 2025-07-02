@@ -17,7 +17,6 @@ class carModelService
     {
        
         $carModels = carModel::with('brand')->paginate(15);
-        
         $carModels->getCollection()->transform(function ($model) {
             return [
                 'id' => $model->id,
