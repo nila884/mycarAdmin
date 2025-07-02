@@ -46,7 +46,7 @@ console.log('Update component initialized with fuel:', fuel);
     return (
          <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline">update</Button>
+                <Button variant="outline" size="sm">update</Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>

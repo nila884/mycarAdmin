@@ -106,7 +106,7 @@ const Update: React.FC<EditBrandProps> = ({ brand }) => { // Renamed for clarity
 
   return (
     <Dialog>
-      <DialogTrigger asChild><Button variant="outline">Edit</Button></DialogTrigger>
+      <DialogTrigger asChild><Button variant="outline" size="sm">Edit</Button></DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Edit Brand</DialogTitle>

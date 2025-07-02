@@ -11,7 +11,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Button } from '@/components/ui/button';
 import { timeFormat } from '@/lib/utils'; // Import the timeFormat function
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, X } from 'lucide-react';
 
 // Define the type for a single category item
 interface CategoryItem {
@@ -78,7 +78,7 @@ export default function category({ categories }: CategoryProps) { // Destructure
                                                                           
       
     <Update category={category} />
-    <Button className='ml-2' variant="destructive" onClick={() => handleDelete(category.id)}>delete</Button>
+    <Button className='ml-2' size="icon" variant="destructive" onClick={() => handleDelete(category.id)}><X/></Button>
       
                                          </TableCell>
                                     </TableRow>

@@ -10,6 +10,7 @@ import CarSettingLayout from '@/layouts/car/settings/layout';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { timeFormat } from '@/lib/utils'; // Import the timeFormat function
+import { X } from 'lucide-react';
 
 
 // Define the type for a single brand item
@@ -89,7 +90,7 @@ export default function brand({ brands }: brandProps) { // Destructure brands fr
    
        <Update brand={brand} />
   
-    <Button className='ml-2' variant="destructive" onClick={() => handleDelete(brand.id)}>delete</Button>
+    <Button className='ml-2' size="icon" variant="destructive" onClick={() => handleDelete(brand.id)}><X/></Button>
 
       
                                          </TableCell>

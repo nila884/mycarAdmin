@@ -10,6 +10,7 @@ import CarSettingLayout from '@/layouts/car/settings/layout';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { timeFormat } from '@/lib/utils'; // Import the timeFormat function
+import { X } from 'lucide-react';
 
 
 // Define the type for a single fuel item
@@ -76,7 +77,7 @@ export default function fuel({ fuels }: FuelProps) { // Destructure fuels from p
                                                                           
       
     <Update fuel={fuel} />
-    <Button className='ml-2' variant="destructive" onClick={() => handleDelete(fuel.id)}>delete</Button>
+    <Button className='ml-2' size="icon" variant="destructive" onClick={() => handleDelete(fuel.id)}><X/></Button>
       
                                          </TableCell>
                                     </TableRow>
