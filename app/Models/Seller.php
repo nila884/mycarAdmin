@@ -12,7 +12,7 @@ class Seller extends Model
         "seller_name",
         "phone",
         "email",
-        "adress",
+        "address",
         "country",
     ];
 }

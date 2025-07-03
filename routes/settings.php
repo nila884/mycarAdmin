@@ -9,6 +9,7 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ModelController;
 use App\Http\Controllers\VersionController;
 use App\Http\Controllers\FeatureController;
+use App\Http\Controllers\SellerController;
 use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
@@ -55,4 +56,9 @@ Route::middleware('auth')->group(function () {
     Route::post('car/settings/feature', [FeatureController::class, 'store'])->name('carfeature.store');
     Route::patch('car/settings/feature/{feature}', [FeatureController::class, 'update'])->name('carfeature.update');
     Route::delete('car/settings/feature/{feature}', [FeatureController::class, 'destroy'])->name('carfeature.destroy');
+
+    Route::get('car/settings/seller', [SellerController::class, 'index'])->name('carseller.index');
+    Route::post('car/settings/seller', [SellerController::class, 'store'])->name('carseller.store');
+    Route::patch('car/settings/seller/{seller}', [SellerController::class, 'update'])->name('carseller.update');
+    Route::delete('car/settings/seller/{seller}', [SellerController::class, 'destroy'])->name('carseller.destroy');
 });

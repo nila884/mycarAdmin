@@ -4,43 +4,73 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
 import { useForm } from '@inertiajs/react';
-import React, { useState } from 'react'; // Import useState to manage dialog open/close state
+import React, { useState, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea'; // Assuming you might use a textarea for address
 
 // Define the type for your form data
-type CreateSellerForm = {
+type EditSellerForm = {
     seller_name: string;
     phone: string;
     email: string;
     address: string;
     country: string;
+    _method?: 'patch'; // For Inertia's PUT/PATCH requests
 };
 
-const Create = () => {
+// Define the props for this component, which will include the seller data
+interface EditSellerProps {
+    seller: {
+        id: number;
+        seller_name: string;
+        phone: string;
+        email: string;
+        address: string;
+        country: string;
+        created_at: string;
+        updated_at: string;
+    };
+}
+
+const Update: React.FC<EditSellerProps> = ({ seller }) => {
     const [open, setOpen] = useState(false); // State to control dialog visibility
 
-    const { data, setData, post, processing, errors, reset } = useForm<CreateSellerForm>({
-        seller_name: "",
-        phone: "",
-        email: "",
-        address: "",
-        country: "",
+    const { data, setData, patch, processing, errors, reset } = useForm<EditSellerForm>({
+        seller_name: seller.seller_name,
+        phone: seller.phone,
+        email: seller.email,
+        address: seller.address,
+        country: seller.country,
+        _method: 'patch', // Important for Laravel's PATCH method spoofing
     });
+
+    // Reset form data when the dialog opens or seller prop changes
+    useEffect(() => {
+        if (open) {
+            setData({
+                seller_name: seller.seller_name,
+                phone: seller.phone,
+                email: seller.email,
+                address: seller.address,
+                country: seller.country,
+                _method: 'patch',
+            });
+            reset(); // Clear any previous errors
+        }
+    }, [open, seller]);
+
 
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault(); // Prevent default form submission
 
-        // Send the data using Inertia's post method
-        post(route('carseller.store'), { // Target the 'carseller.store' route
+        // Send the data using Inertia's patch method
+        patch(route('carseller.update', seller.id), { // Target the 'carseller.update' route with seller ID
             onSuccess: () => {
-                reset(); // Reset form fields on successful submission
                 setOpen(false); // Close the dialog
                 // You might want to show a success message here
-                console.log('Seller created successfully!');
+                console.log('Seller updated successfully!');
             },
             onError: (errors) => {
-                console.error('Submission error:', errors);
-                // Errors are automatically available in the 'errors' object from useForm
+                console.error('Update error:', errors);
             },
             onFinish: () => {
                 // Any cleanup or final actions
@@ -49,13 +79,13 @@ const Create = () => {
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}> {/* Control dialog visibility */}
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline">Add New Seller</Button>
+                <Button variant="outline" size="sm">Edit</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Add New Seller</DialogTitle>
+                    <DialogTitle>Update Seller</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={onSubmit} className="grid gap-4 py-4">
                     <div className="grid gap-2">
@@ -122,7 +152,7 @@ const Create = () => {
                     </div>
 
                     <Button type="submit" disabled={processing}>
-                        {processing ? 'Submitting...' : 'Submit'}
+                        {processing ? 'Updating...' : 'Update Seller'}
                     </Button>
                 </form>
             </DialogContent>
@@ -130,4 +160,4 @@ const Create = () => {
     );
 };
 
-export default Create;
+export default Update;
