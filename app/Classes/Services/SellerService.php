@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log; // Added for debugging, optional
 class SellerService
 {
     public function Index()
-    {
+    { 
         $sellers = Seller::paginate(15);
         // Ensure to return the transformed collection
         return $sellers->getCollection()->transform(function ($seller) {

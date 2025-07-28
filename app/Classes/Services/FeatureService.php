@@ -43,7 +43,7 @@ Class FeatureService
         return Feature::create([
             "feature_name" => $name,
             "description" => $description,
-            "icon" => $iconPath,
+            "icon" => Storage::url($iconPath),
         ]);
     }
 
@@ -72,7 +72,7 @@ Class FeatureService
         $feature->update([
             "feature_name" => $name,
             "description" => $description,
-            "icon" => $iconPath,
+            "icon" => Storage::url($iconPath),
         ]);
         return $feature;
     }

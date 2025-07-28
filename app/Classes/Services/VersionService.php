@@ -87,12 +87,13 @@ Class VersionService
     public function getAllCarModels()
     {
         // Helper to get all car models for dropdowns in frontend
-        return CarModel::select('id', 'model_name')->get()->map(function($carModel) {
+        $carModels= CarModel::select('id', 'model_name')->get()->map(function($carModel) {
             return [
                 'id' => $carModel->id,
                 'model_name' => $carModel->model_name,
             ];
         });
+        return $carModels;
     }
 
     public function DataValidation(Request $request, String $method, Version|bool $version = null): ValidatorReturn|null

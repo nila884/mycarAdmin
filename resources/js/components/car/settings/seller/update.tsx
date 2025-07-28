@@ -128,9 +128,10 @@ const Update: React.FC<EditSellerProps> = ({ seller }) => {
 
                     <div className="grid gap-2">
                         <Label htmlFor="address">Address</Label>
-                        <Textarea
+                      <Input
                             id="address"
-                            placeholder="Seller's physical address"
+                            type="text"
+                            placeholder="Address"
                             value={data.address}
                             onChange={(e) => setData('address', e.target.value)}
                             disabled={processing}

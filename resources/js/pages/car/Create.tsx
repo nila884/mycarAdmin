@@ -1,24 +1,48 @@
+// @/pages/car/create.tsx
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import CreateForm from "@/components/car/create-form";
+import CreateCarForm from "@/components/car/create-form";
+import { Car,Brand,Feature,FuelType,Seller,CarModel,Category, Version, CarDetail } from "@/lib/object"; // Import Car type
 
 
-const breadcrumbs: BreadcrumbItem[] = [
+
+
+interface CreateCarPageProps {
+  car?: CarDetail; // Optional car prop for editing
+  brands: Brand[];
+  carModels: CarModel[];
+  categories: Category[];
+  fuelTypes: FuelType[];
+  versions: Version[];
+  sellers: Seller[];
+  features: Feature[];
+}
+
+export default function Create({ car, brands, carModels, categories, fuelTypes, versions, sellers, features }: CreateCarPageProps) {
+
+
+
+  const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Cars Create form',
-        href: '/car/create',
+      title: car ? `Edit Car: ${car.brand_name} ${car.model_name}` : 'Add New Car',
+      href: car ? route('car.edit', car.id) : route('car.create'),
     },
-];
-export default function list() {
-
-   
+  ];
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-    <Head title="Add new car form" />
-  <CreateForm />
+      <Head title={car ? "Edit Car Form" : "Add New Car Form"} />
+      <CreateCarForm
+        car={car}
+        brands={brands}
+        carModels={carModels}
+        categories={categories}
+        fuelTypes={fuelTypes}
+        versions={versions}
+        sellers={sellers}
+        features={features}
+      />
     </AppLayout>
-
-  )
+  );
 }

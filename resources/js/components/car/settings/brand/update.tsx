@@ -28,8 +28,7 @@ interface EditBrandProps {
     };
 }
 
-const Update: React.FC<EditBrandProps> = ({ brand }) => { // Renamed for clarity
-  console.log('Update component rendered with brand:', brand);
+const Update: React.FC<EditBrandProps> = ({ brand }) => { 
   
   const [preview, setPreview] = useState<string | ArrayBuffer | null>(null);
   const [fileRejectionError, setFileRejectionError] = useState<string | null>(null);

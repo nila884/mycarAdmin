@@ -22,8 +22,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('car/settings/settings');
     })->name('carsettings');
     
-    Route::get('car/list',[CarController::class, 'index'])->name('carlist');
-    Route::get('car/create', [CarController::class, 'create'])->name('carcreate');
+
+    Route::get('car/list', [CarController::class, 'index'])->name('car.index');
+    Route::post('car/store', [CarController::class, 'store'])->name('car.store');
+    Route::get('car/create', [CarController::class, 'create'])->name('car.create');
+    Route::get('car/{car}/edit', [CarController::class, 'edit'])->name('car.edit');
+    Route::post('car/{car}/update', [CarController::class, 'update'])->name('car.update');
+    Route::delete('car/{car}', [CarController::class, 'destroy'])->name('car.destroy');
+    Route::get('car/{car}/show', [CarController::class, 'show'])->name('car.show');
+
     
 
 });

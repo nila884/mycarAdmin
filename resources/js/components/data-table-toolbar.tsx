@@ -6,8 +6,6 @@ import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTableViewOptions } from "./data-table-view-options"
-import { Link } from "@inertiajs/react"
-
 
 
 interface DataTableToolbarProps<TData> {
@@ -23,10 +21,10 @@ export function DataTableToolbar<TData>({
     <div className="flex items-center justify-between pr-4">
       <div className="flex flex-1 items-center space-x-2 ">
         <Input
-          placeholder="Filter email..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+          placeholder="Filter brand..."
+          value={(table.getColumn("brand_name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
+            table.getColumn("brand_name")?.setFilterValue(event.target.value)
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
@@ -44,11 +42,7 @@ export function DataTableToolbar<TData>({
       </div>
         <div className="flex items-center space-x-2 flex-1/4 justify-end">
                 <DataTableViewOptions table={table} />
-    <Link href="/car/create">
-         <Button className="h-8 px-2 lg:px-3 ml-1">
-        <span className="hidden lg:inline">Add New</span>
-      </Button>                           
-    </Link>
+  
         </div>
 
     </div>

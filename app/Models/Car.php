@@ -19,6 +19,7 @@ class Car extends Model
 {
     use HasFactory;
     protected $fillable=[
+        "id",
         "car_model_id",
         "category_id", 
         "fuel_type_id",
@@ -33,7 +34,7 @@ class Car extends Model
         "price",
         "status",
         "transmission",
-        "streeting",
+        "streering",
         "steating_capacity",
         "engine_code",
         "engine_size",
@@ -41,7 +42,6 @@ class Car extends Model
         "wheel_driver",
         "m_3",
         "doors",
-        "dimensions",
         "location",
     ];
 
@@ -87,10 +87,10 @@ class Car extends Model
     }
 
 
-    public function features()
-    {
-        return $this->belongsToMany(Feature::class,'carfeatures','car_id','feature_id');
-    }
+ public function features()
+{
+    return $this->belongsToMany(Feature::class, 'car_features', 'car_id', 'feature_id');
+}
 
     public function prices()
 {

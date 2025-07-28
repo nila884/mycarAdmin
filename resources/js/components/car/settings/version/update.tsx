@@ -106,7 +106,7 @@ const Update: React.FC<UpdateVersionProps> = ({ version, models }) => {
                 {models.length > 0 ? (
                   models.map((model) => (
                     <SelectItem key={model.id} value={model.model_name}>
-                      {model.model_name.toUpperCase()}
+                      {model.model_name}
                     </SelectItem>
                   ))
                 ) : (

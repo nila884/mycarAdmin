@@ -1,39 +1,40 @@
+// @/pages/car/list.tsx
 import AppLayout from "@/layouts/app-layout";
-import { columns, Payment } from "@/components/car/columns"
-import { DataTable } from "@/components/car/data-table"
+import { columns, Car } from "@/components/car/columns"; // Import Car type
+import { DataTable } from "@/components/car/data-table";
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react'; // Import Link from Inertia.js
+import { Button } from "@/components/ui/button"; // Assuming shadcn/ui Button
 
-let data: Payment[] = [
-    {
-        id: "728ed52f",
-        amount: 100,
-        status: "pending",
-        email: "test@test.com"
-    },
-    {
-        id: "728ed52g",
-        amount: 200,
-        status: "success",
-        email: "test2@test.com",
-    }
-]
+// Assume `cars` data is passed as a prop from Inertia backend
+interface CarListPageProps {
+  cars: {
+    data: Car[]; // Inertia paginated data
+    links: any; // Pagination links
+    meta: any; // Pagination meta
+  };
+}
 
-const breadcrumbs: BreadcrumbItem[] = [
+export default function List({ cars }: CarListPageProps) { // Destructure cars prop
+
+  const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Cars listings',
-        href: '/car/list',
+      title: 'Cars listings',
+      href: route('car.index'),
     },
-];
-export default function list() {
+  ];
 
   return (
-            <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Appearance settings" />
-                <div className="container mx-auto py-10">
-      <DataTable columns={columns} data={data} />
-    </div>
-            </AppLayout>
-
-  )
+    <AppLayout breadcrumbs={breadcrumbs}>
+      <Head title="Cars Listings" />
+      <div className="container mx-auto py-10">
+        <div className="flex justify-end mb-4">
+          <Link href={route('car.create')}> {/* Link to the create car page */}
+            <Button>Add New Car</Button>
+          </Link>
+        </div>
+        <DataTable columns={columns} data={cars.data} /> {/* Pass the cars.data to DataTable */}
+      </div>
+    </AppLayout>
+  );
 }

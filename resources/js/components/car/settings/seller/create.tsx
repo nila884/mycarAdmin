@@ -5,7 +5,6 @@ import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
 import { useForm } from '@inertiajs/react';
 import React, { useState } from 'react'; // Import useState to manage dialog open/close state
-import { Textarea } from '@/components/ui/textarea'; // Assuming you might use a textarea for address
 
 // Define the type for your form data
 type CreateSellerForm = {
@@ -17,7 +16,7 @@ type CreateSellerForm = {
 };
 
 const Create = () => {
-    const [open, setOpen] = useState(false); // State to control dialog visibility
+    const [open, setOpen] = useState(false); 
 
     const { data, setData, post, processing, errors, reset } = useForm<CreateSellerForm>({
         seller_name: "",
@@ -35,7 +34,6 @@ const Create = () => {
             onSuccess: () => {
                 reset(); // Reset form fields on successful submission
                 setOpen(false); // Close the dialog
-                // You might want to show a success message here
                 console.log('Seller created successfully!');
             },
             onError: (errors) => {
@@ -49,7 +47,7 @@ const Create = () => {
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}> {/* Control dialog visibility */}
+        <Dialog open={open} onOpenChange={setOpen}> 
             <DialogTrigger asChild>
                 <Button variant="outline">Add New Seller</Button>
             </DialogTrigger>
@@ -98,9 +96,10 @@ const Create = () => {
 
                     <div className="grid gap-2">
                         <Label htmlFor="address">Address</Label>
-                        <Textarea
+                          <Input
                             id="address"
-                            placeholder="Seller's physical address"
+                            type="text"
+                            placeholder="Address"
                             value={data.address}
                             onChange={(e) => setData('address', e.target.value)}
                             disabled={processing}

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('car_model_id')->index();
             $table->string('version_name');
-            $table->string('version_year')->nullable();
+            $table->year('version_year')->nullable();
             $table->foreign('car_model_id')->references('id')->on('car_models')->onDelete('cascade');
             $table->timestamps();
         });

@@ -18,7 +18,6 @@ interface EditCategoryProps {
 }
 
 const Update = ({ category }: EditCategoryProps) => {
-console.log('Update component initialized with category:', category);
 
     const { data, setData, patch, processing, errors, reset } = useForm({
         category_name: category.category_name, // Initialize with the existing category name

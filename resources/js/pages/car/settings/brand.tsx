@@ -75,7 +75,7 @@ export default function brand({ brands }: brandProps) { // Destructure brands fr
                                     <TableRow key={brand.id}>
                                         <TableCell>
                                             <img
-                                                 src={`/storage/${brand.logo}`}
+                                                 src={brand.logo}
                                                 alt={brand.brand_name}
                                                 className="w-10 h-10 object-cover rounded"
                                             />

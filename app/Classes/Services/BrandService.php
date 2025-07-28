@@ -39,7 +39,7 @@ Class BrandService
         
         return Brand::create([
             "brand_name" => strtolower($name),
-            "logo" => $logoPath
+            "logo" => Storage::url($logoPath)
         ]);
     }
 
@@ -69,7 +69,7 @@ Class BrandService
 
         $brand->update([
             "brand_name" => $name,
-            "logo" => $logoPath // Save the updated relative path (or null)
+            "logo" => Storage::url($logoPath) // Save the updated relative path (or null)
         ]);
 
         return $brand;

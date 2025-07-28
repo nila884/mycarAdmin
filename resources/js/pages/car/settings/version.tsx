@@ -73,14 +73,14 @@ export default function Version({ versions, carModels }: VersionProps) {
                 <div className="space-y-6">
                     <HeadingSmall title="Car Version settings" description="Add new, Update and delete car Versions" />
 
-                    <Create models={carModels} /> {/* Pass carModels to the Create component */}
+                    <Create models={carModels} /> 
 
                     <Table className="min-w-full">
                         <TableCaption>A list of your car versions.</TableCaption>
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[100px]">Version Name</TableHead>
-                                <TableHead>Model Name</TableHead> {/* New column for model name */}
+                                <TableHead>Model Name</TableHead>
                                 <TableHead>Version Year</TableHead>
                                 <TableHead>Created At</TableHead>
                                 <TableHead>Last Update</TableHead>
@@ -92,13 +92,13 @@ export default function Version({ versions, carModels }: VersionProps) {
                                 versions.data.map((version) => (
                                     <TableRow key={version.id}>
                                         <TableCell className="font-medium">{version.version_name.toUpperCase()}</TableCell>
-                                        <TableCell>{version.car_model_name.toUpperCase()}</TableCell> {/* Display model name */}
+                                        <TableCell>{version.car_model_name.toUpperCase()}</TableCell> 
                                         <TableCell>{version.version_year}</TableCell>
                                         <TableCell>{timeFormat(version.created_at)}</TableCell>
                                         <TableCell>{timeFormat(version.updated_at)}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end space-x-2">
-                                                <UpdateVersion version={version} models={carModels} /> {/* Pass version and carModels */}
+                                                <UpdateVersion version={version} models={carModels} />
                                                 <Button
                                                     className='ml-2'
                                                     variant="destructive"

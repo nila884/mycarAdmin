@@ -14,8 +14,10 @@ class Feature extends Model
         "icon",        
     ];
 
+
+      
     public function cars()
     {
-        return $this->belongsToMany(Car::class);
+        return $this->belongsToMany(Car::class, 'car_features', 'feature_id', 'car_id');
     }
 }
