@@ -8,6 +8,8 @@ use Inertia\Response;
 use App\Models\Brand;
 use App\Classes\Services\BrandService; // Import your service class
 use Illuminate\Validation\ValidationException; // Important for handling validation errors from service
+use App\Http\Resources\BrandResource; // Import the resource for API responses
+use Illuminate\Http\JsonResponse;
 
 class BrandController extends Controller
 {
@@ -122,4 +124,17 @@ class BrandController extends Controller
             return back()->withErrors(['general' => 'Failed to delete brand. Please try again.']);
         }
     }
+
+       /**
+     * Return a listing of all brands for API consumption.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function apiIndex(): JsonResponse
+    {
+
+        $brands = Brand::orderBy('brand_name', 'asc')->get();
+     
+        return BrandResource::collection($brands)->response();
+    }             
 }

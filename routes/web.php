@@ -7,6 +7,7 @@ use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\VersionController;
+use App\Http\Controllers\BrandController;
 
 
 Route::get('/', function () {
@@ -31,9 +32,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('car/{car}', [CarController::class, 'destroy'])->name('car.destroy');
     Route::get('car/{car}/show', [CarController::class, 'show'])->name('car.show');
 
-    
+   
 
 });
 
+require __DIR__.'/api.php';
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
