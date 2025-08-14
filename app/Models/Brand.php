@@ -21,4 +21,18 @@ class Brand extends Model
         "logo",
     ];
 
+      /**
+     * A brand can have many car models.
+     */
+    public function carModels()
+    {
+        return $this->hasMany(carModel::class);
+    }
+    /**
+     * A brand can have many cars.
+     */
+    public function cars()
+    {
+        return $this->hasMany(Car::class);          
+    }
 }

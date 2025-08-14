@@ -7,8 +7,6 @@ use Inertia\Inertia;
 use App\Models\Car;
 use App\Classes\Services\CarService;
 use Illuminate\Validation\ValidationException;
-
-// Import all models needed for dropdowns/checkboxes
 use App\Models\Brand;
 use App\Models\CarModel;
 use App\Models\FuelType;
@@ -16,6 +14,7 @@ use App\Models\Version;
 use App\Models\Seller;
 use App\Models\Category;
 use App\Models\Feature;
+use App\Http\Resources\CarResource; 
 
 
 class CarController extends Controller
@@ -94,8 +93,6 @@ class CarController extends Controller
      */
     public function show(string $id)
     {
-        // This method is typically for viewing a single resource in detail.
-        // For Inertia CRUD, the 'edit' method often serves to fetch data for pre-filling a form.
         $car = $this->carService->read($id);
         if (!$car) {
             abort(404);
@@ -164,5 +161,53 @@ class CarController extends Controller
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to delete car. Please try again. Error: ' . $e->getMessage()]);
         }
+    }
+
+      /**
+     * Display a listing of all cars based on provided filters (brand, model, version).
+     * All filters are optional query parameters.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function carsSearch(Request $request)
+    {
+        $brandName = $request->input('brand');
+        $modelName = $request->input('model');
+        $versionName = $request->input('version');
+
+        $query = Car::query();
+
+        // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
+        $query->with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'images', 'features', 'prices']);
+            
+        // Conditionally apply the brand filter if the brand name is provided.
+        $query->when($brandName, function ($brandQuery) use ($brandName) {
+            $brandQuery->whereHas('carModel.brand', function ($innerQuery) use ($brandName) {
+                $innerQuery->where('brand_name', $brandName);
+            });
+        });
+            
+        // Conditionally apply the car model filter if the model name is provided.
+        $query->when($modelName, function ($modelQuery) use ($modelName) {
+            $modelQuery->whereHas('carModel', function ($innerQuery) use ($modelName) {
+                $innerQuery->where('model_name', $modelName);
+            });
+        });
+        
+        // Conditionally apply the version filter if the version name is provided.
+        $query->when($versionName, function ($versionQuery) use ($versionName) {
+            $versionQuery->whereHas('version', function ($innerQuery) use ($versionName) {
+                $innerQuery->where('version_name', $versionName);
+            });
+        });
+
+        // Get the final collection of cars.
+        $cars = $query->get();
+        if( $cars->isEmpty()) {
+            return response()->json(['message' => 'No cars found for the given filters.'], 404);
+        }
+        // Return a collection of CarResource instances.
+        return CarResource::collection($cars);
     }
 }

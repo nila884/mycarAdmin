@@ -8,6 +8,8 @@ use App\Models\Category;
 use App\Classes\Services\CategoryService;
 use Inertia\Response;
 use Illuminate\Validation\ValidationException;
+use App\Http\Resources\CategoryResource;
+use Illuminate\Http\JsonResponse;
 
 class CategoryController extends Controller
 {
@@ -108,5 +110,13 @@ class CategoryController extends Controller
         }
         
 
+    }
+
+    /**
+     * API endpoint to get all categories.
+     */
+      public function apiIndex(): JsonResponse
+    {
+        return CategoryResource::collection(Category::all())->response();
     }
 }

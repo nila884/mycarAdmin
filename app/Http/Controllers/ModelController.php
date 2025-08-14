@@ -9,6 +9,8 @@ use App\Models\CarModel; // Ensure correct casing for CarModel
 use App\Classes\Services\carModelService; // Import your service
 use App\Classes\Services\BrandService; // Import BrandService to get brands
 use Illuminate\Validation\ValidationException;
+use App\Http\Resources\ModelResource; // Import ModelResource for API responses
+use Illuminate\Http\JsonResponse;
 
 class ModelController extends Controller
 {
@@ -81,5 +83,12 @@ class ModelController extends Controller
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to delete car model. Please try again.']);
         }
+    }
+
+    /**
+     * fetch all car model.
+     */   public function apiIndex(): JsonResponse
+    {
+        return ModelResource::collection(CarModel::all())->response();
     }
 }

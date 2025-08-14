@@ -8,6 +8,8 @@ use Inertia\Response;
 use App\Models\Version;
 use App\Classes\Services\VersionService; // Import your service
 use Illuminate\Validation\ValidationException;
+use App\Http\Resources\VersionResource;
+use Illuminate\Http\JsonResponse;
 
 class VersionController extends Controller
 {
@@ -78,5 +80,13 @@ class VersionController extends Controller
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to delete car version. Please try again.']);
         }
+    }
+
+    /**
+     * API endpoint to get all versions.
+     */
+        public function apiIndex(): JsonResponse
+    {
+       return VersionResource::collection(Version::all())->response();
     }
 }

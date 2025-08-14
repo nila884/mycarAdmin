@@ -34,7 +34,7 @@ class CarService
             'prices' => function($query) {
                 $query->where('is_current', true); // Eager load only the current price
             }
-        ])->paginate(15);
+        ])->paginate(50);
         // Transform the collection for frontend consumption
         $cars->getCollection()->transform(function ($car) {
             return [
@@ -66,10 +66,10 @@ class CarService
                 'doors' => $car->doors,
                 'dimensions' => $car->dimensions,
                 'location' => $car->location,
+                'image_main' => $car->images->first()->image_path ?? '/storage/no-image.png' , // Get image main paths
                 'publication_status' => $car->publication_status ?? 'pending',
                 'car_sells_status' => $car->car_sells_status ?? 'selling',
                 'features' => $car->features->pluck('id')->toArray(), // Get feature IDs
-                'image_main' => $car->images[0], // Get image main paths
                 'created_at' => $car->created_at->format('Y-m-d H:i:s'),
                 'updated_at' => $car->updated_at->format('Y-m-d H:i:s'),
             ];

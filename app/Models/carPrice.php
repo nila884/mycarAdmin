@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Car;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 
 class CarPrice extends Model
 {
+    use HasFactory;
     protected $fillable = ['car_id', 'price', 'discount', 'discount_type', 'is_current'];
 
     public function car()
@@ -15,7 +17,7 @@ class CarPrice extends Model
         return $this->belongsTo(Car::class);
     }
 
-    public function getFinalPriceAttribute()
+    public function getFinalPrice()
     {
         if (!$this->discount || !$this->discount_type) {
             return $this->price;

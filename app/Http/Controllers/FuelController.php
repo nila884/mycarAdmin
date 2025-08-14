@@ -8,6 +8,8 @@ use Inertia\Response;
 use App\Models\FuelType as Fuel;
 use App\Classes\Services\FuelTypeService as FuelService;
 use Illuminate\Validation\ValidationException;
+use App\Http\Resources\FuelTypeResource;
+use Illuminate\Http\JsonResponse;
 
 class FuelController extends Controller
 {
@@ -104,5 +106,12 @@ class FuelController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Fuel not found or could not be deleted.']);
         }
+    }
+
+    /**
+     * API endpoint to get all fuel types.
+     */ public function apiIndex(): JsonResponse
+    {
+        return FuelTypeResource::collection(Fuel::all())->response();
     }
 }

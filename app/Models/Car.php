@@ -31,7 +31,6 @@ class Car extends Model
         "manufacture_year",
         "color",
         "weight",
-        "price",
         "status",
         "transmission",
         "streering",
@@ -49,6 +48,7 @@ class Car extends Model
     {
         return $this->belongsTo(Brand::class);
     }
+
 
     public function carModel()
     {
@@ -101,5 +101,7 @@ public function currentPrice()
 {
     return $this->hasOne(CarPrice::class)->where('is_current', true);
 }
-
+public function imageMain(){
+    return $this->hasOne(Image::class)->where('is_main', true);
+}
 }
