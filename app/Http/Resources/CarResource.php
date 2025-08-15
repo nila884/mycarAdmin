@@ -24,6 +24,19 @@ class CarResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            
+            'location' => $this->location,
+            'status' => $this->status,
+            'image_main' => new ImageResource($this->whenLoaded('images')->firstWhere('is_main', true)),
+            'price' => new CarPriceResource($this->whenLoaded('prices')->firstWhere('is_current', true)),
+           
+            'spect'=>[
+            'engine_code' => $this->engine_code,
+            'engine_size' => $this->engine_size,
+            'model_code' => $this->model_code,
+            'wheel_driver' => $this->wheel_driver,
+            'm_3' => $this->m_3,
+            'weight' => $this->weight,
             'chassis_number' => $this->chassis_number,
             'registration_year' => $this->registration_year,
             'manufacture_year' => $this->manufacture_year,
@@ -33,16 +46,8 @@ class CarResource extends JsonResource
             'steering' => $this->streering,
             'seating_capacity' => $this->steating_capacity,
             'doors' => $this->doors,
-            'location' => $this->location,
-            'status' => $this->status,
-            'image_main' => new ImageResource($this->whenLoaded('images')->firstWhere('is_main', true)),
-            'price' => new CarPriceResource($this->whenLoaded('prices')->firstWhere('is_current', true)),
-            'engine_code' => $this->engine_code,
-            'engine_size' => $this->engine_size,
-            'model_code' => $this->model_code,
-            'wheel_driver' => $this->wheel_driver,
-            'm_3' => $this->m_3,
-            'weight' => $this->weight,
+            ],
+
             
             // Nested relationships using other resources
             // 'model' => new ModelResource($this->whenLoaded('carModel')),
@@ -52,6 +57,7 @@ class CarResource extends JsonResource
             'version' => VersionResource::make($this->whenLoaded('version')),
             'seller' => SellerResource::make($this->whenLoaded('seller')),
             'features' => FeatureResource::collection($this->whenLoaded('features')),
+            'images'=> ImageResource::collection($this->whenLoaded('images')),
            
         ];
     }

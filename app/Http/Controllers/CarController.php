@@ -15,6 +15,7 @@ use App\Models\Seller;
 use App\Models\Category;
 use App\Models\Feature;
 use App\Http\Resources\CarResource; 
+use App\Http\Resources\CarListingResource;
 
 
 class CarController extends Controller
@@ -205,9 +206,64 @@ class CarController extends Controller
         // Get the final collection of cars.
         $cars = $query->get();
         if( $cars->isEmpty()) {
-            return response()->json(['message' => 'No cars found for the given filters.'], 404);
+            return response()->json(
+                [
+                    'message' => 'No cars found for the given filters.',
+                    'data'=>[]
+            
+            ], 200);
         }
         // Return a collection of CarResource instances.
-        return CarResource::collection($cars);
+        return CarListingResource::collection($cars);
     }
+
+    /**
+     * Display a listing of cars for the home page.
+     *
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function carsHome()
+    {
+        $query = Car::query();
+                // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
+        $query->with(['carModel.brand',  'version', 'carModel', 'images',  'prices']);
+        
+       $cars= $query->take(10)->get();
+        if( $cars->isEmpty()) {
+            return response()->json(
+                [
+                    'message' => 'No cars found for the home page.',
+                    'data'=>[]
+            
+            ], 200);
+        }
+        // Return a collection of CarResource instances.
+        return CarListingResource::collection($cars);
+
+
+    }
+    /**
+     * Display the details of a specific car.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\Resources\Json\JsonResource
+     */
+    public function carDetail($id)
+    {
+              $car = Car::with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'features', 'images', 'prices'] )
+              ->find($id);
+      
+        if (!$car) {
+            return response()->json(
+                [
+                    'message' => 'Car not found.',
+                    'data' => []
+                ], 404
+            );
+        }
+
+        return new CarResource($car);
+        
+        
+    }        
 }
