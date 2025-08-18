@@ -13,7 +13,8 @@ use App\Http\Controllers\CarController;
  Route::get('api/models', [ModelController::class, 'apiIndex'])->name('api.models');
  Route::get('api/versions', [VersionController::class, 'apiIndex'])->name('api.versions');
 
-Route::get('api/cars/search', [CarController::class, 'carsSearch'])->name('api.cars.search');
+Route::get('api/cars-search', [CarController::class, 'carsSearch'])->name('api.cars.search');
+// Route::get('api/cars-filter', [CarController::class, 'carsFilter'])->name('api.cars.filter');
 
 Route::get('api/cars/home', [CarController::class, 'carsHome'])->name('api.cars.home');
 

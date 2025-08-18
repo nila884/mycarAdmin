@@ -173,9 +173,14 @@ class CarController extends Controller
      */
     public function carsSearch(Request $request)
     {
-        $brandName = $request->input('brand');
-        $modelName = $request->input('model');
-        $versionName = $request->input('version');
+        // dd($request);
+        $brandId = $request->query('brand');
+        $modelId = $request->query('model');
+        $versionId = $request->query('version');
+        $categoryIds = $request->query('category');
+        $fuelTypeIds = $request->query('fuel');
+        $transmission = $request->query('transmission');
+        $steering = $request->query('steering');
 
         $query = Car::query();
 
@@ -183,24 +188,120 @@ class CarController extends Controller
         $query->with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'images', 'features', 'prices']);
             
         // Conditionally apply the brand filter if the brand name is provided.
-        $query->when($brandName, function ($brandQuery) use ($brandName) {
-            $brandQuery->whereHas('carModel.brand', function ($innerQuery) use ($brandName) {
-                $innerQuery->where('brand_name', $brandName);
+        $query->when($brandId, function ($brandQuery) use ($brandId) {
+            $brandQuery->whereHas('carModel.brand', function ($innerQuery) use ($brandId) {
+                $innerQuery->where('id', $brandId);
             });
         });
+
+        
             
         // Conditionally apply the car model filter if the model name is provided.
-        $query->when($modelName, function ($modelQuery) use ($modelName) {
-            $modelQuery->whereHas('carModel', function ($innerQuery) use ($modelName) {
-                $innerQuery->where('model_name', $modelName);
+        $query->when($modelId, function ($modelQuery) use ($modelId) {
+            $modelQuery->whereHas('carModel', function ($innerQuery) use ($modelId) {
+                $innerQuery->where('id', $modelId);
             });
         });
         
         // Conditionally apply the version filter if the version name is provided.
-        $query->when($versionName, function ($versionQuery) use ($versionName) {
-            $versionQuery->whereHas('version', function ($innerQuery) use ($versionName) {
-                $innerQuery->where('version_name', $versionName);
+        $query->when($versionId, function ($versionQuery) use ($versionId) {
+            $versionQuery->whereHas('version', function ($innerQuery) use ($versionId) {
+                $innerQuery->where('version_name', $versionId);
             });
+        });
+
+          $query->when($categoryIds, function ($categoryQuerry) use ($categoryIds) {
+            $ids = explode(',', $categoryIds);
+            $categoryQuerry->whereIn('category_id', $ids);
+        });
+
+        $query->when($fuelTypeIds, function ($q) use ($fuelTypeIds) {
+            $ids = explode(',', $fuelTypeIds);
+            $q->whereIn('fuel_type_id', $ids);
+        });
+
+        $query->when($transmission, function ($q) use ($transmission) {
+            $q->where('transmission', 'LIKE', '%' . $transmission . '%');
+        });
+
+        $query->when($steering, function ($q) use ($steering) {
+            $q->where('streering', 'LIKE', '%' . $steering . '%');
+        });
+
+        // Get the final collection of cars.
+        $cars = $query->get();
+        if( $cars->isEmpty()) {
+            return response()->json(
+                [
+                    'message' => 'No cars found for the given filters.',
+                    'data'=>[]
+            
+            ], 200);
+        }
+        // Return a collection of CarResource instances.
+        return CarListingResource::collection($cars);
+    }
+
+/**
+     * Display a listing of all cars based on provided filters (brand, model, version).
+     * All filters are optional query parameters.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function carsFilter(Request $request)
+    {
+       dd($request);
+        $brandId = $request->input('brand');
+        $modelId = $request->input('model');
+        $versionId = $request->input('version');
+          $categoryIds = $request->query('category');
+        $fuelTypeIds = $request->query('fuel');
+        $transmission = $request->query('transmission');
+        $steering = $request->query('steering');
+            
+        $query = Car::query();
+
+        // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
+        $query->with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'images', 'features', 'prices']);
+            
+        // Conditionally apply the brand filter if the brand name is provided.
+        $query->when($brandId, function ($brandQuery) use ($brandId) {
+            $brandQuery->whereHas('carModel.brand', function ($innerQuery) use ($brandId) {
+                $innerQuery->where('id', $brandId);
+            });
+        });
+            
+        // Conditionally apply the car model filter if the model name is provided.
+        $query->when($modelId, function ($modelQuery) use ($modelId) {
+            $modelQuery->whereHas('carModel', function ($innerQuery) use ($modelId) {
+                $innerQuery->where('id', $modelId);
+            });
+        });
+        
+        // Conditionally apply the version filter if the version name is provided.
+        $query->when($versionId, function ($versionQuery) use ($versionId) {
+            $versionQuery->whereHas('version', function ($innerQuery) use ($versionId) {
+                $innerQuery->where('id', $versionId);
+            });
+        });
+
+         $query->when($categoryIds, function ($categoryQuerry) use ($categoryIds) {
+            $ids = explode(',', $categoryIds);
+            $categoryQuerry->whereIn('category_id', $ids);
+        });
+
+        $query->when($fuelTypeIds, function ($fuelTypeQuerry) use ($fuelTypeIds) {
+            $ids = explode(',', $fuelTypeIds);
+            $q->whereIn('fuel_type_id', $ids);
+        });
+
+        $query->when($transmission, function ($q) use ($transmission) {
+            $q->where('transmission', 'LIKE', '%' . $transmission . '%');
+        });
+
+        $query->when($steering, function ($q) use ($steering) {
+            $q->where('streering', 'LIKE', '%' . $steering . '%');
         });
 
         // Get the final collection of cars.
@@ -250,6 +351,7 @@ class CarController extends Controller
      */
     public function carDetail($id)
     {
+
               $car = Car::with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'features', 'images', 'prices'] )
               ->find($id);
       
@@ -265,5 +367,31 @@ class CarController extends Controller
         return new CarResource($car);
         
         
-    }        
+    }   
+    
+    /**
+     * Display a listing of cars for the home page.
+     *
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function carRecomended()
+    {
+        $query = Car::query();
+                // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
+        $query->with(['carModel.brand',  'version', 'carModel', 'images',  'prices']);
+        
+       $cars= $query->take(4)->get();
+        if( $cars->isEmpty()) {
+            return response()->json(
+                [
+                    'message' => 'No cars found for the home page.',
+                    'data'=>[]
+            
+            ], 200);
+        }
+        // Return a collection of CarResource instances.
+        return CarListingResource::collection($cars);
+
+
+    }
 }
