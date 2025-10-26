@@ -16,6 +16,14 @@ use App\Models\Category;
 use App\Models\Feature;
 use App\Http\Resources\CarResource; 
 use App\Http\Resources\CarListingResource;
+use App\Http\Resources\BrandResource;
+use App\Http\Resources\ModelResource;
+use App\Http\Resources\CategoryResource;
+use App\Http\Resources\FuelTypeResource;
+use App\Http\Resources\VersionResource;
+use App\Http\Resources\FeatureResource;
+use Illuminate\Http\JsonResponse;
+
 
 
 class CarController extends Controller
@@ -43,6 +51,7 @@ class CarController extends Controller
      */
     public function create()
     {
+       
         // Fetch necessary data for dropdowns and checkboxes
         $brands = Brand::all(['id', 'brand_name']);
         $carModels = CarModel::all(['id', 'model_name', 'brand_id']);
@@ -251,7 +260,6 @@ class CarController extends Controller
      */
     public function carsFilter(Request $request)
     {
-       dd($request);
         $brandId = $request->input('brand');
         $modelId = $request->input('model');
         $versionId = $request->input('version');
@@ -391,6 +399,42 @@ class CarController extends Controller
         }
         // Return a collection of CarResource instances.
         return CarListingResource::collection($cars);
+
+
+    }
+
+     /**
+     * Display a listing of cars for the home page.
+     *
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function carsHomeMobile()
+    {
+        
+        $query = Car::query();
+                // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
+        $query->with(['carModel.brand',  'version', 'carModel', 'images',  'prices']);
+        
+       $cars= $query->take(4)->get();
+        if( $cars->isEmpty()) {
+            return response()->json(
+                [
+                    'message' => 'No cars found for the home page.',
+                    'data'=>[]
+            
+            ], 200);
+        }
+        // Return a collection of CarResource instances.
+        // return CarListingResource::collection($cars);
+        return response()->json(
+            [
+                
+                'carsRecomended' => CarListingResource::collection($cars),
+                'carsNew' => CarListingResource::collection($cars),
+                'carsRecentlyViewed' => CarListingResource::collection($cars),
+                
+            ], 200
+        );
 
 
     }

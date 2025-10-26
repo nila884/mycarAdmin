@@ -1,10 +1,11 @@
 // @/pages/car/list.tsx
 import AppLayout from "@/layouts/app-layout";
-import { columns, Car } from "@/components/car/columns"; // Import Car type
+import { columns } from "@/components/car/columns"; // Import Car type
 import { DataTable } from "@/components/car/data-table";
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react'; // Import Link from Inertia.js
 import { Button } from "@/components/ui/button"; // Assuming shadcn/ui Button
+import { Car } from "@/lib/object";
 
 // Assume `cars` data is passed as a prop from Inertia backend
 interface CarListPageProps {

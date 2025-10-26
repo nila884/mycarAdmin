@@ -18,7 +18,10 @@ class FeatureResource extends JsonResource
         'id'=>$this->id,
         'name'=>$this->feature_name,
         'description'=>$this->description,
+        'is_active'=>$this->is_active,
+        'is_main'=>$this->is_main,
         'icon'=>$this->icon, 
+
         ];
     }
 }

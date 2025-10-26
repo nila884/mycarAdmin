@@ -7,6 +7,8 @@ use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Feature;
 use App\Classes\Services\FeatureService; // Import your service
+use App\Http\Resources\FeatureResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
 class FeatureController extends Controller
@@ -33,6 +35,7 @@ class FeatureController extends Controller
      */
     public function store(Request $request)
     {
+        
         $validator = $this->featureService->DataValidation($request, 'post');
 
         if ($validator->fails()) {
@@ -78,4 +81,18 @@ class FeatureController extends Controller
             return back()->withErrors(['general' => 'Failed to delete car feature. Please try again.']);
         }
     }
+
+
+       /**
+     * Return a listing of all brands for API consumption.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function apiIndex(): JsonResponse
+    {
+
+        $features = Feature::orderBy('feature_name', 'asc')->get();
+     
+        return FeatureResource::collection($features)->response();
+    }      
 }

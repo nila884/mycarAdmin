@@ -8,13 +8,13 @@ import InputError from '@/components/input-error';
 import { useForm } from '@inertiajs/react'; // Import useForm from Inertia
 import { ImagePlus } from 'lucide-react'; // Assuming you have lucide-react installed for icons
 
-// Define the type for your form data, now including the image
+
 type CreateBrandForm = {
     brand_name: string;
     logo: File | null; // Add image field, can be null initially
 };
 
-const Create = () => { // Renamed the component to 'CreateBrand' for better naming conventions
+const Create = () => {
 
   const [preview, setPreview] = React.useState<string | ArrayBuffer | null>(null);
   const [fileRejectionError, setFileRejectionError] = React.useState<string | null>(null);

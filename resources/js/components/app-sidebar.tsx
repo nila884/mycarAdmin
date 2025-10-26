@@ -30,6 +30,12 @@ const mainNavItems: NavItem[] = [
         icon: Wrench,
     },
 
+        {
+        title: 'Shipping',
+        href: '/shipping',
+        icon: Wrench,
+    },
+
 ];
 
 const footerNavItems: NavItem[] = [

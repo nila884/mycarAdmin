@@ -22,6 +22,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('car/settings', function () {
         return Inertia::render('car/settings/settings');
     })->name('carsettings');
+
+    Route::get('shipping', function () {
+        return Inertia::render('shipping/shipping');
+    })->name('shipping');
     
 
     Route::get('car/list', [CarController::class, 'index'])->name('car.index');

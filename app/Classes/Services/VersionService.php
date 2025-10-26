@@ -86,7 +86,6 @@ Class VersionService
 
     public function getAllCarModels()
     {
-        // Helper to get all car models for dropdowns in frontend
         $carModels= CarModel::select('id', 'model_name')->get()->map(function($carModel) {
             return [
                 'id' => $carModel->id,

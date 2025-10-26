@@ -21,6 +21,8 @@ Class FeatureService
                 'feature_name' => $feature->feature_name,
                 'description' => $feature->description,
                 'icon' => $feature->icon ? Storage::url($feature->icon) : null, // Generate full URL
+                'is_active' => $feature->is_active,
+                'is_main'=> $feature->is_main,
                 'created_at' => $feature->created_at->format('Y-m-d'),
                 'updated_at' => $feature->updated_at->format('Y-m-d'),
             ];
@@ -30,6 +32,7 @@ Class FeatureService
 
     public function Create(Request $request)
     {
+       
         $name = strtolower(trim(htmlspecialchars($request->feature_name)));
         $description = trim(htmlspecialchars($request->description));
         $iconPath = null;
@@ -43,6 +46,7 @@ Class FeatureService
         return Feature::create([
             "feature_name" => $name,
             "description" => $description,
+            "is_main" => $request->is_main,
             "icon" => Storage::url($iconPath),
         ]);
     }
@@ -51,6 +55,7 @@ Class FeatureService
     {
         $name = strtolower(trim(htmlspecialchars($request->feature_name)));
         $description = trim(htmlspecialchars($request->description));
+
         $iconPath = $feature->icon; // Keep existing icon path by default
 
         if ($request->hasFile('icon')) {
@@ -72,6 +77,7 @@ Class FeatureService
         $feature->update([
             "feature_name" => $name,
             "description" => $description,
+            "is_main" => $request->is_main,
             "icon" => Storage::url($iconPath),
         ]);
         return $feature;
@@ -94,13 +100,16 @@ Class FeatureService
                 return Validator::make($request->all(), [
                     "feature_name" => ["required", "string", "max:255", "unique:features,feature_name", 'regex:/^[a-zA-Z0-9\s\'-]+$/'],
                     "description" => ["required", "string", "min:10"],
+                    "is_main" => ["boolean"],
                     "icon" => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:1024'],
+
                 ]);
             case 'patch':
                 return Validator::make($request->all(), [
                     "feature_name" => ["required", "string", "max:255", Rule::unique("features", "feature_name")->ignore($feature->id), 'regex:/^[a-zA-Z0-9\s\'-]+$/'],
                     "description" => ["required", "string", "min:10"],
                     "icon" => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:1024'],
+                    "is_main" => ["boolean"],
                     "clear_icon" => ['boolean'], // For explicit icon removal
                 ]);
             default:

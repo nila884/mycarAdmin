@@ -11,6 +11,8 @@ class Feature extends Model
     protected $fillable=[
         "feature_name",
         "description",
+        "is_main",
+        "is_active",
         "icon",        
     ];
 

@@ -1,83 +1,89 @@
 <?php
 namespace App\Classes\Services;
 
-
 use App\Models\Country;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
+
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator as ValidatorReturn;
+use Illuminate\Support\Facades\Storage; // Required for file management
 
 class CountryService
 {
     public function Index()
     {
-        $country =  Country::paginate(15);
-        return $country;
+        // Using pagination as per your existing CountryService logic
+        return Country::orderBy('country_name', 'asc')->paginate(15);
     }
-    public function Create(Request $request)
+
+    public function DataValidation(Request $request, string $method, Country|null $country = null): ValidatorReturn|null
     {
-        $name = trim(htmlspecialchars($request->country_name));
-        $code = trim(htmlspecialchars($request->code));
-        $prefix = trim(htmlspecialchars($request->prefix));
-        return Country::create([
-            "country_name" => $name,
-            "code" => $code,
-            "prefix" => $prefix,
-        ]);
+        $rules = [
+            // Using all fillable fields
+            "country_name" => ["required", "string", "max:255", "regex:/^[a-zA-Z\s]+$/"],
+            "code" => ["required", "string", "max:3", "min:2"],
+            "prefix" => ["required", "string", "max:10"],
+            "currency" => ["nullable", "string", "max:10"],
+            // Flag is required for creation, nullable for update
+            "flags" => [$method === 'post' ? 'required' : 'nullable', 'file', 'mimes:png,jpg,jpeg,svg', 'max:512'], 
+        ];
+
+        // Apply unique rules based on method
+        if (strtolower($method) === 'post') {
+            $rules["country_name"][] = "unique:countries,country_name";
+            $rules["code"][] = "unique:countries,code";
+            $rules["prefix"][] = "unique:countries,prefix";
+        } elseif (strtolower($method) === 'patch' && $country) {
+            $rules["country_name"][] = Rule::unique("countries", "country_name")->ignore($country->id);
+            $rules["code"][] = Rule::unique("countries", "code")->ignore($country->id);
+            $rules["prefix"][] = Rule::unique("countries", "prefix")->ignore($country->id);
+        }
+
+        return Validator::make($request->all(), $rules);
     }
+
+    public function Create(Request $request): Country
+    {
+        $data = $request->only('country_name', 'code', 'prefix', 'currency');
+        $data['country_name'] = trim(htmlspecialchars($data['country_name']));
+        
+        if ($request->hasFile('flags')) {
+            // Store file to 'public/country' folder
+            $flagPath = $request->file('flags')->store('country', 'public');
+            // Save only the filename in the database (e.g., '123_filename.png')
+            $data['flags'] = basename($flagPath); 
+        }
+
+        return Country::create($data);
+    }
+
     public function Update(Request $request, Country $country): Country
     {
-        $name = trim(htmlspecialchars($request->country_name));
-        $code = trim(htmlspecialchars($request->code));
-        $prefix = trim(htmlspecialchars($request->prefix));
-        $currency = trim(htmlspecialchars($request->currency));
-        $flag = $request->flags;
-        $flag_file = $country->id . '_' . $flag->getClientOriginalName();
-        // $type = $flag->getClientMimeType();
-        // $size = $flag->getSize();
-        $flag->move(storage_path('app/public/country'), $flag_file);
-        $country->update([
-            "country_name" => $name,
-            "code" => $code,
-            "prefix" => $prefix,
-            "currency" => $currency,
-            "flags"=>$flag_file
-        ]);
+        $data = $request->only('country_name', 'code', 'prefix', 'currency');
+        $data['country_name'] = trim(htmlspecialchars($data['country_name']));
+        $flagName = $country->flags; // Keep existing flag by default
+
+        if ($request->hasFile('flags')) {
+            // Delete old flag if it exists in storage
+            if ($country->flags) {
+                 Storage::disk('public')->delete('country/' . $country->flags);
+            }
+            
+            $flagPath = $request->file('flags')->store('country', 'public');
+            $flagName = basename($flagPath);
+        } 
+        
+        $country->update(array_merge($data, ["flags" => $flagName]));
         return $country;
     }
 
     public function Delete(Country $country): bool
     {
-        return $country->delete();
-    }
-    /**
-     * Validation
-     *
-     * @param  Request $request
-     * @param  string $method
-     * @param  Country|bool $country
-     * @return ValidatorReturn|null
-     */
-    public function DataValidation(Request $request, String $method, Country|bool $country = null): ValidatorReturn|null
-    {
-        switch (strtolower($method)) {
-            case 'post':
-                return Validator::make($request->all(), [
-                    "country_name" => ["required", "unique:countries,country_name"],
-                    "code" => ["required", "unique:countries,code"],
-                    "prefix" => ["required", "unique:countries,prefix"],
-                    "currency" => ["nullable"],
-                ]);
-            case 'patch':
-                return Validator::make($request->all(), [
-                    "country_name" => ["required", Rule::unique("countries", "country_name")->ignore($country->id)],
-                    "code" => ["required", Rule::unique("countries", "code")->ignore($country->id)],
-                    "prefix" => ["required", Rule::unique("countries", "prefix")->ignore($country->id)],
-                    "currency" => ["nullable"],
-                ]);
-            default:
-                return null;
+        // Delete the associated flag file
+        if ($country->flags) {
+            Storage::disk('public')->delete('country/' . $country->flags);
         }
+        return $country->delete();
     }
 }

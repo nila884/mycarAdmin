@@ -179,6 +179,7 @@ class CarService
         $car = Car::with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'features', 'images', 'prices' => function($query) {
             $query->where('is_current', true); 
         }])->find($id);
+
         if (!$car) {
             return null;
         }

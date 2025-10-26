@@ -11,12 +11,14 @@ import React, { useEffect } from 'react';
 import { ImagePlus, XCircle } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm as useInertiaForm } from '@inertiajs/react';
+import { Switch } from '@/components/ui/switch';
 
 // Define types for FeatureItem
 interface FeatureItem {
     id: number;
     feature_name: string;
     description: string;
+    is_main:boolean;
     icon: string | null;
     created_at: string;
     updated_at: string;
@@ -26,6 +28,7 @@ interface FeatureItem {
 type EditFeatureForm = {
     feature_name: string;
     description: string;
+    is_main: boolean;
     icon: File | null;
     _method?: 'patch'; // For Inertia's PUT/PATCH requests
     clear_icon?: boolean; // To explicitly tell backend to clear icon
@@ -40,7 +43,8 @@ const UpdateFeature: React.FC<UpdateFeatureProps> = ({ feature }) => {
   const [preview, setPreview] = React.useState<string | ArrayBuffer | null>(null);
   const [fileRejectionError, setFileRejectionError] = React.useState<string | null>(null);
   const [currenticonPath, setCurrenticonPath] = React.useState<string | null>(null);
-
+    console.log(feature);
+    
   const formSchema = z.object({
     feature_name: z.string().min(2, {
         message: "Feature name must be at least 2 characters.",
@@ -48,6 +52,7 @@ const UpdateFeature: React.FC<UpdateFeatureProps> = ({ feature }) => {
     description: z.string().min(10, {
         message: "Feature description must be at least 10 characters.",
     }),
+    is_main: z.boolean(),
     icon: z
       .any()
       .nullable()
@@ -62,6 +67,7 @@ const UpdateFeature: React.FC<UpdateFeatureProps> = ({ feature }) => {
     defaultValues: {
       feature_name: feature.feature_name,
       description: feature.description,
+      is_main:feature.is_main,
       icon: null, // Always start with null for file input
     },
   });
@@ -71,6 +77,7 @@ const UpdateFeature: React.FC<UpdateFeatureProps> = ({ feature }) => {
     feature_name: feature.feature_name,
     description: feature.description,
     icon: null,
+    is_main: feature.is_main,
     _method: 'patch',
     clear_icon: false,
   });
@@ -88,6 +95,7 @@ const UpdateFeature: React.FC<UpdateFeatureProps> = ({ feature }) => {
     setData({
         feature_name: feature.feature_name,
         description: feature.description,
+        is_main:feature.is_main,
         icon: null,
         _method: 'patch',
         clear_icon: false,
@@ -212,6 +220,32 @@ const UpdateFeature: React.FC<UpdateFeatureProps> = ({ feature }) => {
                     />
                   </FormControl>
                   <FormMessage>{errors.description}</FormMessage>
+                </FormItem>
+              )}
+            />
+
+ <FormField
+              control={form.control}
+              name="is_main" // Name uses the key from the Zod schema
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel>Main Feature</FormLabel>
+                    <DialogDescription className="text-sm">
+                      Check this to designate the feature as a 'Main' or critical feature.
+                    </DialogDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={data.is_main}
+                      onCheckedChange={(checked) => {
+                        field.onChange(checked);
+                        setData('is_main', checked);
+                      }}
+                      disabled={processing}
+                    />
+                  </FormControl>
+                  <FormMessage>{errors.is_main}</FormMessage>
                 </FormItem>
               )}
             />

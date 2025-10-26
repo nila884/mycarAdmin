@@ -3,6 +3,9 @@
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CountryController;
+use App\Http\Controllers\PortController;
+use App\Http\Controllers\ShippingCostController;
 use App\Http\Controllers\FuelController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BrandController;
@@ -11,6 +14,7 @@ use App\Http\Controllers\VersionController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\SellerController;
 use Inertia\Inertia;
+
 
 Route::middleware('auth')->group(function () {
     Route::redirect('settings', 'settings/profile');
@@ -61,4 +65,20 @@ Route::middleware('auth')->group(function () {
     Route::post('car/settings/seller', [SellerController::class, 'store'])->name('carseller.store');
     Route::patch('car/settings/seller/{seller}', [SellerController::class, 'update'])->name('carseller.update');
     Route::delete('car/settings/seller/{seller}', [SellerController::class, 'destroy'])->name('carseller.destroy');
+
+ Route::get('shipping/countries/list', [CountryController::class, 'index'])->name('country.index');
+    Route::post('shipping/countries', [CountryController::class, 'store'])->name('country.store');
+    Route::patch('shipping/countries/{country}', [CountryController::class, 'update'])->name('country.update');
+    Route::delete('shipping/countries/{country}', [CountryController::class, 'destroy'])->name('country.destroy');
+
+    Route::get('shipping/ports/list', [PortController::class, 'index'])->name('port.index');
+    Route::post('shipping/ports', [PortController::class, 'store'])->name('port.store');
+    Route::patch('shipping/ports/{port}', [PortController::class, 'update'])->name('port.update');
+    Route::delete('shipping/ports/{port}', [PortController::class, 'destroy'])->name('port.destroy');
+
+    Route::get('shipping/prices/list', [ShippingCostController::class, 'index'])->name('shipping.index');
+    Route::post('shipping/prices', [ShippingCostController::class, 'store'])->name('shipping.store');
+    Route::patch('shipping/prices/{shippingCost}', [ShippingCostController::class, 'update'])->name('shipping.update');
+    Route::delete('shipping/prices/{shippingCost}', [ShippingCostController::class, 'destroy'])->name('shipping.destroy');
+   
 });

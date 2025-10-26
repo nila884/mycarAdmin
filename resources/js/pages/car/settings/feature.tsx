@@ -17,6 +17,7 @@ interface FeatureItem {
     id: number;
     feature_name: string;
     description: string;
+    is_main: boolean;
     icon: string | null; // icon can be null
     created_at: string;
     updated_at: string;

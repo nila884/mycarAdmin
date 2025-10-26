@@ -26,8 +26,8 @@ class VersionController extends Controller
     public function index(): Response
     {
         return Inertia::render('car/settings/version', [
-            'versions' => $this->versionService->Index(), // Get paginated versions
-            'carModels' => $this->versionService->getAllCarModels(), // Pass all car models for dropdowns
+            'versions' => $this->versionService->Index(), 
+            'carModels' => $this->versionService->getAllCarModels(),
         ]);
     }
 

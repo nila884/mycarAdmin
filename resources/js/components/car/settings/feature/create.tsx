@@ -10,11 +10,13 @@ import React from 'react';
 import { ImagePlus, XCircle } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm as useInertiaForm } from '@inertiajs/react'; // Import Inertia's useForm
+import { Switch } from '@/components/ui/switch';
 
 // Define the form data type
 type CreateFeatureForm = {
     feature_name: string;
     description: string;
+    is_main: boolean;
     icon: File | null; // File type for upload
 };
 
@@ -29,6 +31,7 @@ const Create = () => {
     description: z.string().min(10, {
         message: "Feature description must be at least 10 characters.",
     }),
+    is_main: z.boolean(),
     icon: z
       .any() // Use any for initial validation, refine later
       .nullable()
@@ -44,6 +47,7 @@ const Create = () => {
       feature_name: "",
       description: "",
       icon: null,
+      is_main: false,
     },
   });
 
@@ -52,6 +56,7 @@ const Create = () => {
     feature_name: "",
     description: "",
     icon: null,
+    is_main:false
   });
 
   const onDrop = React.useCallback(
@@ -165,6 +170,32 @@ const Create = () => {
                     />
                   </FormControl>
                   <FormMessage>{errors.description}</FormMessage> {/* Display Inertia error */}
+                </FormItem>
+              )}
+            />
+
+ <FormField
+              control={form.control}
+              name="is_main" // Name uses the key from the Zod schema
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel>Main Feature</FormLabel>
+                    <DialogDescription className="text-sm">
+                      Check this to designate the feature as a 'Main' or critical feature.
+                    </DialogDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={data.is_main}
+                      onCheckedChange={(checked) => {
+                        field.onChange(checked);
+                        setData('is_main', checked);
+                      }}
+                      disabled={processing}
+                    />
+                  </FormControl>
+                  <FormMessage>{errors.is_main}</FormMessage>
                 </FormItem>
               )}
             />
