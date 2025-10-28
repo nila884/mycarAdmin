@@ -13,11 +13,11 @@ class ShippingCostResource extends JsonResource
     {
          return [
             'id' => $this->id,
-            'price' => number_format($this->price, 2), // Format price with two decimals
+            'price_roro' => number_format($this->price_roro, 2),
+            'price_container' => number_format($this->price_container, 2),
             'is_current' => (bool)$this->is_current,
             'port_id' => $this->port_id,
-            // Eager load the Port and its Country via Port relation
-            'port' => new PortResource($this->whenLoaded('Port'))->resolve(), 
+            'port' => new PortResource($this->whenLoaded('Port')), 
          
         ];
     }

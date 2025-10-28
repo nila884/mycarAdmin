@@ -7,6 +7,7 @@ use App\Http\Controllers\ModelController;
 use App\Http\Controllers\VersionController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\CarController;
+use App\Http\Controllers\CountryController;
 
  Route::get('api/brands', [BrandController::class, 'apiIndex'])->name('api.brands');
  Route::get('api/fuels', [FuelController::class, 'apiIndex'])->name('api.fuels');
@@ -24,3 +25,5 @@ Route::get('api/cars/home', [CarController::class, 'carsHome'])->name('api.cars.
 Route::get('api/cars/detail/{id}', [CarController::class, 'carDetail'])->name('api.cars.detail');
 
 Route::get('api/m/cars/home', [CarController::class, 'carsHomeMobile'])->name('api.cars.home.mobile');
+
+Route::get('api/shipping-details',[CountryController::class, 'shippingDetails'])->name('api.cars.shipping.details');

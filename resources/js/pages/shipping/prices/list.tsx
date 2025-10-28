@@ -14,7 +14,8 @@ import ShippingLayout from '@/layouts/shipping/layout';
 
 interface ShippingCostItem {
     id: number;
-    price: string; 
+    price_roro: string; 
+    price_container: string;
     is_current: boolean;
     port_id: number;
     port: PortItem; 
@@ -65,7 +66,8 @@ export default function ShippingCostIndex({ costs,ports }: ShippingCostProps) {
               <TableRow>
                 <TableHead>Country</TableHead>
                 <TableHead>Port</TableHead>
-                <TableHead>Price</TableHead>
+                <TableHead>Roro Price</TableHead>
+                 <TableHead>Container Price</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Last Updated</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -78,7 +80,10 @@ export default function ShippingCostIndex({ costs,ports }: ShippingCostProps) {
                     <TableCell>{cost.port.country.country_name}</TableCell>
                     <TableCell className="font-medium">{cost.port.name}</TableCell>
                     <TableCell className={cost.is_current ? 'font-bold text-green-600' : 'text-gray-700'}>
-                      ${cost.price}
+                      ${cost.price_roro}
+                    </TableCell>
+                    <TableCell className={cost.is_current ? 'font-bold text-green-600' : 'text-gray-700'}>
+                      ${cost.price_container}
                     </TableCell>
                     <TableCell>
                       {cost.is_current ? (

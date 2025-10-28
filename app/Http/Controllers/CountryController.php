@@ -8,6 +8,8 @@ use App\Classes\Services\CountryService;
 use App\Http\Resources\CountryResource;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\JsonResponse;
+use App\Models\Port;
+use App\Http\Resources\PortResource;
 
 class CountryController extends Controller
 {
@@ -59,5 +61,19 @@ class CountryController extends Controller
     {
         $countries = Country::orderBy('country_name', 'asc')->get();
         return CountryResource::collection($countries)->response();
+    }
+
+    public function shippingDetails(): JsonResponse
+    {
+        $countries = Country::orderBy('country_name', 'asc')->get();
+     
+        $portsQuery= Port::query();
+        $portsQuery->with('currentShippingCost')->with('country');
+        $ports = $portsQuery->get();
+         
+        return response()->json([
+            'countries' => CountryResource::collection($countries),
+            'ports' => PortResource::collection($ports),
+        ]);
     }
 }

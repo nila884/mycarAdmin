@@ -10,12 +10,13 @@ class ShippingCost extends Model
 {
            use HasFactory;
     protected $fillable=[
-       "price",
+       "price_roro",
+       "price_container",
        "is_current",
        "port_id"       
     ];
 
-            public function Port()
+    public function Port()
     {
         return $this->belongsTo(Port::class);
     }

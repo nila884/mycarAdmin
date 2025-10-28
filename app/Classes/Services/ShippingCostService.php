@@ -21,7 +21,8 @@ class ShippingCostService
     {
         $rules = [
             "port_id" => ["required", "exists:ports,id"],
-            "price" => ["required", "numeric", "min:0"],
+            "price_roro" => [ "numeric", "min:0"],
+            "price_container" => [ "numeric", "min:0"],
             "is_current" => ["boolean"], // is_current field
         ];
 
@@ -30,7 +31,7 @@ class ShippingCostService
 
     public function Create(Request $request): ShippingCost
     {
-        $data = $request->only('port_id', 'price', 'is_current');
+        $data = $request->only('port_id', 'price_roro','price_container', 'is_current');
         
         // Ensure only one active price exists per port using a transaction
         return DB::transaction(function () use ($data) {
@@ -46,14 +47,13 @@ class ShippingCostService
 
     public function Update(Request $request, ShippingCost $cost): ShippingCost
     {
-        $data = $request->only('port_id', 'price', 'is_current');
+        $data = $request->only('port_id', 'price_roro','price_container', 'is_current');
         
         return DB::transaction(function () use ($data, $cost) {
             $isBeingActivated = ($data['is_current'] ?? false) && $data['is_current'] !== $cost->is_current;
             $portIdIsChanging = $data['port_id'] != $cost->port_id;
             
             if ($isBeingActivated || $portIdIsChanging) {
-                // If it's being marked current or the port is changing, deactivate the old active price for the *new* port
                 if ($data['is_current'] ?? false) {
                     ShippingCost::where('port_id', $data['port_id'])
                                 ->where('is_current', true)

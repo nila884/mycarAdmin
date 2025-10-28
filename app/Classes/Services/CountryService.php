@@ -50,10 +50,11 @@ class CountryService
         $data['country_name'] = trim(htmlspecialchars($data['country_name']));
         
         if ($request->hasFile('flags')) {
-            // Store file to 'public/country' folder
-            $flagPath = $request->file('flags')->store('country', 'public');
-            // Save only the filename in the database (e.g., '123_filename.png')
-            $data['flags'] = basename($flagPath); 
+
+                $imageFile = $request->file('flags');
+                $imageName = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
+                $path = $imageFile->storeAs('flags', $imageName,'public');
+            $data['flags'] = Storage::url($path); 
         }
 
         return Country::create($data);
@@ -63,19 +64,21 @@ class CountryService
     {
         $data = $request->only('country_name', 'code', 'prefix', 'currency','import_regulation_information');
         $data['country_name'] = trim(htmlspecialchars($data['country_name']));
-        $flagName = $country->flags; // Keep existing flag by default
+        $flagName = $country->flags;
 
         if ($request->hasFile('flags')) {
-            // Delete old flag if it exists in storage
             if ($country->flags) {
-                 Storage::disk('public')->delete('country/' . $country->flags);
+                Storage::disk('public')->delete(str_replace('/storage/', '', $country->flags));
+
             }
             
-            $flagPath = $request->file('flags')->store('country', 'public');
-            $flagName = basename($flagPath);
+             $imageFile = $request->file('flags');
+                $imageName = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
+                $path = $imageFile->storeAs('flags', $imageName,'public');
+            $data['flags'] = Storage::url($path); 
         } 
         
-        $country->update(array_merge($data, ["flags" => $flagName]));
+        $country->update($data);
         return $country;
     }
 
@@ -83,7 +86,7 @@ class CountryService
     {
         // Delete the associated flag file
         if ($country->flags) {
-            Storage::disk('public')->delete('country/' . $country->flags);
+             Storage::disk('public')->delete(str_replace('/storage/', '', $country->flags));
         }
         return $country->delete();
     }

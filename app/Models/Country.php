@@ -26,4 +26,11 @@ class Country extends Model
     {
         return $this->hasMany(User::class, 'country_id', 'id');
     }
+
+    public function ports()
+    {
+        return $this->hasMany(Port::class);
+    }
+
+
 }

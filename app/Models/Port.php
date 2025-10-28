@@ -10,13 +10,22 @@ class Port extends Model
 {
        use HasFactory;
     protected $fillable=[
+        "id",
        "name",
        "code",
        "country_id"       
     ];
 
+
         public function country()
     {
         return $this->belongsTo(Country::class);
+    }
+
+public function currentShippingCost()
+    {
+        // This is a HasOne relationship constrained to only fetch the record where is_current is true (or 1)
+        return $this->hasOne(ShippingCost::class)
+                    ->where('is_current', 1);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\CountryResource;
+use App\Http\Resources\ShippingCostResource;
 
 class PortResource extends JsonResource
 {
@@ -17,8 +18,12 @@ class PortResource extends JsonResource
             'name' => $this->name,
             'code' => $this->code,
             'country_id' => $this->country_id,
-            // Eager load the Country resource when available
-            'country' => new CountryResource($this->whenLoaded('country'))->resolve(), 
+            'cost' => $this->whenLoaded('currentShippingCost', function () {
+                if (!$this->currentShippingCost) {
+                    return ShippingCostResource::make(null);
+                }
+                return ShippingCostResource::make($this->currentShippingCost);
+            }),
             
         ];
     }

@@ -12,15 +12,15 @@ import { timeFormat } from '@/lib/utils';
 import { X } from 'lucide-react';
 import CountryForm from '@/components/shipping/country/countryForm';
 
-// Define the type for a single Country item, matching CountryResource.php
+
 export interface CountryItem {
     id: number;
-    country_name: string; // From CountryResource 'name'
+    country_name: string; 
     code: string;
     prefix: string;
     import_regulation_information:string;
     currency: string;
-    flags: string | null; // From CountryResource 'flags_url'
+    flags: string | null; 
     created_at: string;
     updated_at: string;
 }
