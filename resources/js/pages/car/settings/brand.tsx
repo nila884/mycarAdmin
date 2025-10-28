@@ -57,7 +57,7 @@ export default function brand({ brands }: brandProps) { // Destructure brands fr
 
                     <Create />
 
-                    <Table className="min-w-2xl">
+                    <Table className="min-w-2xl border rounded-md">
                         <TableCaption>A list of car brand.</TableCaption>
                         <TableHeader>
                             <TableRow>

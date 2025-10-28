@@ -9,6 +9,7 @@ use App\Http\Resources\ShippingCostResource;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\PortResource;
+use App\Models\Port;
 
 class ShippingCostController extends Controller
 {
@@ -22,8 +23,8 @@ class ShippingCostController extends Controller
     public function index()
     {
         
-        $costs = ShippingCostResource::collection($this->shippingCostService->Index())->resolve();;
-       $ports= PortResource::collection($this->shippingCostService->GetAllPorts())->resolve();
+        $costs = $this->shippingCostService->Index();
+       $ports= Port::with('country')->orderBy('name', 'asc')->get();
         return Inertia::render('shipping/prices/list', [
             'costs' => $costs,
             'ports' => $ports,

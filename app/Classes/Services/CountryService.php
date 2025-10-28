@@ -25,6 +25,7 @@ class CountryService
             "code" => ["required", "string", "max:3", "min:2"],
             "prefix" => ["required", "string", "max:10"],
             "currency" => ["nullable", "string", "max:10"],
+            "import_regulation_information" => ["nullable", "string"],
             // Flag is required for creation, nullable for update
             "flags" => [$method === 'post' ? 'required' : 'nullable', 'file', 'mimes:png,jpg,jpeg,svg', 'max:512'], 
         ];
@@ -45,7 +46,7 @@ class CountryService
 
     public function Create(Request $request): Country
     {
-        $data = $request->only('country_name', 'code', 'prefix', 'currency');
+        $data = $request->only('country_name', 'code', 'prefix', 'currency','import_regulation_information');
         $data['country_name'] = trim(htmlspecialchars($data['country_name']));
         
         if ($request->hasFile('flags')) {
@@ -60,7 +61,7 @@ class CountryService
 
     public function Update(Request $request, Country $country): Country
     {
-        $data = $request->only('country_name', 'code', 'prefix', 'currency');
+        $data = $request->only('country_name', 'code', 'prefix', 'currency','import_regulation_information');
         $data['country_name'] = trim(htmlspecialchars($data['country_name']));
         $flagName = $country->flags; // Keep existing flag by default
 

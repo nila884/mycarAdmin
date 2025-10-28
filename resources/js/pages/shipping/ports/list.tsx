@@ -79,7 +79,7 @@ export default function PortIndex({ ports,countries }: PortProps) {
                   <TableRow key={port.id}>
                     <TableCell className="font-medium">{port.name}</TableCell>
                     <TableCell>{port.code || 'N/A'}</TableCell>
-                    <TableCell>{port.country.name}</TableCell>
+                    <TableCell>{port.country.country_name}</TableCell>
                     <TableCell>{timeFormat(port.created_at)}</TableCell>
                     <TableCell className="text-right">
                       {/* You need to create this component */}

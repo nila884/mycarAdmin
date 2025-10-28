@@ -6,8 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator as ValidatorReturn;
-use App\Models\Country;
-use App\Http\Resources\CountryResource;
+
 
 class PortService
 {
@@ -56,8 +55,5 @@ class PortService
         return $port->delete();
     }
 
-    public function getAllCountries()
-    {
-        return CountryResource::collection( Country::orderBy('country_name', 'asc')->get())->resolve();
-    }
+
 }

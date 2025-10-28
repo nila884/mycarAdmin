@@ -19,8 +19,7 @@ class PortResource extends JsonResource
             'country_id' => $this->country_id,
             // Eager load the Country resource when available
             'country' => new CountryResource($this->whenLoaded('country'))->resolve(), 
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            
         ];
     }
 }

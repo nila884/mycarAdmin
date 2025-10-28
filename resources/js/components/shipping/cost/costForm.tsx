@@ -52,8 +52,7 @@ const ShippingCostForm: React.FC<ShippingCostFormProps> = ({ cost, ports }) => {
 
     const [open, setOpen] = useState(false);
     
-    // Convert price string from Resource back to a local string/number representation for the form
-    const initialPrice = isUpdate ? parseFloat(cost!.price.replace(/,/g, '')).toFixed(2) : "";
+   const initialPrice = isUpdate ? parseFloat(cost.price.replace(/,/g, '')).toFixed(2) : "";
 
     const { data, setData, post, processing, errors, reset } = useForm<ShippingCostInertiaForm>({
         _method: isUpdate ? 'patch' : undefined,
@@ -112,7 +111,7 @@ const ShippingCostForm: React.FC<ShippingCostFormProps> = ({ cost, ports }) => {
                             <SelectContent>
                                 {ports.map(port => (
                                     <SelectItem key={port.id} value={port.id.toString()}>
-                                        {port.name} ({port.country.name})
+                                        {port.name} ({port.country.country_name})
                                     </SelectItem>
                                 ))}
                             </SelectContent>

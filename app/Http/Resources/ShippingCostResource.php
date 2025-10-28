@@ -16,8 +16,6 @@ class ShippingCostResource extends JsonResource
             'price' => number_format($this->price, 2), // Format price with two decimals
             'is_current' => (bool)$this->is_current,
             'port_id' => $this->port_id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
             // Eager load the Port and its Country via Port relation
             'port' => new PortResource($this->whenLoaded('Port'))->resolve(), 
          

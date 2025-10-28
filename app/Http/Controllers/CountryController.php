@@ -22,7 +22,7 @@ class CountryController extends Controller
     {
        
         return Inertia::render('shipping/countries/list', [
-            'countries' => CountryResource::collection($this->countryService->Index()),
+            'countries' => $this->countryService->Index(),
         ]);
     }
 

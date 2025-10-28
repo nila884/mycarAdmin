@@ -19,10 +19,9 @@ class CountryResource extends JsonResource
             'code' => $this->code,
             'prefix' => $this->prefix,
             'currency' => $this->currency,
+            'import_regulation_information' => $this->import_regulation_information,
             // Construct the public URL for the flag file
             'flags_url' => $this->flags ? Storage::url('country/' . $this->flags) : null, 
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
             // Include user count if the relation is eager loaded (e.g., Country::withCount('users'))
             'users_count' => $this->whenCounted('users'),
         ];

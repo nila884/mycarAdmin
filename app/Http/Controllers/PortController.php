@@ -8,7 +8,7 @@ use App\Classes\Services\PortService;
 use App\Http\Resources\PortResource;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\JsonResponse;
-use App\Http\Resources\CountryResource;
+use App\Models\Country;
 
 class PortController extends Controller
 {
@@ -22,8 +22,8 @@ class PortController extends Controller
     public function index()
     {
         return Inertia::render('shipping/ports/list', [
-            'ports' => PortResource::collection($this->portService->Index())->resolve(),
-            'countries' => $this->portService->getAllCountries(),
+            'ports' => $this->portService->Index(),
+            'countries' => Country::orderBy('country_name', 'asc')->get(),
         ]);
     }
 

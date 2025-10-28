@@ -15,6 +15,7 @@ class Country extends Model
         "prefix",
         "currency",
         "flags",
+        "import_regulation_information"
     ];
     /**
      * Get all of the users for the Country

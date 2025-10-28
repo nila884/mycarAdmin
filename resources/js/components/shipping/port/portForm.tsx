@@ -19,7 +19,7 @@ import React, { useState, useEffect } from 'react';
 // Reusing types
 interface CountryItem {
     id: number;
-    name: string;
+    country_name: string;
 }
 interface PortItem {
     id: number;
@@ -111,7 +111,7 @@ const PortForm: React.FC<PortFormProps> = ({ port, countries }) => {
                             <SelectContent>
                                 {countries.map(country => (
                                     <SelectItem key={country.id} value={country.id.toString()}>
-                                        {country.name}
+                                        {country.country_name}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

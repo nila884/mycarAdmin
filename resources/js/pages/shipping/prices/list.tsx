@@ -35,7 +35,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function ShippingCostIndex({ costs,ports }: ShippingCostProps) {
-console.log(costs);
+
 
   function handleDelete(id: number) {
     if (!window.confirm('Are you sure you want to delete this shipping cost record?')) return;
@@ -75,7 +75,7 @@ console.log(costs);
               {costs.length > 0 ? (
                 costs.map((cost) => (
                   <TableRow key={cost.id} className={cost.is_current ? 'bg-green-50/50' : ''}>
-                    <TableCell>{cost.port.country.name}</TableCell>
+                    <TableCell>{cost.port.country.country_name}</TableCell>
                     <TableCell className="font-medium">{cost.port.name}</TableCell>
                     <TableCell className={cost.is_current ? 'font-bold text-green-600' : 'text-gray-700'}>
                       ${cost.price}

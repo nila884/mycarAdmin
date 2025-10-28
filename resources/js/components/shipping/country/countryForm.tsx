@@ -9,6 +9,7 @@ import { useForm } from '@inertiajs/react';
 import { ImagePlus, XCircle, Pencil } from 'lucide-react';
 import React, { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from "react-dropzone";
+import { Textarea } from '@/components/ui/textarea';
 
 // Define the base type for data that the server expects
 type CountryFormData = {
@@ -17,6 +18,7 @@ type CountryFormData = {
     prefix: string;
     currency: string;
     flags: File | null;
+    import_regulation_information: string;
 };
 
 // Define the full Inertia form type
@@ -27,11 +29,12 @@ type CountryInertiaForm = CountryFormData & {
 // Define the Country item received from the backend (used for 'update' mode)
 interface CountryItem {
     id: number;
-    name: string; // Maps to country_name
+    country_name: string; // Maps to country_name
     code: string;
     prefix: string;
     currency: string;
-    flags_url: string | null;
+    flags: string | null;
+    import_regulation_information: string;
 }
 
 interface CountryFormProps {
@@ -40,20 +43,21 @@ interface CountryFormProps {
 
 const CountryForm: React.FC<CountryFormProps> = ({ country }) => {
     const isUpdate = !!country;
-    const title = isUpdate ? `Update ${country?.name}` : 'Create New Country';
+    const title = isUpdate ? `Update ${country?.country_name}` : 'Create New Country';
     const routeName = isUpdate ? 'country.update' : 'country.store';
     const submitText = isUpdate ? 'Update Country' : 'Create Country';
 
     const [open, setOpen] = useState(false);
-    const [preview, setPreview] = useState<string | ArrayBuffer | null>(isUpdate ? country!.flags_url : null);
+    const [preview, setPreview] = useState<string | ArrayBuffer | null>(isUpdate ? country!.flags : null);
     const [fileRejectionError, setFileRejectionError] = useState<string | null>(null);
 
     const { data, setData, post, processing, errors, reset } = useForm<CountryInertiaForm>({
         _method: isUpdate ? 'patch' : undefined,
-        country_name: isUpdate ? country!.name : "",
+        country_name: isUpdate ? country!.country_name : "",
         code: isUpdate ? country!.code : "",
         prefix: isUpdate ? country!.prefix : "",
         currency: isUpdate ? country!.currency : "",
+        import_regulation_information: isUpdate ? country!.import_regulation_information || "" : "",
         flags: null,
     });
 
@@ -62,13 +66,14 @@ const CountryForm: React.FC<CountryFormProps> = ({ country }) => {
         if (open) {
             setData({
                 _method: isUpdate ? 'patch' : undefined,
-                country_name: isUpdate ? country!.name : "",
+                country_name: isUpdate ? country!.country_name : "",
                 code: isUpdate ? country!.code : "",
                 prefix: isUpdate ? country!.prefix : "",
                 currency: isUpdate ? country!.currency : "",
+                import_regulation_information: isUpdate ? country!.import_regulation_information || "" : "",
                 flags: null,
             });
-            setPreview(isUpdate ? country!.flags_url : null);
+            setPreview(isUpdate ? country!.flags : null);
             setFileRejectionError(null);
         }
     }, [open, isUpdate, country, setData]);
@@ -156,6 +161,19 @@ const CountryForm: React.FC<CountryFormProps> = ({ country }) => {
                         <InputError message={errors.currency} />
                     </div>
 
+                    {/* import regulation infos */}
+
+<div>
+                        <Label htmlFor="import_regulation_information">Import Regulation Information</Label>
+                        <Textarea
+                            id="import_regulation_information"
+                            placeholder="Enter detailed import regulations, documentation requirements, etc."
+                            value={data.import_regulation_information}
+                            onChange={(e) => setData('import_regulation_information', e.target.value)}
+                        />
+                        <InputError message={errors.import_regulation_information} />
+                    </div>
+
                     {/* Flags Upload */}
                     <div>
                         <Label htmlFor="flags">Flag Image</Label>
@@ -167,7 +185,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ country }) => {
                             `}
                         >
                             <Input {...getInputProps()} />
-                            {(data.flags || country?.flags_url) && preview ? (
+                            {(data.flags || country?.flags) && preview ? (
                                 <div className="relative">
                                     <img src={preview as string} alt="Flag Preview" className="max-h-[100px] w-auto object-contain rounded-lg mb-2" />
                                     {/* Clear button only appears if a NEW file is present or if we are updating and clearing the existing one */}
@@ -179,7 +197,7 @@ const CountryForm: React.FC<CountryFormProps> = ({ country }) => {
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setData('flags', null); // Clear new file upload
-                                            setPreview(isUpdate ? country!.flags_url : null); // Revert preview for update mode
+                                            setPreview(isUpdate ? country!.flags : null); // Revert preview for update mode
                                             setFileRejectionError(null);
                                         }}
                                     >
