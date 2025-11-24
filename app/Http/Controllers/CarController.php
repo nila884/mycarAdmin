@@ -14,7 +14,7 @@ use App\Models\Version;
 use App\Models\Seller;
 use App\Models\Category;
 use App\Models\Feature;
-use App\Http\Resources\CarResource; 
+use App\Http\Resources\CarResource;
 use App\Http\Resources\CarListingResource;
 use App\Http\Resources\BrandResource;
 use App\Http\Resources\ModelResource;
@@ -51,7 +51,7 @@ class CarController extends Controller
      */
     public function create()
     {
-       
+
         // Fetch necessary data for dropdowns and checkboxes
         $brands = Brand::all(['id', 'brand_name']);
         $carModels = CarModel::all(['id', 'model_name', 'brand_id']);
@@ -68,7 +68,7 @@ class CarController extends Controller
                 'car_model_id' => $version->car_model_id,
                 'model_name' => $version->carModel->model_name ?? 'N/A'  ];
         });
-        
+
         return Inertia::render('car/create', [
             'brands' => $brands,
             'carModels' => $carModels,
@@ -85,7 +85,7 @@ class CarController extends Controller
      */
     public function store(Request $request)
     {
-       
+
         try {
             $this->carService->Create($request);
             return redirect()->route('car.index')
@@ -127,7 +127,7 @@ class CarController extends Controller
 
         // Fetch the car data including its relationships for pre-filling the form
         $carData = $this->carService->read($car->id);
-      
+
         if (!$carData) {
             abort(404);
         }
@@ -195,7 +195,7 @@ class CarController extends Controller
 
         // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
         $query->with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'images', 'features', 'prices']);
-            
+
         // Conditionally apply the brand filter if the brand name is provided.
         $query->when($brandId, function ($brandQuery) use ($brandId) {
             $brandQuery->whereHas('carModel.brand', function ($innerQuery) use ($brandId) {
@@ -203,15 +203,15 @@ class CarController extends Controller
             });
         });
 
-        
-            
+
+
         // Conditionally apply the car model filter if the model name is provided.
         $query->when($modelId, function ($modelQuery) use ($modelId) {
             $modelQuery->whereHas('carModel', function ($innerQuery) use ($modelId) {
                 $innerQuery->where('id', $modelId);
             });
         });
-        
+
         // Conditionally apply the version filter if the version name is provided.
         $query->when($versionId, function ($versionQuery) use ($versionId) {
             $versionQuery->whereHas('version', function ($innerQuery) use ($versionId) {
@@ -244,7 +244,7 @@ class CarController extends Controller
                 [
                     'message' => 'No cars found for the given filters.',
                     'data'=>[]
-            
+
             ], 200);
         }
         // Return a collection of CarResource instances.
@@ -267,26 +267,26 @@ class CarController extends Controller
         $fuelTypeIds = $request->query('fuel');
         $transmission = $request->query('transmission');
         $steering = $request->query('steering');
-            
+
         $query = Car::query();
 
         // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
         $query->with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'images', 'features', 'prices']);
-            
+
         // Conditionally apply the brand filter if the brand name is provided.
         $query->when($brandId, function ($brandQuery) use ($brandId) {
             $brandQuery->whereHas('carModel.brand', function ($innerQuery) use ($brandId) {
                 $innerQuery->where('id', $brandId);
             });
         });
-            
+
         // Conditionally apply the car model filter if the model name is provided.
         $query->when($modelId, function ($modelQuery) use ($modelId) {
             $modelQuery->whereHas('carModel', function ($innerQuery) use ($modelId) {
                 $innerQuery->where('id', $modelId);
             });
         });
-        
+
         // Conditionally apply the version filter if the version name is provided.
         $query->when($versionId, function ($versionQuery) use ($versionId) {
             $versionQuery->whereHas('version', function ($innerQuery) use ($versionId) {
@@ -319,7 +319,7 @@ class CarController extends Controller
                 [
                     'message' => 'No cars found for the given filters.',
                     'data'=>[]
-            
+
             ], 200);
         }
         // Return a collection of CarResource instances.
@@ -336,14 +336,14 @@ class CarController extends Controller
         $query = Car::query();
                 // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
         $query->with(['carModel.brand',  'version', 'carModel', 'images',  'prices']);
-        
+
        $cars= $query->take(10)->get();
         if( $cars->isEmpty()) {
             return response()->json(
                 [
                     'message' => 'No cars found for the home page.',
                     'data'=>[]
-            
+
             ], 200);
         }
         // Return a collection of CarResource instances.
@@ -362,7 +362,7 @@ class CarController extends Controller
 
               $car = Car::with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'features', 'images', 'prices'] )
               ->find($id);
-      
+
         if (!$car) {
             return response()->json(
                 [
@@ -373,10 +373,10 @@ class CarController extends Controller
         }
 
         return new CarResource($car);
-        
-        
-    }   
-    
+
+
+    }
+
     /**
      * Display a listing of cars for the home page.
      *
@@ -387,14 +387,14 @@ class CarController extends Controller
         $query = Car::query();
                 // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
         $query->with(['carModel.brand',  'version', 'carModel', 'images',  'prices']);
-        
+
        $cars= $query->take(4)->get();
         if( $cars->isEmpty()) {
             return response()->json(
                 [
                     'message' => 'No cars found for the home page.',
                     'data'=>[]
-            
+
             ], 200);
         }
         // Return a collection of CarResource instances.
@@ -410,29 +410,29 @@ class CarController extends Controller
      */
     public function carsHomeMobile()
     {
-        
-        $query = Car::query();
+
+        $query = Car::query();      
                 // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
         $query->with(['carModel.brand',  'version', 'carModel', 'images',  'prices']);
-        
+
        $cars= $query->take(4)->get();
         if( $cars->isEmpty()) {
             return response()->json(
                 [
                     'message' => 'No cars found for the home page.',
                     'data'=>[]
-            
+
             ], 200);
         }
         // Return a collection of CarResource instances.
         // return CarListingResource::collection($cars);
         return response()->json(
             [
-                
+
                 'carsRecomended' => CarListingResource::collection($cars),
                 'carsNew' => CarListingResource::collection($cars),
                 'carsRecentlyViewed' => CarListingResource::collection($cars),
-                
+
             ], 200
         );
 
