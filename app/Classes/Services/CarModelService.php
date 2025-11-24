@@ -15,7 +15,6 @@ class carModelService
 {
     public function Index()
     {
-       
         $carModels = carModel::with('brand')->paginate(15);
         $carModels->getCollection()->transform(function ($model) {
             return [
@@ -66,7 +65,6 @@ class carModelService
                 $brandId = $brand->id;
             }
         }
-        
         $carModel->update([
             "model_name" => $name,
             "brand_id" => $brandId

@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\FuelController;
@@ -8,13 +9,17 @@ use App\Http\Controllers\VersionController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\ModuleController;
 
- Route::get('api/brands', [BrandController::class, 'apiIndex'])->name('api.brands');
- Route::get('api/fuels', [FuelController::class, 'apiIndex'])->name('api.fuels');
- Route::get('api/categories', [CategoryController::class, 'apiIndex'])->name('api.categories');
- Route::get('api/models', [ModelController::class, 'apiIndex'])->name('api.models');
- Route::get('api/versions', [VersionController::class, 'apiIndex'])->name('api.versions');
-    Route::get('api/features', [FeatureController::class, 'apiIndex'])->name('api.features');
+Route::get('api/brands', [BrandController::class, 'apiIndex'])->name('api.brands');
+Route::get('api/fuels', [FuelController::class, 'apiIndex'])->name('api.fuels');
+Route::get('api/categories', [CategoryController::class, 'apiIndex'])->name('api.categories');
+Route::get('api/models', [ModelController::class, 'apiIndex'])->name('api.models');
+Route::get('api/versions', [VersionController::class, 'apiIndex'])->name('api.versions');
+Route::get('api/features', [FeatureController::class, 'apiIndex'])->name('api.features');
+
+
+
 
 
 Route::get('api/cars-search', [CarController::class, 'carsSearch'])->name('api.cars.search');
@@ -26,4 +31,4 @@ Route::get('api/cars/detail/{id}', [CarController::class, 'carDetail'])->name('a
 
 Route::get('api/m/cars/home', [CarController::class, 'carsHomeMobile'])->name('api.cars.home.mobile');
 
-Route::get('api/shipping-details',[CountryController::class, 'shippingDetails'])->name('api.cars.shipping.details');
+Route::get('api/shipping-details', [CountryController::class, 'shippingDetails'])->name('api.cars.shipping.details');
