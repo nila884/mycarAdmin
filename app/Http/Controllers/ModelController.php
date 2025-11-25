@@ -20,7 +20,7 @@ class ModelController extends Controller
     public function __construct(carModelService $carModelService, BrandService $brandService)
     {
         $this->carModelService = $carModelService;
-        $this->brandService = $brandService; 
+        $this->brandService = $brandService;
     }
 
     /**

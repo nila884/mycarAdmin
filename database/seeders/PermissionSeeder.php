@@ -21,7 +21,7 @@ class PermissionSeeder extends Seeder
         foreach ($modules as $module) {
             foreach ($actions as $action) {
                 Permission::firstOrCreate([
-                    'name' => $module->name . '.' . $action
+                    'name' => $module->name . ' ' . $action
                 ]);
             }
         }

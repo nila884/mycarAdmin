@@ -1,17 +1,16 @@
 <?php
+
 namespace App\Http\Controllers\admin;
 
-
-use App\Models\User;
-use App\Models\Country;
-use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use App\Classes\Services\UserService;
+use App\Http\Controllers\Controller;
+use App\Models\Country;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use SDamian\LaravelManPagination\Pagination;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -19,8 +18,9 @@ class UserController extends Controller
 
     public function __construct()
     {
-        $this->userService = new UserService();
+        $this->userService = new UserService;
     }
+
     /**
      * Display a listing of the resource.
      */
@@ -31,27 +31,28 @@ class UserController extends Controller
         // }
 
         $data = Validator::make($request->all(), [
-            "user"        => ["nullable", "string"],
-            "status"        => ["nullable", "string"],
-            "date"        => ["nullable", "string"],
-            "role_id"        => ["nullable"],
-            "simple_date"        => ["nullable"],
+            'user' => ['nullable', 'string'],
+            'status' => ['nullable', 'string'],
+            'date' => ['nullable', 'string'],
+            'role_id' => ['nullable'],
+            'simple_date' => ['nullable'],
         ])->validated();
 
         $user = User::query();
-        $users = $this->userService->Index($data,$user);
+        $users = $this->userService->Index($data, $user);
         // dd($purchases->get());
         // $total = $users->count();
         // $pagination = new Pagination(['options_select' => config('pagination.options_select')]);
         // $pagination->paginate($total);
         // $limit = $pagination->limit();
         // $offset = $pagination->offset();
-        $users = $users->orderBy("users.id", "desc")->paginate(15);
-        $roles=Role::all();
-        $Countries=Country::all();
+        $users = $users->orderBy('users.id', 'desc')->paginate(15);
+        $roles = Role::all();
+        $Countries = Country::all();
+
         // $statusAll=Status::where("module", "user")->get();
         // $status = Status::where("module", "user")->get()->pluck("name", "id");
-        return view("admin.users.index", compact("users",'Countries','roles'));
+        return view('admin.users.index', compact('users', 'Countries', 'roles'));
     }
 
     /**
@@ -67,13 +68,14 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $this->userService->DataValidation($request, "post");
+        $data = $this->userService->DataValidation($request, 'post');
         if ($data->fails()) {
             return back()->withInput()->withErrors($data);
         }
         $user = $this->userService->Create($request);
+
         // dd($user);
-        return redirect()->route("user.index")->with("success", "User successfully created.");
+        return redirect()->route('user.index')->with('success', 'User successfully created.');
     }
 
     /**
@@ -89,7 +91,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        return view("admin.user.index", compact("user"));
+        return view('admin.user.index', compact('user'));
     }
 
     /**
@@ -97,12 +99,13 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $data = $this->userService->DataValidation($request, "patch", $user);
+        $data = $this->userService->DataValidation($request, 'patch', $user);
         if ($data->fails()) {
-            return back()->withInput()->withErrors($data, "err_" . $user->id)->with("err", $user->id);
+            return back()->withInput()->withErrors($data, 'err_'.$user->id)->with('err', $user->id);
         }
         $user = $this->userService->Update($request, $user);
-        return redirect()->route("user.index")->with("success", "User ($user->first_name) successfully updated.");
+
+        return redirect()->route('user.index')->with('success', "User ($user->first_name) successfully updated.");
     }
 
     /**
@@ -112,7 +115,8 @@ class UserController extends Controller
     {
         $name = $user->name;
         $this->userService->Delete($user);
-        return redirect()->route("user.index")->with("success", "User ($user->first_name) successfully updated.");
+
+        return redirect()->route('user.index')->with('success', "User ($user->first_name) successfully updated.");
     }
 
     /**
@@ -120,11 +124,12 @@ class UserController extends Controller
      */
     public function change_password(Request $request, User $user)
     {
-        $data = $this->userService->DataValidation($request, "patch", $user, true);
+        $data = $this->userService->DataValidation($request, 'patch', $user, true);
         if ($data->fails()) {
-            return back()->withInput()->withErrors($data, "err_pswd_" . $user->id)->with("err_pwsd", $user->id);
+            return back()->withInput()->withErrors($data, 'err_pswd_'.$user->id)->with('err_pwsd', $user->id);
         }
         $user = $this->userService->ChangePassword($request, $user);
-        return back()->with("success", "Reset password for ($user->first_name), successfully reset.");
+
+        return back()->with('success', "Reset password for ($user->first_name), successfully reset.");
     }
 }

@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Classes\Services\PermissionService;
 use App\Models\Module;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Permission;
-use App\Classes\Services\PermissionService;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Permission;
+
 // use App\classes\service\PermissionService;
 
 class PermissionController extends Controller
@@ -15,8 +16,9 @@ class PermissionController extends Controller
 
     public function __construct()
     {
-        $this->permissionService = new PermissionService();
+        $this->permissionService = new PermissionService;
     }
+
     /**
      * Display a listing of the resource.
      */
@@ -24,9 +26,12 @@ class PermissionController extends Controller
     {
 
         $permissions = $this->permissionService->Index($request);
-        $modules = Module::get()->pluck("name", "id")->toArray();
+
+        return $permissions;
+        $modules = Module::get()->pluck('name', 'id')->toArray();
         $actions = ['view', 'create', 'update', 'delete'];
-        return Inertia::render("management/permission/permission", compact("permissions", "modules", "actions"));
+
+        return Inertia::render('management/permission/permission', compact('permissions', 'modules', 'actions'));
     }
 
     /**
@@ -42,13 +47,21 @@ class PermissionController extends Controller
      */
     public function store(Request $request)
     {
+        $actions = ['view', 'create', 'update', 'delete'];
+        $actions = implode(',', $actions);
 
-        $data = $this->permissionService->DataValidation($request, "post");
-        if ($data->fails()) {
-            return back()->withInput()->withErrors($data);
-        }
+        $data = $request->validate([
+            'module' => ['required', 'exists:modules,id'],
+            'can_do' => ['required', 'array', 'in:'.$actions],
+        ]);
+        // if ($data->fails()) {
+        //     return back()->withInput()->withErrors($data);
+        // }
         $permission = $this->permissionService->Create($request);
-        return back()->with("success", "Permission successfully created.");
+
+        return $permission;
+
+        return back()->with('success', 'Permission successfully created.');
     }
 
     /**
@@ -64,7 +77,7 @@ class PermissionController extends Controller
      */
     public function edit(Permission $permission)
     {
-        return view("admin.permission.index", compact("permission"));
+        return view('admin.permission.index', compact('permission'));
     }
 
     /**
@@ -72,12 +85,19 @@ class PermissionController extends Controller
      */
     public function update(Request $request, Permission $permission)
     {
-        $data = $this->permissionService->DataValidation($request, "patch", $permission);
-        if ($data->fails()) {
-            return back()->withInput()->withErrors($data, "err_" . $permission->id)->with("err", $permission->id);
-        }
+        // dd($permission);
+        $data = $request->validate([
+
+            'name' => ['required', 'unique:permissions,name'],
+        ]);
+        // if ($data->fails()) {
+        //     return back()->withInput()->withErrors($data, "err_" . $permission->id)->with("err", $permission->id);
+        // }
         $permission = $this->permissionService->Update($request, $permission);
-        return back()->with("success", "Permission ($permission->name) successfully updated.");
+
+        return $permission;
+
+        return back()->with('success', "Permission ($permission->name) successfully updated.");
     }
 
     /**
@@ -87,6 +107,7 @@ class PermissionController extends Controller
     {
         $name = $permission->name;
         $this->permissionService->Delete($permission);
-        return back()->with("success", "Permission ($permission->name) successfully updated.");
+
+        return back()->with('success', "Permission ($permission->name) successfully updated.");
     }
 }
