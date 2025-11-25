@@ -22,8 +22,9 @@ class PermissionController extends Controller
     public function index(Request $request)
     {
         $permissions = $this->permissionService->Index($request);
+        return $permissions;
         $modules = Module::get()->pluck("name", "id")->toArray();
-        $actions =   $actions = ['view', 'create', 'update', 'delete'];
+        $actions = ['view', 'create', 'update', 'delete'];
         return view("admin.permission.index", compact("permissions", "modules", "actions"));
     }
 
@@ -40,12 +41,18 @@ class PermissionController extends Controller
      */
     public function store(Request $request)
     {
+        $actions = ['view', 'create', 'update', 'delete'];
+        $actions = implode(",", $actions);
 
-        $data = $this->permissionService->DataValidation($request, "post");
-        if ($data->fails()) {
-            return back()->withInput()->withErrors($data);
-        }
+        $data = $request->validate([
+            "module" => ["required", "exists:modules,id"],
+            "can_do"  => ["required", "array", "in:" . $actions],
+        ]);
+        // if ($data->fails()) {
+        //     return back()->withInput()->withErrors($data);
+        // }
         $permission = $this->permissionService->Create($request);
+        return $permission;
         return back()->with("success", "Permission successfully created.");
     }
 
@@ -70,11 +77,16 @@ class PermissionController extends Controller
      */
     public function update(Request $request, Permission $permission)
     {
-        $data = $this->permissionService->DataValidation($request, "patch", $permission);
-        if ($data->fails()) {
-            return back()->withInput()->withErrors($data, "err_" . $permission->id)->with("err", $permission->id);
-        }
+        // dd($permission);
+        $data = $request->validate([
+
+            "name"    => ["required", "unique:permissions,name"],
+        ]);
+        // if ($data->fails()) {
+        //     return back()->withInput()->withErrors($data, "err_" . $permission->id)->with("err", $permission->id);
+        // }
         $permission = $this->permissionService->Update($request, $permission);
+        return $permission;
         return back()->with("success", "Permission ($permission->name) successfully updated.");
     }
 

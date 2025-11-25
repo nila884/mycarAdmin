@@ -10,7 +10,7 @@ use Illuminate\Validation\Validator as ValidatorReturn;
 
 class ModuleService
 {
-  public function Index(Request $request)
+  public function Index()
   {
     $modules =  Module::paginate(15);
     return $modules;

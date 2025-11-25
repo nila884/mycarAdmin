@@ -1,17 +1,17 @@
 <?php
 
-use App\Http\Controllers\admin\UserController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CarController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ModelController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\FeatureController;
-use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\RoleController;
 use App\Http\Controllers\VersionController;
+use App\Http\Controllers\PermissionController;
 
 
 Route::get('/', function () {
@@ -46,6 +46,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/user', UserController::class);
 });
 
-require __DIR__ . '/api.php';
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
