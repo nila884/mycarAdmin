@@ -10,10 +10,19 @@ use Illuminate\Validation\Validator as ValidatorReturn;
 
 class ModuleService
 {
-  public function Index(Request $request)
+  public function Index()
   {
+   
     $modules =  Module::paginate(15);
-    return $modules;
+    $modules->getCollection()->transform(function($module){
+      return[
+        'id'=>$module->id,
+        'name'=>$module->name,
+        'created_at'=>$module->created_at->format('Y-m-d'),
+        'updated_at'=>$module->updated_at->format('Y-m-d'),
+      ];
+    });
+  return $modules ;
   }
   public function Create(Request $request)
   {

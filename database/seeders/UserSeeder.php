@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class UserSeeder extends Seeder
 {
@@ -15,6 +14,7 @@ class UserSeeder extends Seeder
     {
         // super admin
         $sa = User::create([
+            'id' => 1,
             'name' => 'Super Admin',
             'email' => 'super@admin.com',
             'password' => bcrypt('password'),

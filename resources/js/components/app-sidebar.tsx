@@ -35,6 +35,11 @@ const mainNavItems: NavItem[] = [
         href: '/shipping',
         icon: Wrench,
     },
+            {
+        title: 'Management',
+        href: '/management',
+        icon: Wrench,
+    },
 
 ];
 

@@ -6,6 +6,7 @@ use App\Models\Module;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use App\Classes\Services\PermissionService;
+use Inertia\Inertia;
 // use App\classes\service\PermissionService;
 
 class PermissionController extends Controller
@@ -21,10 +22,11 @@ class PermissionController extends Controller
      */
     public function index(Request $request)
     {
+
         $permissions = $this->permissionService->Index($request);
         $modules = Module::get()->pluck("name", "id")->toArray();
-        $actions =   $actions = ['view', 'create', 'update', 'delete'];
-        return view("admin.permission.index", compact("permissions", "modules", "actions"));
+        $actions = ['view', 'create', 'update', 'delete'];
+        return Inertia::render("management/permission/permission", compact("permissions", "modules", "actions"));
     }
 
     /**

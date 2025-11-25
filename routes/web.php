@@ -40,10 +40,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('car/{car}', [CarController::class, 'destroy'])->name('car.destroy');
     Route::get('car/{car}/show', [CarController::class, 'show'])->name('car.show');
 
-    Route::resource('/module', ModuleController::class);
-    Route::resource('/permission', PermissionController::class);
-    Route::resource('/role', RoleController::class);
-    Route::resource('/user', UserController::class);
+    Route::get('management', function () {
+        return Inertia::render('management/management');
+
+    })->name('management');
+    Route::get('management/module/list',[ModuleController::class,'index'])->name('module.index');
+    Route::post('management/module/store',[ModuleController::class,'store'])->name('module.store');
+    Route::delete('management/module/{module}',[ModuleController::class,'destroy'])->name('module.destroy');
+    Route::patch('management/module/{module}',[ModuleController::class,'update'])->name('module.update');
+
+    Route::get('management/permission/list',[PermissionController::class,'index'])->name('permission.index');
+    Route::post('management/permission/store',[PermissionController::class,'store'])->name('permission.store');
+    Route::delete('management/permission/{module}',[PermissionController::class,'destroy'])->name('permission.destroy');
+    Route::patch('management/permission/{module}',[PermissionController::class,'update'])->name('permission.update');
+
+
+    // Route::resource('/module', ModuleController::class);
+    // Route::resource('/permission', PermissionController::class);
+    // Route::resource('/role', RoleController::class);
+    // Route::resource('/user', UserController::class);
 });
 
 require __DIR__ . '/api.php';
