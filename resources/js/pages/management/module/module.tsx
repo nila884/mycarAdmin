@@ -38,8 +38,8 @@ interface ModuleProps {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Car module settings',
-        href: '/management/module',
+        title: 'Module  settings',
+        href: '/management/module/list',
     },
 ];
 
@@ -59,16 +59,16 @@ export default function module({ modules }: ModuleProps) { // Destructure module
 }
   return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Car module settings" />
+            <Head title="Module settings" />
 
             <Layout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Car module settings" description="Add new ,Update and delete car modules name" />
+                    <HeadingSmall title="Module settings" description="Add new ,Update and delete modules name" />
 
                     <ModuleForm />
     <div className="rounded-md border">
                     <Table className=" max-w-3xl">
-                        <TableCaption>A list of car module.</TableCaption>
+                        <TableCaption>A list of module.</TableCaption>
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[100px]">module name</TableHead>

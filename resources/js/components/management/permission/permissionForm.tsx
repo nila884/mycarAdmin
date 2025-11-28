@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { parseInitialPermissions } from '@/utils/util';
+import { ModuleItem } from '@/pages/management/module/module';
 
 
 // --- TYPE DEFINITIONS (Ensure these match your actual data structures) ---
@@ -32,11 +33,6 @@ interface PermissionItem {
     guard_name: string;
 }
 
-// Define the Module item received from the backend
-interface ModuleItem {
-    id: number;
-    name: string; // e.g., "User"
-}
 
 interface permissionFormProps {
     permission?: PermissionItem // Optional: presence defines 'update' mode
@@ -48,7 +44,7 @@ interface permissionFormProps {
 
 
 const permissionForm: React.FC<permissionFormProps> = ({ permission, actions, modules }) => {
-    
+    const [open, setOpen] = useState(false);
     const isUpdate = !!permission;
     const title = isUpdate ? `Update ${permission?.name}` : 'Create New permission';
     
@@ -135,7 +131,7 @@ const permissionForm: React.FC<permissionFormProps> = ({ permission, actions, mo
 
         if (isUpdate) {
             patch(route(routeName, routeParams), {
-                onSuccess: () => { /* handle success */ },
+                onSuccess: () => { setOpen(false); reset() },
                 onError: (errors) => { console.error('Update error:', errors); },
             });
         } else {
@@ -150,7 +146,7 @@ const permissionForm: React.FC<permissionFormProps> = ({ permission, actions, mo
     };
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 {isUpdate ? (
                     <Button variant="ghost" size="icon" title={`Edit ${permission.name}`}>

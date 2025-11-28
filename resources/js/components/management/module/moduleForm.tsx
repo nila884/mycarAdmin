@@ -93,7 +93,7 @@ const moduleForm: React.FC<ModuleFormProps> = ({ module }) => {
                         />
                         <InputError message={errors.name} />
                     </div>
-                    <Button type="submit" disabled={processing} className="w-full">
+                    <Button type="submit" disabled={processing || !data.name} className="w-full">
                         {processing ? 'Submitting...' : submitText}
                     </Button>
                 </form>

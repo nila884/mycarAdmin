@@ -47,6 +47,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('management/permission/{permission}', [PermissionController::class, 'destroy'])->name('permission.destroy');
     Route::patch('management/permission/{permission}', [PermissionController::class, 'update'])->name('permission.update');
 
+    Route::get('management/role/list', [RoleController::class, 'index'])->name('role.index');
+    Route::post('management/role/store', [RoleController::class, 'store'])->name('role.store');
+    Route::delete('management/role/{role}', [RoleController::class, 'destroy'])->name('role.destroy');
+    Route::patch('management/role/{role}', [RoleController::class, 'update'])->name('role.update');
+
     // Route::resource('/module', ModuleController::class);
     // Route::resource('/permission', PermissionController::class);
     // Route::resource('/role', RoleController::class);

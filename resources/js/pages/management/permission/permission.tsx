@@ -41,8 +41,8 @@ interface PermissionProps {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Car permission settings',
-        href: '/management/permission',
+        title: 'Permission settings',
+        href: '/management/permission/list',
     },
 ];
 
@@ -65,16 +65,16 @@ console.log(permissions);
 }
   return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Car permission settings" />
+            <Head title="Permission settings" />
 
             <Layout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Car permission settings" description="Add new ,Update and delete car permissions name" />
+                    <HeadingSmall title="Permission settings" description="Add new ,Update and delete permissions name" />
 
                     <PermissionForm actions={actions} modules={modules}/>
     <div className="rounded-md border">
                     <Table className=" max-w-4xl">
-                        <TableCaption>A list of car permission.</TableCaption>
+                        <TableCaption>A list of permissions.</TableCaption>
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[100px]">permission name</TableHead>

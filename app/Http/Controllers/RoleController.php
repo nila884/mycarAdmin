@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Module;
+use App\Classes\Services\RoleService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Spatie\Permission\Models\Role;
-use App\Classes\Services\RoleService;
+use Inertia\Inertia;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
@@ -15,17 +15,25 @@ class RoleController extends Controller
 
     public function __construct()
     {
-        $this->roleService = new RoleService();
+        $this->roleService = new RoleService;
     }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $roles = $this->roleService->Index($request);
-        $modules = Module::get()->pluck("name", "id")->toArray();
-        $permission = Permission::get()->pluck("name", "id")->toArray();
-        return view("admin.role.index", compact("roles", "modules", "permission"));
+        $permissions = Permission::all()->map(function ($permission) {
+            return [
+                'id' => $permission->id,
+                'name' => $permission->name,
+            ];
+        })->toArray();
+
+        return Inertia::render('management/role/role', [
+            'roles' => $this->roleService->Index($request),
+            'permissions' => $permissions,
+        ]);
     }
 
     /**
@@ -42,19 +50,19 @@ class RoleController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
-        $msg = ["permission.required" => "Select 1 or more permissions"];
+        $msg = ['permission.required' => 'Select 1 or more permissions'];
 
         $data = $request->validate([
-            "name"        => ["required", "unique:roles,name"],
-            "permission"  => ["required", "array", "exists:permissions,id"]
+            'name' => ['required', 'unique:roles,name'],
+            'permission' => ['required', 'array', 'exists:permissions,id'],
         ], $msg);
 
         // if ($data->fails()) {
         //     return back()->withInput()->withErrors($data);
         // }
         $role = $this->roleService->Create($request);
-        return $role;
-        return back()->with("success", "Role successfully created.");
+
+        return back()->with('success', 'Role successfully created.');
     }
 
     /**
@@ -70,7 +78,7 @@ class RoleController extends Controller
      */
     public function edit(Role $role)
     {
-        return view("admin.role.index", compact("role"));
+        return view('admin.role.index', compact('role'));
     }
 
     /**
@@ -79,13 +87,13 @@ class RoleController extends Controller
     public function update(Request $request, Role $role)
     {
         $data = $request->validate([
-            "name"        => ["required", Rule::unique("roles", "name")->ignore($role->id)],
-            "permission"  => ["required", "array", "exists:permissions,id"]
+            'name' => ['required', Rule::unique('roles', 'name')->ignore($role->id)],
+            'permission' => ['required', 'array', 'exists:permissions,id'],
         ]);
 
         $role = $this->roleService->Update($request, $role);
-        return $role;
-        return back()->with("success", "Role ($role->name) successfully updated.");
+
+        return back()->with('success', "Role ($role->name) successfully updated.");
     }
 
     /**
@@ -95,6 +103,7 @@ class RoleController extends Controller
     {
         $name = $role->name;
         $this->roleService->Delete($role);
-        return back()->with("success", "Role ($role->name) successfully updated.");
+
+        return back()->with('success', "Role ($role->name) successfully updated.");
     }
 }
