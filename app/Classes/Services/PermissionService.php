@@ -14,6 +14,15 @@ class PermissionService
     public function Index(Request $request)
     {
         $permissions = Permission::paginate(15);
+        $permissions->getCollection()->transform(function ($permission) {
+            return [
+                'id' => $permission->id,
+                'name' => $permission->name,
+                'guard_name' => $permission->guard_name,
+                'created_at' => $permission->created_at->format('Y-m-d'),
+                'updated_at' => $permission->updated_at->format('Y-m-d'),
+            ];
+        });
 
         return $permissions;
     }
@@ -21,7 +30,7 @@ class PermissionService
     public function Create(Request $request)
     {
         $mod = Module::find($request->module);
-        foreach ($request->can_do as $v) {
+        foreach ($request->actions as $v) {
             $name = trim(strtolower(htmlspecialchars($v.' '.$mod->name)));
             Permission::firstOrCreate(['name' => $name]);
         }
@@ -29,11 +38,43 @@ class PermissionService
         return true;
     }
 
-    public function Update(Request $request, Permission $permission): Permission
+    public function Update(Request $request, Permission $representativePermission): bool
     {
-        return $permission;
-        // $name = trim(strtolower(htmlspecialchars($request->name)));
-        // $permission->update(["name" => $name]);
+
+        $newModuleId = $request->input('module');
+        $newActions = $request->input('actions');
+
+        $availableActions = ['view', 'create', 'update', 'delete'];
+
+        // 2. Look up the new Module name
+        $mod = Module::find($newModuleId);
+        if (! $mod) {
+            return false;
+        }
+        $moduleName = strtolower($mod->name); // e.g., 'user'
+        $guardName = 'web';
+
+        $existingPermissions = Permission::where('name', 'like', "% {$moduleName}")->get();
+
+        foreach ($availableActions as $action) {
+            $fullPermissionName = strtolower($action).' '.$moduleName;
+
+            if (in_array($action, $newActions)) {
+                Permission::firstOrCreate([
+                    'name' => $fullPermissionName,
+                    'guard_name' => $guardName,
+                ]);
+            } else {
+                // Action is UNSELECTED: Ensure it DOES NOT EXIST
+                $permissionToDelete = $existingPermissions->firstWhere('name', $fullPermissionName);
+
+                if ($permissionToDelete) {
+                    $permissionToDelete->delete();
+                }
+            }
+        }
+
+        return true;
     }
 
     public function Delete(Permission $permission): bool
@@ -51,13 +92,13 @@ class PermissionService
             case 'post':
                 return Validator::make($request->all(), [
                     'module' => ['required', 'exists:modules,id'],
-                    'can_do' => ['required', 'array', 'in:'.$actions],
+                    'actions' => ['required', 'array', 'in:'.$actions],
                     // "name"    => ["required", "unique:permissions,name"],
                 ]);
             case 'patch':
                 return Validator::make($request->all(), [
                     'module' => ['required', 'exists:modules,id'],
-                    'can_do' => ['required', 'array', 'in:'.$actions],
+                    'actions' => ['required', 'array', 'in:'.$actions],
                     // "name" => ["required", Rule::unique("permissions", "name")->ignore($permission->id)],
                 ]);
             default:

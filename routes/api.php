@@ -1,17 +1,16 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BrandController;
-use App\Http\Controllers\FuelController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\ModelController;
-use App\Http\Controllers\VersionController;
-use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\CarController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\FeatureController;
+use App\Http\Controllers\FuelController;
+use App\Http\Controllers\ModelController;
 use App\Http\Controllers\ModuleController;
-use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\VersionController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('brands', [BrandController::class, 'apiIndex'])->name('api.brands');
 Route::get('fuels', [FuelController::class, 'apiIndex'])->name('api.fuels');
@@ -20,10 +19,9 @@ Route::get('amodels', [ModelController::class, 'apiIndex'])->name('api.models');
 Route::get('versions', [VersionController::class, 'apiIndex'])->name('api.versions');
 Route::get('features', [FeatureController::class, 'apiIndex'])->name('api.features');
 
-    Route::get('/role', [RoleController::class,'index']);
-    Route::post('/permission', [PermissionController::class,'store']);
-    Route::patch('/role/{role}', [RoleController::class,'update']);
-    Route::delete('/module/{module}', [ModuleController::class,'destroy']);
+Route::get('/role', [RoleController::class, 'index']);
+Route::patch('/role/{role}', [RoleController::class, 'update']);
+Route::delete('/module/{module}', [ModuleController::class, 'destroy']);
 
 Route::get('api/cars-search', [CarController::class, 'carsSearch'])->name('api.cars.search');
 Route::get('/api/cars/recomended', [CarController::class, 'carRecomended'])->name('api.cars.recomanded');

@@ -1,18 +1,12 @@
 <?php
 
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CarController;
+use App\Http\Controllers\ModuleController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\BrandController;
-use App\Http\Controllers\ModelController;
-use App\Http\Controllers\ModuleController;
-use App\Http\Controllers\SellerController;
-use App\Http\Controllers\FeatureController;
-use App\Http\Controllers\VersionController;
-use App\Http\Controllers\PermissionController;
-
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -31,7 +25,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('shipping/shipping');
     })->name('shipping');
 
-
     Route::get('car/list', [CarController::class, 'index'])->name('car.index');
     Route::post('car/store', [CarController::class, 'store'])->name('car.store');
     Route::get('car/create', [CarController::class, 'create'])->name('car.create');
@@ -44,16 +37,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('management/management');
 
     })->name('management');
-    Route::get('management/module/list',[ModuleController::class,'index'])->name('module.index');
-    Route::post('management/module/store',[ModuleController::class,'store'])->name('module.store');
-    Route::delete('management/module/{module}',[ModuleController::class,'destroy'])->name('module.destroy');
-    Route::patch('management/module/{module}',[ModuleController::class,'update'])->name('module.update');
+    Route::get('management/module/list', [ModuleController::class, 'index'])->name('module.index');
+    Route::post('management/module/store', [ModuleController::class, 'store'])->name('module.store');
+    Route::delete('management/module/{module}', [ModuleController::class, 'destroy'])->name('module.destroy');
+    Route::patch('management/module/{module}', [ModuleController::class, 'update'])->name('module.update');
 
-    Route::get('management/permission/list',[PermissionController::class,'index'])->name('permission.index');
-    Route::post('management/permission/store',[PermissionController::class,'store'])->name('permission.store');
-    Route::delete('management/permission/{module}',[PermissionController::class,'destroy'])->name('permission.destroy');
-    Route::patch('management/permission/{module}',[PermissionController::class,'update'])->name('permission.update');
-
+    Route::get('management/permission/list', [PermissionController::class, 'index'])->name('permission.index');
+    Route::post('management/permission/store', [PermissionController::class, 'store'])->name('permission.store');
+    Route::delete('management/permission/{permission}', [PermissionController::class, 'destroy'])->name('permission.destroy');
+    Route::patch('management/permission/{permission}', [PermissionController::class, 'update'])->name('permission.update');
 
     // Route::resource('/module', ModuleController::class);
     // Route::resource('/permission', PermissionController::class);
@@ -61,5 +53,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Route::resource('/user', UserController::class);
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';

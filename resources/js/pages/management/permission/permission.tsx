@@ -7,10 +7,10 @@ import AppLayout from '@/layouts/app-layout';
 import Layout from '@/layouts/management/layout';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { timeFormat } from '@/lib/utils'; // Import the timeFormat function
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, X } from 'lucide-react';
+import { timeFormat } from '@/lib/utils';
 import PermissionForm from '@/components/management/permission/permissionForm';
+import { ModuleItem } from '../module/module';
+import { X } from 'lucide-react';
 
 
 export interface PermissionItem {
@@ -35,8 +35,8 @@ interface PermissionProps {
             active: boolean;
         }>;
     };
-    modules: String[];
-    actions: String[];
+    modules: ModuleItem[];
+    actions: string[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -49,10 +49,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 // Update the component to accept props
 export default function Permission({ permissions,actions,modules }: PermissionProps) { // Destructure permissions from props
 
+console.log(permissions);
+
    
         
   function handleDelete(id: number) {
-  if (!window.confirm('Are you sure you want to delete this permission?')) return;
+  if (!window.confirm('Are you sure you want to delete this permission? '+id)) return;
 
   router.delete(`/management/permission/${id}`, {
     preserveScroll: true,
@@ -69,9 +71,9 @@ export default function Permission({ permissions,actions,modules }: PermissionPr
                 <div className="space-y-6">
                     <HeadingSmall title="Car permission settings" description="Add new ,Update and delete car permissions name" />
 
-                    <PermissionForm />
+                    <PermissionForm actions={actions} modules={modules}/>
     <div className="rounded-md border">
-                    <Table className=" max-w-3xl">
+                    <Table className=" max-w-4xl">
                         <TableCaption>A list of car permission.</TableCaption>
                         <TableHeader>
                             <TableRow>
@@ -115,6 +117,8 @@ export default function Permission({ permissions,actions,modules }: PermissionPr
                             )}
                         </TableBody>
                     </Table>
+
+                    
                     </div>
                 </div>
             </Layout>

@@ -24,10 +24,10 @@ class ModuleController extends Controller
      */
     public function index()
     {
-        return $this->moduleService->Index();
-        // return Inertia::render('car/settings/module', [
-        //     'modules' => $this->moduleService->Index(), // Using the service to get data
-        // ]);
+        // return $this->moduleService->Index();
+        return Inertia::render('management/module/module', [
+            'modules' => $this->moduleService->Index(), // Using the service to get data
+        ]);
     }
 
     /**

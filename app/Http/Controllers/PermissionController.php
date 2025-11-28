@@ -27,11 +27,21 @@ class PermissionController extends Controller
 
         $permissions = $this->permissionService->Index($request);
 
-        return $permissions;
-        $modules = Module::get()->pluck('name', 'id')->toArray();
+        $modules = Module::get()->pluck('name', 'id')->map(function ($item, $key) {
+            return [
+                'id' => $key,
+                'name' => $item,
+            ];
+        })->values();
         $actions = ['view', 'create', 'update', 'delete'];
 
-        return Inertia::render('management/permission/permission', compact('permissions', 'modules', 'actions'));
+        return Inertia::render('management/permission/permission',
+            [
+                'permissions' => $permissions,
+                'modules' => $modules,
+                'actions' => $actions,
+            ]
+        );
     }
 
     /**
@@ -47,19 +57,16 @@ class PermissionController extends Controller
      */
     public function store(Request $request)
     {
+
         $actions = ['view', 'create', 'update', 'delete'];
         $actions = implode(',', $actions);
 
         $data = $request->validate([
             'module' => ['required', 'exists:modules,id'],
-            'can_do' => ['required', 'array', 'in:'.$actions],
+            'actions' => ['required', 'array', 'in:'.$actions],
         ]);
-        // if ($data->fails()) {
-        //     return back()->withInput()->withErrors($data);
-        // }
-        $permission = $this->permissionService->Create($request);
 
-        return $permission;
+        $permission = $this->permissionService->Create($request);
 
         return back()->with('success', 'Permission successfully created.');
     }
@@ -85,19 +92,23 @@ class PermissionController extends Controller
      */
     public function update(Request $request, Permission $permission)
     {
-        // dd($permission);
-        $data = $request->validate([
 
-            'name' => ['required', 'unique:permissions,name'],
+        // The actions array defined here should match the one in your index/store methods
+        $actions = ['view', 'create', 'update', 'delete'];
+        $actionsString = implode(',', $actions);
+
+        // 1. Validate the incoming module and actions data
+        $request->validate([
+            'module' => ['required', 'exists:modules,id'],
+            'actions' => ['required', 'array', 'in:'.$actionsString],
         ]);
-        // if ($data->fails()) {
-        //     return back()->withInput()->withErrors($data, "err_" . $permission->id)->with("err", $permission->id);
-        // }
-        $permission = $this->permissionService->Update($request, $permission);
 
-        return $permission;
+        // 2. Call the service to synchronize the permissions for the module
+        // The service will handle the complex logic of creating or deleting individual permissions.
+        $this->permissionService->Update($request, $permission);
 
-        return back()->with('success', "Permission ($permission->name) successfully updated.");
+        // 3. Return a general success message (since multiple permissions were affected)
+        return redirect()->route('permission.index')->with('success', 'Permissions for module successfully updated.');
     }
 
     /**
@@ -105,7 +116,9 @@ class PermissionController extends Controller
      */
     public function destroy(Permission $permission)
     {
+
         $name = $permission->name;
+
         $this->permissionService->Delete($permission);
 
         return back()->with('success', "Permission ($permission->name) successfully updated.");
