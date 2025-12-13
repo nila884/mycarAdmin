@@ -22,10 +22,9 @@ class CarService
 
         // Load relationships for display in the frontend
         $cars = Car::with([
-            'carModel.brand',
+            'version.carModel.brand',
             'category',
             'fuelType',
-            'version',
             'seller',
             'features',
             'images' => function ($query) {
@@ -39,8 +38,8 @@ class CarService
         $cars->getCollection()->transform(function ($car) {
             return [
                 'id' => $car->id,
-                'brand_name' => $car->carModel->brand->brand_name ?? 'N/A', // Access nested relationships
-                'model_name' => $car->carModel->model_name ?? 'N/A',
+                'brand_name' => $car->version->carModel->brand->brand_name ?? 'N/A', // Access nested relationships
+                'model_name' => $car->version->carModel->model_name ?? 'N/A',
                 'category' => $car->category->category_name ?? 'N/A', // Changed to 'category' for frontend consistency
                 'category_id' => $car->category->id ?? 'N/A',
                 'fuel_type' => $car->fuelType->fuel_type ?? 'N/A', // Changed to 'fuel_type'
@@ -91,7 +90,7 @@ class CarService
         try {
             // Map frontend form field names to backend database column names
             $car = Car::create([
-                'car_model_id' => $request->car_model_id,
+
                 'category_id' => $request->category_id,
                 'fuel_type_id' => $request->fuel_type_id,
                 'version_id' => $request->version_id,
@@ -175,23 +174,21 @@ class CarService
     public function read(int $id)
     {
 
-        $car = Car::with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'features', 'images', 'prices' => function ($query) {
+        $car = Car::with(['version.carModel.brand', 'category', 'fuelType', 'seller', 'features', 'images', 'prices' => function ($query) {
             $query->where('is_current', true);
         }])->find($id);
 
         if (! $car) {
             return null;
         }
-
         $transformedCar = [
             'id' => $car->id,
-            'brand_name' => $car->carModel->brand->brand_name ?? 'N/A',
-            'car_brand_id' => $car->carModel->brand->id,
-            'car_model_id' => $car->carModel->id,
+            'brand_name' => $car->version->carModel->brand->brand_name ?? 'N/A',
+            'car_brand_id' => $car->version->carModel->brand->id,
             'version_id' => $car->version->id,
             'seller_id' => $car->seller->id,
             'fuel_type_id' => $car->fuelType->id,
-            'model_name' => $car->carModel->model_name ?? 'N/A',
+            'model_name' => $car->version->carModel->model_name ?? 'N/A',
             'category' => $car->category->category_name ?? 'N/A',
             'category_id' => $car->category->id ?? 'N/A',
             'fuel_type' => $car->fuelType->fuel_type ?? 'N/A',
@@ -242,7 +239,6 @@ class CarService
         try {
             // Map frontend form field names to backend database column names
             $car->update([
-                'car_model_id' => $request->car_model_id,
                 'category_id' => $request->category_id,
                 'fuel_type_id' => $request->fuel_type_id,
                 'version_id' => $request->version_id,
@@ -391,7 +387,6 @@ class CarService
     {
         $currentYear = date('Y');
         $rules = [
-            'car_model_id' => ['required', 'exists:car_models,id'],
             'category_id' => ['required', 'exists:categories,id'],
             'fuel_type_id' => ['required', 'exists:fuel_types,id'],
             'version_id' => ['required', 'exists:versions,id'],

@@ -76,27 +76,25 @@ class DatabaseSeeder extends Seeder
 
         foreach ($brands as $brand) {
 
-            $carModels = carModel::factory(4)->create([
+            carModel::factory(4)->create([
                 'brand_id' => $brand->id,
             ]);
         }
+        $carModelIds = CarModel::pluck('id');
+        foreach ($carModelIds as $id) {
 
-        foreach ($carModels as $carModel) {
-
-            $versions = Version::factory(2)->create([
-                'car_model_id' => $carModel->id,
+            Version::factory(3)->create([
+                'car_model_id' => $id,
             ]);
         }
-        $carModelIds = CarModel::pluck('id');
+
         $versionIds = Version::pluck('id');
         $categoryIds = Category::pluck('id');
         $fuelTypesIds = FuelType::pluck('id');
         $sellerIds = Seller::pluck('id');
         $versionIds = Version::pluck('id');
         $cars = Car::factory(150)->create([
-            'car_model_id' => function (array $attributes) use ($carModelIds) {
-                return $carModelIds->random();
-            },
+
             'category_id' => function (array $attributes) use ($categoryIds) {
                 return $categoryIds->random();
             },

@@ -14,11 +14,11 @@ class VersionResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-          return [
+        return [
             'id' => $this->id,
             'name' => $this->version_name,
             'model_id' => $this->car_model_id,
-            'model' => new ModelResource($this->whenLoaded('CarModel')),
+            'model' => ModelResource::make($this->whenLoaded('carModel')),
         ];
 
     }

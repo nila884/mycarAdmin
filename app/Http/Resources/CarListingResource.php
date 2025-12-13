@@ -14,22 +14,22 @@ class CarListingResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return  [
+
+        return [
             'id' => $this->id,
 
             'location' => $this->location,
             'image_main' => new ImageResource($this->whenLoaded('images')->firstWhere('is_main', true)),
             'price' => new CarPriceResource($this->whenLoaded('prices')->firstWhere('is_current', true)),
-           
-            'spect'=>[
-            
-            'manufacture_year' => $this->manufacture_year,
-            'mileage' => $this->mileage,
-            
+
+            'spect' => [
+
+                'manufacture_year' => $this->manufacture_year,
+                'mileage' => $this->mileage,
+
             ],
-            'version' => VersionResource::make($this->whenLoaded('version')),
-            'model' => ModelResource::make($this->whenLoaded('carModel')),
-           
+            'version' => new VersionResource($this->whenLoaded('version')),
+
         ];
     }
 }

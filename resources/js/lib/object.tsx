@@ -1,6 +1,6 @@
 export type Car = {
     id:number;
-    car_model_id: CarModel;
+  
     car_brand_id: Brand;
     version_id: Version;
     category_id: Category;
@@ -36,7 +36,7 @@ export interface CarDetail {
     id: number;
     car_brand_id: number | null;
     brand_name: string;
-    car_model_id: number | null;
+   
     model_name: string;
     category_id: number | null;
     category: string;

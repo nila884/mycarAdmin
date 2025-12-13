@@ -4,7 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\BrandResource;
 
 class ModelResource extends JsonResource
 {
@@ -15,11 +14,11 @@ class ModelResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-          return [
+        return [
             'id' => $this->id,
             'name' => $this->model_name,
             'brand_id' => $this->brand_id,
-            'brand' => new BrandResource($this->whenLoaded('brand')),
+            'brand' => BrandResource::make($this->whenLoaded('brand')),
         ];
     }
 }

@@ -190,18 +190,18 @@ class CarController extends Controller
         $query = Car::query();
 
         // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'images', 'features', 'prices']);
+        $query->with(['version.carModel.brand', 'category', 'fuelType',  'seller', 'images', 'features', 'prices']);
 
         // Conditionally apply the brand filter if the brand name is provided.
         $query->when($brandId, function ($brandQuery) use ($brandId) {
-            $brandQuery->whereHas('carModel.brand', function ($innerQuery) use ($brandId) {
+            $brandQuery->whereHas('version.carModel.brand', function ($innerQuery) use ($brandId) {
                 $innerQuery->where('id', $brandId);
             });
         });
 
         // Conditionally apply the car model filter if the model name is provided.
         $query->when($modelId, function ($modelQuery) use ($modelId) {
-            $modelQuery->whereHas('carModel', function ($innerQuery) use ($modelId) {
+            $modelQuery->whereHas('version.carModel', function ($innerQuery) use ($modelId) {
                 $innerQuery->where('id', $modelId);
             });
         });
@@ -265,18 +265,18 @@ class CarController extends Controller
         $query = Car::query();
 
         // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'images', 'features', 'prices']);
+        $query->with(['version.carModel.brand', 'category', 'fuelType',  'seller', 'images', 'features', 'prices']);
 
         // Conditionally apply the brand filter if the brand name is provided.
         $query->when($brandId, function ($brandQuery) use ($brandId) {
-            $brandQuery->whereHas('carModel.brand', function ($innerQuery) use ($brandId) {
+            $brandQuery->whereHas('version.carModel.brand', function ($innerQuery) use ($brandId) {
                 $innerQuery->where('id', $brandId);
             });
         });
 
         // Conditionally apply the car model filter if the model name is provided.
         $query->when($modelId, function ($modelQuery) use ($modelId) {
-            $modelQuery->whereHas('carModel', function ($innerQuery) use ($modelId) {
+            $modelQuery->whereHas('version.carModel', function ($innerQuery) use ($modelId) {
                 $innerQuery->where('id', $modelId);
             });
         });
@@ -330,7 +330,7 @@ class CarController extends Controller
     {
         $query = Car::query();
         // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['carModel.brand',  'version', 'carModel', 'images',  'prices']);
+        $query->with(['version.carModel.brand', 'images',  'prices']);
 
         $cars = $query->take(10)->get();
         if ($cars->isEmpty()) {
@@ -356,7 +356,7 @@ class CarController extends Controller
     public function carDetail($id)
     {
 
-        $car = Car::with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'features', 'images', 'prices'])
+        $car = Car::with(['version.carModel.brand', 'category', 'fuelType', 'seller', 'features', 'images', 'prices'])
             ->find($id);
 
         if (! $car) {
@@ -381,7 +381,7 @@ class CarController extends Controller
     {
         $query = Car::query();
         // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['carModel.brand',  'version', 'carModel', 'images',  'prices']);
+        $query->with(['version.carModel.brand',   'images',  'prices']);
 
         $cars = $query->take(4)->get();
         if ($cars->isEmpty()) {
@@ -408,7 +408,7 @@ class CarController extends Controller
 
         $query = Car::query();
         // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['carModel.brand',  'version', 'carModel', 'images',  'prices']);
+        $query->with(['version.carModel.brand', 'images',  'prices']);
 
         $cars = $query->take(4)->get();
         if ($cars->isEmpty()) {

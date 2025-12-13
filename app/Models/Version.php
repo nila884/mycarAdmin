@@ -8,14 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 class Version extends Model
 {
     use HasFactory;
-    protected $fillable=[
-        "car_model_id",
-        "version_name",
-        "version_year"
+
+    protected $fillable = [
+        'car_model_id',
+        'version_name',
+        'version_year',
     ];
 
     public function CarModel()
     {
         return $this->belongsTo(carModel::class);
+    }
+
+    public function cars()
+    {
+        return $this->hasMany(Car::class);
     }
 }

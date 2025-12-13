@@ -106,12 +106,13 @@ const CarShowDetails: React.FC<CarShowDetailsProps> = ({ car }) => {
                         <h2 className="text-2xl font-bold text-gray-900 mb-4">Features</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                            {car.features.map((feature)=>(
-                            <div key={feature.id}>
+                            <div key={feature.id} className="flex flex-col items-center p-4  rounded-lg bg-gray-50">
                                 <img
                                 src={feature.icon}
+                                className="w-10 h-10 mb-2"
                                 alt='no icon'
                                />
-                                <span>{feature.feature_name}</span>
+                                <span className="text-sm">{feature.feature_name}</span>
                             </div>
                            ))}
                           
