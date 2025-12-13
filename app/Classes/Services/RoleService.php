@@ -64,6 +64,10 @@ class RoleService
 
     public function Update(Request $request, Role $role): Role|RedirectResponse
     {
+        if ($role->id === 1 || $role->name === 'super-admin') {
+            abort(403, "The foundational 'super-admin' role cannot be modified.");
+        }
+
         // dd($request->all());
         DB::beginTransaction();
         try {
@@ -88,6 +92,10 @@ class RoleService
 
     public function Delete(Role $role): bool
     {
+        if ($role->id === 1 || $role->name === 'super-admin') {
+            abort(403, "The foundational 'super-admin' role cannot be deleted.");
+        }
+
         return $role->delete();
     }
 

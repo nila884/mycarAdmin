@@ -15,7 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('seller_name');
             $table->string('phone');
-            $table->string('email')->unique();
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->onDelete('cascade')
+                ->unique();
+            $table->string('avatar')->nulable();
+            $table->text('description')->nullable();
             $table->string('country');
             $table->string('address');
             $table->timestamps();

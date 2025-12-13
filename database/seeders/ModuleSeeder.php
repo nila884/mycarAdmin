@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Module;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ModuleSeeder extends Seeder
@@ -15,7 +14,9 @@ class ModuleSeeder extends Seeder
     {
         Module::create(['name' => 'car']);
         Module::create(['name' => 'user']);
-        Module::create(['name' => 'invoice']);
-        Module::create(['name' => 'settings']);
+        Module::create(['name' => 'modules']);
+        Module::create(['name' => 'permissions']);
+        Module::create(['name' => 'roles']);
+
     }
 }

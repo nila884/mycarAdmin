@@ -17,13 +17,13 @@ Route::get('models', [ModelController::class, 'apiIndex'])->name('api.models');
 Route::get('versions', [VersionController::class, 'apiIndex'])->name('api.versions');
 Route::get('features', [FeatureController::class, 'apiIndex'])->name('api.features');
 
-Route::get('api/cars-search', [CarController::class, 'carsSearch'])->name('api.cars.search');
-Route::get('/api/cars/recomended', [CarController::class, 'carRecomended'])->name('api.cars.recomanded');
+Route::get('cars-search', [CarController::class, 'carsSearch'])->name('api.cars.search');
+Route::get('cars/recomended', [CarController::class, 'carRecomended'])->name('api.cars.recomanded');
 
-Route::get('api/cars/home', [CarController::class, 'carsHome'])->name('api.cars.home');
+Route::get('cars/home', [CarController::class, 'carsHome'])->name('api.cars.home');
 
-Route::get('api/cars/detail/{id}', [CarController::class, 'carDetail'])->name('api.cars.detail');
+Route::get('cars/detail/{id}', [CarController::class, 'carDetail'])->name('api.cars.detail');
 
-Route::get('api/m/cars/home', [CarController::class, 'carsHomeMobile'])->name('api.cars.home.mobile');
+Route::get('m/cars/home', [CarController::class, 'carsHomeMobile'])->name('api.cars.home.mobile');
 
-Route::get('api/shipping-details', [CountryController::class, 'shippingDetails'])->name('api.cars.shipping.details');
+Route::get('shipping-details', [CountryController::class, 'shippingDetails'])->name('api.cars.shipping.details');

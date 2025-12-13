@@ -4,9 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Module;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Spatie\Permission\Models\Role;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -17,7 +16,7 @@ class RolePermissionSeeder extends Seeder
     {
         $superAdmin = Role::findByName('super-admin');
         $admin = Role::findByName('admin');
-        $agency = Role::findByName('agency');
+        $seller = Role::findByName('seller');
         $user = Role::findByName('user');
 
         $superAdmin->givePermissionTo(Permission::all());
@@ -31,16 +30,16 @@ class RolePermissionSeeder extends Seeder
             ]);
         }
 
-        // agency: can only view cars and agency
-        $agency->givePermissionTo([
-            "car.view",
-            "car.create",
-            "car.update",
-            "user.view",
+        // seller: can only view cars and seller
+        $seller->givePermissionTo([
+            'car.view',
+            'car.create',
+            'car.update',
+            'user.view',
 
         ]);
 
         // user: only view car
-        $user->givePermissionTo("car.view");
+        $user->givePermissionTo('car.view');
     }
 }

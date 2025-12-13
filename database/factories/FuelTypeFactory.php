@@ -2,16 +2,15 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\FuelType;
-
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FuelType>
  */
 class FuelTypeFactory extends Factory
 {
-   /**
+    /**
      * The name of the factory's corresponding model.
      *
      * @var string
@@ -26,7 +25,7 @@ class FuelTypeFactory extends Factory
     public function definition()
     {
         return [
-            'fuel_type' => $this->faker->unique()->sentence(2, true) . ' Fuel',
+            'fuel_type' => $this->faker->unique()->sentence(1, true).' Fuel',
         ];
     }
 }

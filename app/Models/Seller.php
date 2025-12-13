@@ -8,11 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class Seller extends Model
 {
     use HasFactory;
-    protected $fillable=[
-        "seller_name",
-        "phone",
-        "email",
-        "address",
-        "country",
+
+    protected $fillable = [
+        'seller_name',
+        'phone',
+        'user_id',
+        'description',
+        'address',
+        'country',
+        'avatar',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

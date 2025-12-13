@@ -12,37 +12,19 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // super admin
+
+        $adminEmail = env('SUPER_ADMIN_EMAIL');
+        $adminPassword = env('SUPER_ADMIN_PASSWORD');
+        $superAdminName = env('SUPER_ADMIN_NAME');
+
         $sa = User::create([
             'id' => 1,
-            'name' => 'Super Admin',
-            'email' => 'super@admin.com',
-            'password' => bcrypt('password'),
+            'name' => $superAdminName,
+            'email' => $adminEmail,
+            'password' => bcrypt($adminPassword),
         ]);
+
         $sa->assignRole('super-admin');
 
-        // admin
-        $admin = User::create([
-            'name' => 'Admin',
-            'email' => 'admin@mail.com',
-            'password' => bcrypt('password'),
-        ]);
-        $admin->assignRole('admin');
-
-        // partner
-        $partner = User::create([
-            'name' => 'Agence',
-            'email' => 'agence@mail.com',
-            'password' => bcrypt('password'),
-        ]);
-        $partner->assignRole('agence');
-
-        // normal user
-        $user = User::create([
-            'name' => 'User',
-            'email' => 'user@mail.com',
-            'password' => bcrypt('password'),
-        ]);
-        $user->assignRole('user');
     }
 }

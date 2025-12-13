@@ -5,7 +5,6 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-    getPaginationRowModel,
       SortingState,
     getSortedRowModel,
     getFilteredRowModel,
@@ -24,37 +23,59 @@ import React from "react"
 import { DataTablePagination } from "@/components/data-table-pagination"
 import { DataTableToolbar } from "@/components/data-table-toolbar"
 
+interface ServerPaginationData {
+    pageIndex: number;
+    pageSize: number;
+    pageCount: number;
+}
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  data: TData[],
+  serverPagination: ServerPaginationData,
+  onServerPageChange: (page: number, pageSize: number) => void,
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  serverPagination,
+  onServerPageChange
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([])
       const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
         const [columnVisibility, setColumnVisibility] =React.useState<VisibilityState>({})
           const [rowSelection, setRowSelection] = React.useState({})
+     const paginationState = {
+        pageIndex: serverPagination.pageIndex,
+        pageSize: serverPagination.pageSize,
+    };
   const table = useReactTable({
 
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-     getPaginationRowModel: getPaginationRowModel(),
          onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
      onColumnVisibilityChange: setColumnVisibility,
       onRowSelectionChange: setRowSelection,
+      pageCount: serverPagination.pageCount,
+      onPaginationChange: updater => {
+        if (typeof updater === 'function') {
+            const newPagination = updater(paginationState);
+            onServerPageChange(newPagination.pageIndex + 1, newPagination.pageSize);
+        }
+    },
     state: {
       sorting,
         columnFilters,
         columnVisibility,
         rowSelection,
+        pagination: paginationState,
     },
+
   })
 
   return (
