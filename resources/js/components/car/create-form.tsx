@@ -7,7 +7,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
-import { Brand, CarModel, Category, Feature, FuelType, Seller, Version, CarDetail, Image } from "@/lib/object";
+import { Brand, CarModel, Category, Feature, FuelType, Seller, Version, CarDetail, Image, CarDetailData, Color } from "@/lib/object";
+import { string } from "zod";
+import { Switch } from "../ui/switch";
 
 interface CreateFormProps {
     brands: Brand[];
@@ -17,7 +19,8 @@ interface CreateFormProps {
     fuelTypes: FuelType[];
     features: Feature[];
     sellers: Seller[];
-    car?: CarDetail;
+    car?: CarDetailData;
+    colors: Color[];
 }
 
 // === UPDATED CarForm TYPE ===
@@ -26,107 +29,125 @@ type CarForm = {
     car_brand_id: string;
     version_id: string;
     category_id: string;
+    exterior_color_id:string;
+    interior_color_id:string;
     fuel_type_id: string;
     seller_id: string;
-    mileage: number | null;
+    mileage: number|null;
     chassis_number: string;
-    registration_year: number | null;
-    manufacture_year: number | null;
-    color: string;
-    status: boolean | null;
-    transmission: 'automatic' | 'manual' | undefined;
-    car_sells_status: 'sold' | 'selling' | 'reserved' | undefined;
-    streering: 'right' | 'left' | undefined;
-    steating_capacity: number | null;
+    registration_year: number|null;
+    manufacture_year: number|null;
+    status: boolean| null;
+    transmission: string;
+    car_selling_status: string;
+    steering: string;
+    seating_capacity: number|null;
     engine_code: string | null;
-    engine_size: number | null;
+    engine_size: number|null;
     model_code: string | null;
-    wheel_driver: string | null;
-    m_3: number | null;
-    doors: number | null;
+    wheel_driver: string ;
+    // streering: string;
+    m_3: number|null;
+    doors: number|null;
     location: string | null;
-    weight: number | null;
-    price: number | null;
-    promo: number | null;
-    publication_status: 'published' | 'pendding' | 'archived' | undefined;
+    weight: number|null;
+    price: number|null;
+    discount:number|null;
+    discount_type:string;
+    publication_status: string;
+    is_current_price: boolean,
     image: File | null;
     images: File[]; // Newly uploaded files
     existing_images: Image[]; 
     images_to_delete: number[];
     features: Feature[];
+    dimensions: {
+        length_mm: number|null;
+        width_mm: number|null;
+        height_mm: number|null;
+    } | null;
 };
 
 // === NEW TYPE FOR IMAGE PREVIEWS ===
 type ImagePreviewItem = {
-    src: string; // The URL to display
-    type: 'existing' | 'new'; // To distinguish existing images from newly added files
-    id?: number; // Only present for existing images from the backend
-    file?: File; // Only present for newly added File objects
+    src: string; 
+    type: 'existing' | 'new'; 
+    id?: number;
+    file?: File; 
 };
 
 
 // === UPDATED getInitialFormData FUNCTION ===
-const getInitialFormData = (car?: CarDetail): CarForm => {
+const getInitialFormData = (car?: CarDetailData): CarForm => {
     return {
-        car_model_id: car?.car_model_id?.toString() || "",
-        car_brand_id: car?.car_brand_id?.toString() || "",
-        version_id: car?.version_id?.toString() || "",
-        category_id: car?.category_id?.toString() || "",
-        fuel_type_id: car?.fuel_type_id?.toString() || "",
-        seller_id: car?.seller_id?.toString() || "",
-        mileage: car?.mileage || null,
-        chassis_number: car?.chassis_number || "",
-        registration_year: car?.registration_year || null,
-        manufacture_year: car?.manufacture_year || null,
-        color: car?.color || "",
-        status: car?.status || null,
-        transmission: car?.transmission || undefined,
-        car_sells_status: car?.car_sells_status === 'sold' || car?.car_sells_status === 'selling' || car?.car_sells_status === 'reserved'
-            ? car.car_sells_status
-            : undefined,
-        streering: car?.streering || undefined,
-        steating_capacity: car?.steating_capacity || null,
-        engine_code: car?.engine_code || null,
-        engine_size: car?.engine_size || null,
-        model_code: car?.model_code || null,
-        wheel_driver: car?.wheel_driver || null,
-        m_3: car?.m_3 || null,
-        doors: car?.doors || null,
-        location: car?.location || null,
-        weight: car?.weight || null,
-        price: car?.price || null,
-        promo: car?.promo || null,
-        publication_status: car?.publication_status === 'published' || car?.publication_status === 'pendding' || car?.publication_status === 'archived'
-            ? car.publication_status
-            : undefined,
+        car_model_id: car?.version.car_model.id?.toString() || "",
+        car_brand_id: car?.version.car_model.brand.id?.toString() || "",
+        version_id: car?.version.id?.toString() || "",
+        category_id: car?.category.id?.toString() || "",
+        fuel_type_id: car?.fuel_type.id?.toString() || "",
+        seller_id: car?.seller.id?.toString() || "",
+        interior_color_id: car?.interior_color?.id.toString()||"",
+        exterior_color_id: car?.exterior_color?.id.toString()||"",
+        mileage: car?.spect.mileage || null,
+        chassis_number: car?.spect.chassis_number || "",
+        registration_year: car?.spect.registration_year || null,
+        manufacture_year: car?.spect.manufacture_year || null,
+        status: car?.spect.status || false,
+        // streering: car?.spect.steering||"",
+        transmission: car?.spect.transmission || "",
+        car_selling_status: car?.car_selling_status ||"",
+        steering: car?.spect.steering || "",
+        seating_capacity: car?.spect.seating_capacity || null,
+        engine_code: car?.spect.engine_code || "",
+        engine_size: car?.spect.engine_size || null,
+        model_code: car?.spect.model_code || "",
+        wheel_driver: car?.spect.wheel_driver || "",
+        m_3: car?.spect.m_3 || null,
+        doors: car?.spect.doors || null,
+        location: car?.location || "",
+        weight: car?.spect.weight || null,
+        price: car?.price.price || null,
+        discount: car?.price.discount || null,
+        discount_type: car?.price.discount_type ||"",
+        is_current_price: car?.price.is_current|| false,
+        publication_status: car?.publication_status || "",
         image: null,
         images: [], // New files start empty
-        existing_images:car?.existing_images||[],
+        existing_images: car?.images || [],
         images_to_delete: [], // Initialize empty, will be populated on removal
         features: car?.features || [],
+        dimensions: car?.spect.dimensions || { 
+            length_mm: null, 
+            width_mm: null, 
+            height_mm: null 
+        },
     };
 };
 
-const CreateCarForm = ({ brands, carModels, categories, versions, features, fuelTypes, sellers, car }: CreateFormProps) => {
+const CreateCarForm = ({ brands, carModels, categories, versions, features, fuelTypes, sellers,colors, car }: CreateFormProps) => {
     const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
 
     const [selectedBrandId, setSelectedBrandId] = useState<string>('');
     const [filteredCarModels, setFilteredCarModels] = useState<CarModel[]>([]);
     const [selectedCarModelId, setSelectedCarModelId] = useState<string>('');
     const [filteredVersions, setFilteredVersions] = useState<Version[]>([]);
+    
 
-    // Initialize Inertia's useForm with updated CarForm type and initial data
+  
+    
     const { data, setData, post, processing, errors, reset } = useForm<CarForm>(
         car ? route('car.update', car.id) : route('car.store'),
         getInitialFormData(car)
     );
-
+       
+         
     // Effect to set main image preview and dropdowns when car prop changes (for edit mode)
     useEffect(() => {
         if (car) {
-            setMainImagePreview(car.image_url || null);
-            setSelectedBrandId(car.car_brand_id?.toString() || "");
-            setSelectedCarModelId(car.car_model_id?.toString() || "");
+           
+            setMainImagePreview(car.image_main.image_path || null);
+            setSelectedBrandId(car.version.car_model.brand.id?.toString() || "");
+            setSelectedCarModelId(car.version.car_model.id?.toString() || "");
         } else {
             setMainImagePreview(null);
             setSelectedBrandId('');
@@ -162,7 +183,8 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
     // Form submission handler
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
+            console.log(data);
+            
         if (car) {
             // Use 'post' method for updates if your backend expects FormData and handles _method spoofing
             post(route('car.update', car.id), {
@@ -170,9 +192,13 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
                     alert('Car updated successfully!');
                 },
                 onError: (submissionErrors) => {
+                    
+                    
+                    
                 },
-                onFinish: () => { },
-                forceFormData: true, // Crucial for sending files and arrays like images_to_delete
+                onFinish: () => {
+                 },
+                forceFormData: true,
             });
         } else {
             post(route('car.store'), {
@@ -271,7 +297,7 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
         // Map existing images from data.existing_images
         ...(data.existing_images || []).map(img => ({
             src: img.image_path ?? "", // img is already a string (the image path)
-            id:img.id,
+            id: Number(img.id), // ensure id is a number to match ImagePreviewItem
             type: "existing" as const,
         })),
         // Map newly added files from data.images
@@ -441,12 +467,12 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
 
                     {/* Steering Select */}
                     <div className="grid gap-2">
-                        <Label htmlFor="streering">Steering</Label>
+                        <Label htmlFor="steering">Steering</Label>
                         <Select
-                            onValueChange={(value) => setData('streering', value as 'right' | 'left')}
-                            value={data.streering || ""} // Ensure value is a string
+                            onValueChange={(value) => setData('steering', value as 'right' | 'left')}
+                            value={data.steering || ""} // Ensure value is a string
                         >
-                            <SelectTrigger id="streering" disabled={processing}>
+                            <SelectTrigger id="steering" disabled={processing}>
                                 <SelectValue placeholder="Select steering" />
                             </SelectTrigger>
                             <SelectContent>
@@ -454,7 +480,7 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
                                 <SelectItem value="left">Left</SelectItem>
                             </SelectContent>
                         </Select>
-                        <InputError message={errors.streering} className="mt-2" />
+                        <InputError message={errors.steering} className="mt-2" />
                     </div>
 
                     {/* Status Select */}
@@ -495,12 +521,12 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
                     </div>
                     {/* Car selling Status Select */}
                     <div className="grid gap-2">
-                        <Label htmlFor="car_sells_status">Car selling Status</Label>
+                        <Label htmlFor="car_selling_status">Car selling Status</Label>
                         <Select
-                            onValueChange={(value) => setData('car_sells_status', value as 'sold' | 'selling' | 'reserved')}
-                            value={data.car_sells_status}
+                            onValueChange={(value) => setData('car_selling_status', value as 'sold' | 'selling' | 'reserved')}
+                            value={data.car_selling_status}
                         >
-                            <SelectTrigger id="car_sells_status" disabled={processing}>
+                            <SelectTrigger id="car_selling_status" disabled={processing}>
                                 <SelectValue placeholder="Select selling status" />
                             </SelectTrigger>
                             <SelectContent>
@@ -516,29 +542,59 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
                 <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-4">
                     {/* Color Select */}
                     <div className="grid gap-2">
-                        <Label htmlFor="color">Color</Label>
+                        <Label htmlFor="interior_color_id">Interior color</Label>
                         <Select
-                            onValueChange={(value) => setData('color', value)}
-                            value={data.color}
+                            onValueChange={(value) => setData('interior_color_id', value)}
+                            value={data.interior_color_id}
                         >
-                            <SelectTrigger id="color" disabled={processing}>
-                                <SelectValue placeholder="Select color" />
+                            <SelectTrigger id="interior_color_id" disabled={processing}>
+                                <SelectValue placeholder="Select interior color" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="red">Red</SelectItem>
-                                <SelectItem value="blue">Blue</SelectItem>
-                                <SelectItem value="yellow">Yellow</SelectItem>
+                                  {colors.length > 0 ? (colors.map((color) => (
+                                    <SelectItem key={color.id.toString()} value={color.id.toString()}>
+                                        {color.name}
+                                    </SelectItem>
+                                ))) : (
+                                    <SelectItem value="placeholder" disabled>
+                                        No Colors available
+                                    </SelectItem>
+                                )}
                             </SelectContent>
                         </Select>
-                        <InputError message={errors.color} className="mt-2" />
+                        <InputError message={errors.interior_color_id} className="mt-2" />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="exterior_color_id">Exterior color</Label>
+                        <Select
+                            onValueChange={(value) => setData('exterior_color_id', value)}
+                            value={data.exterior_color_id}
+                        >
+                            <SelectTrigger id="exterior_color_id" disabled={processing}>
+                                <SelectValue placeholder="Select exterior color" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                  {colors.length > 0 ? (colors.map((color) => (
+                                    <SelectItem key={color.id.toString()} value={color.id.toString()}>
+                                        {color.name}
+                                    </SelectItem>
+                                ))) : (
+                                    <SelectItem value="placeholder" disabled>
+                                        No Colors available
+                                    </SelectItem>
+                                )}
+                            </SelectContent>
+                        </Select>
+                        <InputError message={errors.exterior_color_id} className="mt-2" />
                     </div>
 
                     {/* Wheel Drive Select */}
                     <div className="grid gap-2">
                         <Label htmlFor="wheel_driver">Wheel Drive</Label>
                         <Select
-                            onValueChange={(value) => setData('wheel_driver', value)}
-                            value={data.wheel_driver || ""}
+                            onValueChange={(value) => setData('wheel_driver', value as 'fwd' | 'rwd' | 'awd')}
+                            value={data.wheel_driver}
                         >
                             <SelectTrigger id="wheel_driver" disabled={processing}>
                                 <SelectValue placeholder="Select wheel drive" />
@@ -623,17 +679,86 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
 
                     {/* Seating Capacity Input */}
                     <div className="grid gap-2">
-                        <Label htmlFor="steating_capacity">Seating Capacity</Label>
+                        <Label htmlFor="seating_capacity">Seating Capacity</Label>
                         <Input
-                            id="steating_capacity"
+                            id="seating_capacity"
                             placeholder="Seating Capacity"
                             type="number"
-                            value={data.steating_capacity !== null ? data.steating_capacity : ""}
-                            onChange={e => setData('steating_capacity', e.target.value === "" ? null : Number(e.target.value))}
+                            value={data.seating_capacity !== null ? data.seating_capacity : ""}
+                            onChange={e => setData('seating_capacity', e.target.value === "" ? null : Number(e.target.value))}
                             disabled={processing}
                         />
-                        <InputError message={errors.steating_capacity} className="mt-2" />
+                        <InputError message={errors.seating_capacity} className="mt-2" />
                     </div>
+                </div>
+
+                 <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-4">
+                    <h4>Dimensions</h4>
+                    <div className="grid gap-2">
+                        <Label htmlFor="width_mm">Width in mm</Label>
+                        <Input
+                            id="width_mm"
+                            placeholder="Width in mm"
+                            type="number"
+                            value={data.dimensions?.width_mm ?? ""}
+                            onChange={e => {
+                                const val = e.target.value === "" ? null : Number(e.target.value);
+                                setData(prev => ({
+                                    ...prev,
+                                    dimensions: {
+                                        ...(prev.dimensions || { length_mm: null, width_mm: null, height_mm: null }),
+                                        width_mm: val,
+                                    },
+                                }));
+                            }}
+                            disabled={processing}
+                        />
+                        <InputError message={(errors as any)['dimensions.width_mm']} className="mt-2" />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="lenght_mm">Lenght in mm</Label>
+                        <Input
+                            id="lenght_mm"
+                            placeholder="Length in mm"
+                            type="number"
+                            value={data.dimensions?.length_mm ?? ""}
+                            onChange={e => {
+                                const val = e.target.value === "" ? null : Number(e.target.value);
+                                setData(prev => ({
+                                    ...prev,
+                                    dimensions: {
+                                        ...(prev.dimensions || { length_mm: null, width_mm: null, height_mm: null }),
+                                        length_mm: val,
+                                    },
+                                }));
+                            }}
+                            disabled={processing}
+                        />
+                        <InputError message={(errors as any)['dimensions.lenght_mm']} className="mt-2" />
+                    </div>
+
+                     <div className="grid gap-2">
+                        <Label htmlFor="Height_mm">Height in mm</Label>
+                        <Input
+                            id="Heigth_mm"
+                            placeholder="Height in mm"
+                            type="number"
+                            value={data.dimensions?.height_mm ?? ""}
+                            onChange={e => {
+                                const val = e.target.value === "" ? null : Number(e.target.value);
+                                setData(prev => ({
+                                    ...prev,
+                                    dimensions: {
+                                        ...(prev.dimensions || { length_mm: null, width_mm: null, height_mm: null }),
+                                        height_mm: val,
+                                    },
+                                }));
+                            }}
+                            disabled={processing}
+                        />
+                        <InputError message={(errors as any)['dimensions.height_mm']} className="mt-2" />
+                    </div>
+                   
                 </div>
 
                 <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-4">
@@ -679,19 +804,38 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
                         <InputError message={errors.price} className="mt-2" />
                     </div>
 
-                    {/* Promo Input */}
+                    {/* discount Input */}
                     <div className="grid gap-2">
-                        <Label htmlFor="promo">Promo</Label>
+                        <Label htmlFor="discount">discount</Label>
                         <Input
-                            id="promo"
-                            placeholder="Promo"
+                            id="discount"
+                            placeholder="discount"
                             type="number"
-                            value={data.promo !== null ? data.promo : ""}
-                            onChange={e => setData('promo', e.target.value === "" ? null : Number(e.target.value))}
+                            value={data.discount !== null ? data.discount : ""}
+                            onChange={e => setData('discount', e.target.value === "" ? null : Number(e.target.value))}
                             disabled={processing}
                         />
-                        <InputError message={errors.promo} className="mt-2" />
+                        <InputError message={errors.discount} className="mt-2" />
                     </div>
+
+                        {/* discount Input */}
+                    <div className="grid gap-2">
+                        <Label htmlFor="is_current">Current price?</Label>
+                          <Switch
+                      checked={data.is_current_price}
+                     
+                      onCheckedChange={(checked) => {
+                        setData('is_current_price', checked);
+                      }}
+                      disabled={processing}
+                    />
+                        
+                        <InputError message={errors.is_current_price} className="mt-2" />
+                    </div>
+
+
+
+
                 </div>
 
                 <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-4">
@@ -858,7 +1002,7 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
                     {allImagesForPreviews.length > 0 && (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-2">
                             {allImagesForPreviews.map((item) => ( // Iterate over ImagePreviewItem
-                                <div key={item.id} className="relative group"> {/* Use item.src as key */}
+                                <div key={item.id} className="relative group">
                                     <img
                                         src={item.src}
                                         alt={`Preview`}

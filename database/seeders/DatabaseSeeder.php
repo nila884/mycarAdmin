@@ -8,6 +8,7 @@ use App\Models\Car; // Ensure to import the VersionSeeder
 use App\Models\carModel;
 use App\Models\CarPrice;
 use App\Models\Category;
+use App\Models\Color;
 use App\Models\EnginePower;
 use App\Models\Feature;
 use App\Models\FuelType;
@@ -50,14 +51,19 @@ class DatabaseSeeder extends Seeder
         }
 
         $imagesCars = collect([
-            '/storage/cars/1765592641_693cce41e8bcd.jpg',
-            '/storage/cars/1765592641_693cce41e8ef1.jpg',
-            '/storage/cars/1765592641_693cce41e85ad.jpg',
-            '/storage/cars/1765592641_693cce41e953a.jpg',
-            '/storage/cars/1765592641_693cce41e8885.jpg',
-            '/storage/cars/1765592641_693cce41e9206.jpg',
-            '/storage/cars/1765592678_693cce6669d9e.jpg',
-            '/storage/cars/1765592678_693cce666988d.jpg',
+     '/storage/cars/1765592641_693cce41e85ad.jpg',
+'/storage/cars/1765592641_693cce41e953a.jpg',
+'/storage/cars/1765592641_693cce41e8885.jpg',
+'/storage/cars/1765592641_693cce41e9206.jpg',
+'/storage/cars/1765592678_693cce666988d.jpg',
+'/storage/cars/1765931485_6941f9dd04c1c.jpeg',
+'/storage/cars/1765931485_6941f9dd03432.jpeg',
+'/storage/cars/1765931485_6941f9dd04292.jpeg',
+'/storage/cars/1765931485_6941f9dd04590.jpeg',
+'/storage/cars/1765931485_6941f9dd04912.jpeg',
+'/storage/cars/1755117889_689cf94123792.jpg',
+
+
         ]);
         $logo = collect([
             '/storage/brand_logos/1765592745_ford.png',
@@ -72,8 +78,8 @@ class DatabaseSeeder extends Seeder
         $categories = Category::factory(5)->create();
         $fuelTypes = FuelType::factory(3)->create();
         $enginePowers = EnginePower::factory(10)->create();
-        $features = Feature::factory(20)->create();
-
+        $features = Feature::factory(40)->create();
+        $colors= Color::factory(5)->create();
         foreach ($brands as $brand) {
 
             carModel::factory(4)->create([
@@ -93,6 +99,9 @@ class DatabaseSeeder extends Seeder
         $fuelTypesIds = FuelType::pluck('id');
         $sellerIds = Seller::pluck('id');
         $versionIds = Version::pluck('id');
+        $colorsIds= Color::pluck('id');
+        
+
         $cars = Car::factory(150)->create([
 
             'category_id' => function (array $attributes) use ($categoryIds) {
@@ -107,12 +116,23 @@ class DatabaseSeeder extends Seeder
             'version_id' => function (array $attributes) use ($versionIds) {
                 return $versionIds->random();
             },
+            'exterior_color_id' => function(array $attributes) use ($colorsIds){
+                return $colorsIds->random();
+            },
+            'interior_color_id' => function(array $attributes) use ($colorsIds){
+                return $colorsIds->random();
+            },
         ]);
 
         foreach ($cars as $car) {
             // Create a CarPrice record for each car.
             CarPrice::factory()->create([
                 'car_id' => $car->id,
+                'is_current' => (true),
+            ]);
+            CarPrice::factory(2)->create([
+                'car_id' => $car->id,
+                'is_current' => (false),
             ]);
 
             Image::factory(1)->create([
@@ -124,7 +144,7 @@ class DatabaseSeeder extends Seeder
             ]);
 
             // Create multiple Image records for each car.
-            Image::factory(6)->create([
+            Image::factory(20)->create([
                 'car_id' => $car->id,
                 'image_path' => function (array $attributes) use ($imagesCars) {
                     return $imagesCars->random();

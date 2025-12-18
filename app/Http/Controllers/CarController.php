@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Classes\Services\CarService;
 use App\Http\Resources\CarListingResource;
 use App\Http\Resources\CarResource;
+use App\Http\Resources\CarResourceManagement;
 use App\Models\Brand;
 use App\Models\Car;
 use App\Models\CarModel;
 use App\Models\Category;
+use App\Models\Color;
 use App\Models\Feature;
 use App\Models\FuelType;
 use App\Models\Seller;
@@ -16,6 +18,8 @@ use App\Models\Version;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+
+use function Pest\Laravel\json;
 
 class CarController extends Controller
 {
@@ -29,13 +33,30 @@ class CarController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request )
     {
-        $cars = $this->carService->Index();
+    $cars = $this->carService->Index();
 
+    $cars->through(fn ($car) => new CarResourceManagement($car));
+
+    return Inertia::render('car/list', [
+        'cars' => $cars,
+        'filters' => $request->only(
+        'search',
+        'sort',
+        'direction',
+        'publication_status',
+        'car_selling_status',
+        'discounted',
+    ),
+    ]);
+    }
+
+    public function searchByBrand(){
+        $cars= $this->carService->searchByBrand();
         return Inertia::render('car/list', [
-            'cars' => $cars,
-        ]);
+            'cars' => $cars->through(fn($car)=> new CarResourceManagement(($car)) ),
+        ]); 
     }
 
     /**
@@ -51,7 +72,7 @@ class CarController extends Controller
         $fuelTypes = FuelType::all(['id', 'fuel_type']);
         $sellers = Seller::all(['id', 'seller_name']);
         $features = Feature::all(['id', 'feature_name']);
-
+        $colors= Color::all(['id','name','hex_code']);
         $versions = Version::with('carModel:id,model_name')->get()->map(function ($version) {
             return [
                 'id' => $version->id,
@@ -69,6 +90,7 @@ class CarController extends Controller
             'versions' => $versions,
             'sellers' => $sellers,
             'features' => $features,
+            'colors'=> $colors,
         ]);
     }
 
@@ -79,8 +101,7 @@ class CarController extends Controller
     {
 
         try {
-            $this->carService->Create($request);
-
+          $car=  $this->carService->Create($request);
             return redirect()->route('car.index')
                 ->with('success', 'Car created successfully!');
         } catch (ValidationException $e) {
@@ -100,8 +121,6 @@ class CarController extends Controller
         if (! $car) {
             abort(404);
         }
-
-        // You might render a 'car/show' page here if you have one
         return Inertia::render('car/show', ['car' => $car]);
     }
 
@@ -118,6 +137,7 @@ class CarController extends Controller
         $versions = Version::all(['id', 'version_name', 'car_model_id', 'version_year']);
         $sellers = Seller::all(['id', 'seller_name']);
         $features = Feature::all(['id', 'feature_name']);
+        $colors= Color::all(['id','name','hex_code']);
 
         // Fetch the car data including its relationships for pre-filling the form
         $carData = $this->carService->read($car->id);
@@ -127,7 +147,7 @@ class CarController extends Controller
         }
 
         return Inertia::render('car/create', [ // Render the same create form for editing
-            'car' => $carData, // Pass the car data to the frontend
+            'car' => CarResourceManagement::make($carData), // Pass the car data to the frontend
             'brands' => $brands,
             'carModels' => $carModels,
             'categories' => $categories,
@@ -135,6 +155,7 @@ class CarController extends Controller
             'versions' => $versions,
             'sellers' => $sellers,
             'features' => $features,
+            'colors' => $colors,
         ]);
     }
 
@@ -145,7 +166,6 @@ class CarController extends Controller
     {
         try {
             $this->carService->update($request, $car);
-
             return redirect()->route('car.index')
                 ->with('success', 'Car updated successfully!');
         } catch (ValidationException $e) {
@@ -329,9 +349,7 @@ class CarController extends Controller
     public function carsHome()
     {
         $query = Car::query();
-        // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
         $query->with(['version.carModel.brand', 'images',  'prices']);
-
         $cars = $query->take(10)->get();
         if ($cars->isEmpty()) {
             return response()->json(
@@ -341,8 +359,6 @@ class CarController extends Controller
 
                 ], 200);
         }
-
-        // Return a collection of CarResource instances.
         return CarListingResource::collection($cars);
 
     }
@@ -431,6 +447,25 @@ class CarController extends Controller
 
             ], 200
         );
+
+    }
+
+    public function getCarsBySellerId($sellerId)
+    {
+        $cars = Car::with(['version.carModel.brand', 'seller', 'images', 'prices'])
+            ->where('seller_id', $sellerId)
+            ->get();
+
+        if ($cars->isEmpty()) {
+            return response()->json(
+                [
+                    'message' => 'No cars found for the given seller.',
+                    'data' => [],
+                ], 200
+            );
+        }
+
+        return CarListingResource::collection($cars);
 
     }
 }

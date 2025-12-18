@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('port_id')->index();
             $table->foreign('port_id')->references('id')->on('ports')->onDelete('cascade');
-            $table->decimal('price', 10, 2);
+            $table->decimal('price_roro', 10, 2);
+            $table->decimal('price_container', 10, 2)->nullable();
             $table->boolean('is_current')->default(false);
             $table->timestamps();
         });

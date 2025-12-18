@@ -19,6 +19,11 @@ return new class extends Migration
     $table->decimal('discount', 10, 2)->nullable();
     $table->enum('discount_type', ['amount', 'percent'])->nullable();
     $table->boolean('is_current')->default(true);
+
+    $table->index(['car_id', 'is_current']);
+    $table->index(['is_current', 'discount']);
+    $table->index('price');
+
     $table->timestamps();
 });
     }

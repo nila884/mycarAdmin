@@ -22,16 +22,14 @@ return new class extends Migration
             $table->string('chassis_number');
             $table->year('registration_year')->nullable();
             $table->year('manufacture_year')->nullable();
-            $table->string('color');
-
             $table->string('image')->nullable();
             $table->unsignedInteger('weight');
             $table->boolean('status')->nullable();
             $table->enum('transmission', ['automatic', 'manual']);
-            $table->enum('streering', ['right', 'left']);
+            $table->enum('steering', ['right', 'left']);
             $table->enum('publication_status', ['published', 'pending', 'archived']);
-            $table->enum('car_sells_status', ['sold', 'selling', 'reserved']);
-            $table->unsignedInteger('steating_capacity');
+            $table->enum('car_selling_status', ['sold', 'selling', 'reserved']);
+            $table->unsignedInteger('seating_capacity');
             $table->string('engine_code')->nullable();
             $table->decimal('engine_size', 3, 1)->nullable();
             $table->string('model_code')->nullable();
@@ -45,6 +43,23 @@ return new class extends Migration
             $table->foreign('fuel_type_id')->references('id')->on('fuel_types')->onDelete('cascade');
             $table->foreign('seller_id')->references('id')->on('sellers')->onDelete('cascade');
             $table->foreign('version_id')->references('id')->on('versions')->onDelete('cascade');
+
+            $table->foreignId('exterior_color_id')
+                ->nullable()
+                ->constrained('colors')
+                ->nullOnDelete();
+
+            $table->foreignId('interior_color_id')
+                ->nullable()
+                ->constrained('colors')
+                ->nullOnDelete();
+
+
+                    $table->index('publication_status');
+                    $table->index('car_selling_status');
+                    $table->index('status');
+                    $table->index('created_at');
+
             $table->timestamps();
 
         });

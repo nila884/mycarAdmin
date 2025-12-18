@@ -1,131 +1,143 @@
-
-
 import {
   ColumnDef,
-  flexRender,
   getCoreRowModel,
   useReactTable,
-      SortingState,
-    getSortedRowModel,
-    getFilteredRowModel,
-     ColumnFiltersState,
-       VisibilityState,
+  SortingState,
+  flexRender,
 } from "@tanstack/react-table"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { router } from "@inertiajs/react"
 import React from "react"
-import { DataTablePagination } from "@/components/data-table-pagination"
 import { DataTableToolbar } from "@/components/data-table-toolbar"
+import { DataTablePagination } from "@/components/data-table-pagination"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { CarDetailData } from "@/lib/object"
 
-interface ServerPaginationData {
-    pageIndex: number;
-    pageSize: number;
-    pageCount: number;
-}
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[],
-  serverPagination: ServerPaginationData,
-  onServerPageChange: (page: number, pageSize: number) => void,
-}
-
-export function DataTable<TData, TValue>({
+export function DataTable({
   columns,
   data,
   serverPagination,
-  onServerPageChange
-}: DataTableProps<TData, TValue>) {
-    const [sorting, setSorting] = React.useState<SortingState>([])
-      const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-        const [columnVisibility, setColumnVisibility] =React.useState<VisibilityState>({})
-          const [rowSelection, setRowSelection] = React.useState({})
-     const paginationState = {
-        pageIndex: serverPagination.pageIndex,
-        pageSize: serverPagination.pageSize,
-    };
-  const table = useReactTable({
+  onServerPageChange,
+  filters,
+}: {
+  columns: ColumnDef<CarDetailData>[]
+  data: CarDetailData[]
+  serverPagination: {
+    pageIndex: number
+    pageSize: number
+    pageCount: number
+  }
+  onServerPageChange: (page: number, pageSize: number) => void
+  filters: any
+})  {
+  const [sorting, setSorting] = React.useState<SortingState>(
+    filters?.sort
+      ? [{ id: filters.sort, desc: filters.direction === "desc" }]
+      : []
+  )
 
+  const table = useReactTable({
     data,
     columns,
+
     getCoreRowModel: getCoreRowModel(),
-         onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-        onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-     onColumnVisibilityChange: setColumnVisibility,
-      onRowSelectionChange: setRowSelection,
-      pageCount: serverPagination.pageCount,
-      onPaginationChange: updater => {
-        if (typeof updater === 'function') {
-            const newPagination = updater(paginationState);
-            onServerPageChange(newPagination.pageIndex + 1, newPagination.pageSize);
-        }
-    },
+
+    manualPagination: true,
+    manualSorting: true,
+    enableMultiSort: true,
+
+    pageCount: serverPagination.pageCount,
+
+    onSortingChange: updater => {
+  const nextSorting =
+    typeof updater === "function" ? updater(sorting) : updater
+
+  setSorting(nextSorting)
+
+  const url = new URL(window.location.href)
+  const params = Object.fromEntries(url.searchParams.entries())
+
+  if (nextSorting.length) {
+    params.sort = JSON.stringify(
+      nextSorting.map(s => ({
+        id: s.id,
+        desc: s.desc,
+      }))
+    )
+    params.page = "1"
+  } else {
+    delete params.sort
+  }
+
+  router.get(route("car.index"), params, {
+    preserveState: true,
+    preserveScroll: true,
+    replace: true,
+  })
+},
+
+onPaginationChange: (updater) => {
+  const next =
+    typeof updater === "function"
+      ? updater({
+          pageIndex: serverPagination.pageIndex,
+          pageSize: serverPagination.pageSize,
+        })
+      : updater
+
+  onServerPageChange(next.pageIndex + 1, next.pageSize)
+},
+
     state: {
       sorting,
-        columnFilters,
-        columnVisibility,
-        rowSelection,
-        pagination: paginationState,
+      pagination: {
+        pageIndex: serverPagination.pageIndex,
+        pageSize: serverPagination.pageSize,
+      },
     },
-
   })
 
   return (
-    <div className="mx-2">
-    <DataTableToolbar table={table} />
-        <div className="rounded-md border my-1 ">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                )
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+    <div>
+      <DataTableToolbar table={table} filters={filters} />
+
+      <div className="rounded-md border my-1">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map(headerGroup => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+               <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </TableHead>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
- <DataTablePagination table={table} />
+            ))}
+          </TableHeader>
+
+          <TableBody>
+            {table.getRowModel().rows.map(row => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map(cell => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <DataTablePagination table={table} />
     </div>
   )
 }

@@ -2,85 +2,142 @@
 
 namespace App\Classes\Services;
 
+use App\Http\Resources\CarResourceManagement;
 use App\Models\Car;
 // This model is for the pivot table directly, but Eloquent's sync handles it
 use App\Models\CarPrice;
-use App\Models\Feature; // Import CarPrice model
 use App\Models\Image;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule; // Import Rule class for unique validation
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator as ValidatorReturn;
 
 class CarService
 {
-    public function Index()
-    {
-
-        // Load relationships for display in the frontend
-        $cars = Car::with([
+  public function Index()
+{
+    $query = Car::query()
+        ->select('cars.*') // ✅ prevents DISTINCT issues
+        ->with([
             'version.carModel.brand',
             'category',
+            'exteriorColor',
+            'interiorColor',
             'fuelType',
             'seller',
             'features',
-            'images' => function ($query) {
-                $query->where('is_main', true)->select('car_id', 'image_path'); // Eager load only the main image, selecting specific columns
-            },
-            'prices' => function ($query) {
-                $query->where('is_current', true); // Eager load only the current price
-            },
-        ])->paginate(15);
-        // Transform the collection for frontend consumption
-        $cars->getCollection()->transform(function ($car) {
-            return [
-                'id' => $car->id,
-                'brand_name' => $car->version->carModel->brand->brand_name ?? 'N/A', // Access nested relationships
-                'model_name' => $car->version->carModel->model_name ?? 'N/A',
-                'category' => $car->category->category_name ?? 'N/A', // Changed to 'category' for frontend consistency
-                'category_id' => $car->category->id ?? 'N/A',
-                'fuel_type' => $car->fuelType->fuel_type ?? 'N/A', // Changed to 'fuel_type'
-                'version_name' => $car->version->version_name ?? 'N/A',
-                'seller_name' => $car->seller->seller_name ?? 'N/A',
-                'mileage' => $car->mileage,
-                'chassis_number' => $car->chassis_number,
-                'registration_year' => $car->registration_year,
-                'manufacture_year' => $car->manufacture_year,
-                'price' => (float) ($car->prices->first()->price ?? $car->price), // Get current price from car_prices table, fallback to car.price
-                'promo' => (float) ($car->prices->first()->discount ?? $car->promo ?? 0), // Get discount from car_prices, fallback to car.promo
-                'color' => $car->color,
-                'weight' => $car->weight,
-                'status' => (bool) $car->status, // Cast to boolean for frontend
-                'transmission' => $car->transmission,
-                'streering' => $car->streering,
-                'steating_capacity' => $car->steating_capacity,
-                'engine_code' => $car->engine_code,
-                'engine_size' => $car->engine_size,
-                'model_code' => $car->model_code,
-                'wheel_driver' => $car->wheel_driver,
-                'm_3' => $car->m_3,
-                'doors' => $car->doors,
-                'dimensions' => $car->dimensions,
-                'location' => $car->location,
-                'image_main' => $car->images->first()->image_path ?? '/storage/no-image.png', // Get image main paths
-                'publication_status' => $car->publication_status ?? 'pending',
-                'car_sells_status' => $car->car_sells_status ?? 'selling',
-                'features' => $car->features->pluck('id')->toArray(), // Get feature IDs
-                'created_at' => $car->created_at->format('Y-m-d H:i:s'),
-                'updated_at' => $car->updated_at->format('Y-m-d H:i:s'),
-            ];
-        });
+            'images',
+            'prices' => fn ($q) => $q->where('is_current', true),
+        ])
+        ->leftJoin('versions', 'cars.version_id', '=', 'versions.id')
+        ->leftJoin('car_models', 'versions.car_model_id', '=', 'car_models.id')
+        ->leftJoin('brands', 'car_models.brand_id', '=', 'brands.id')
 
-        return $cars;
+        ->leftJoinSub(
+            CarPrice::select('car_id', 'price')
+                ->where('is_current', true),
+            'current_prices',
+            'current_prices.car_id',
+            '=',
+            'cars.id'
+        );
+
+
+    if ($search = request('search')) {
+        $query->where('brands.brand_name', 'like', "%{$search}%")
+        ->orWhereHas('version.carModel', fn ($m) =>
+                $m->where('model_name', 'like', "%{$search}%")
+            );
     }
+
+    if ($publicationStatus = request('publication_status')) {
+        $query->where('cars.publication_status', $publicationStatus);
+    }
+
+    if ($sellingStatus = request('car_selling_status')) {
+        $query->where('cars.car_selling_status', $sellingStatus);
+    }
+
+    if ($status = request('status')) {
+        $query->where('cars.status', $status);
+    }
+
+        if (request('discounted')) {
+            $query->whereExists(function ($q) {
+                $q->selectRaw(1)
+                ->from('car_prices')
+                ->whereColumn('car_prices.car_id', 'cars.id')
+                ->where('car_prices.is_current', true)
+                ->whereNotNull('car_prices.discount')
+                ->where('car_prices.discount', '>', 0);
+            });
+        }
+
+    if ($sorts = request('sort')) {
+        $sorts = json_decode($sorts, true) ?? [];
+
+        foreach ($sorts as $sort) {
+            $direction = $sort['desc'] ? 'desc' : 'asc';
+
+            match ($sort['id']) {
+                'brand' =>
+                    $query->orderBy('brands.brand_name', $direction),
+
+                'model' =>
+                    $query->orderBy('car_models.model_name', $direction),
+
+                'price' =>
+                    $query->orderBy('current_prices.price', $direction),
+
+                'status' =>
+                    $query->orderBy('cars.status', $direction),
+
+                'publication_status' =>
+                    $query->orderBy('cars.publication_status', $direction),
+
+                'selling_status' =>
+                    $query->orderBy('cars.car_selling_status', $direction),
+
+                'created_at' =>
+                    $query->orderBy('cars.created_at', $direction),
+
+                'updated_at' =>
+                    $query->orderBy('cars.updated_at', $direction),
+
+                default => null,
+            };
+        }
+    } else {
+        $query->orderByDesc('cars.created_at');
+    }
+
+    return $query
+        ->paginate(15)
+        ->withQueryString();
+}
+
+
+
+
+    public function searchByBrand(){
+        $query = Car::query();
+        $query->with(['version.carModel.brand', 'category', 'fuelType',  'seller', 'images', 'features', 'prices']);
+        $query->whereHas('version.carModel.brand', function ($q) {
+            $q->where('brand_name', 'like', '%' . request('search') . '%');
+        });
+        return $query->paginate(15);
+    }
+
 
     public function Create(Request $request)
     {
         $validator = $this->DataValidation($request, 'post');
-
+        // dd($validator->errors()->getMessages());
         if ($validator->fails()) {
             throw new \Illuminate\Validation\ValidationException($validator);
         }
@@ -90,21 +147,23 @@ class CarService
         try {
             // Map frontend form field names to backend database column names
             $car = Car::create([
-
+                 'car_model_id'=> $request->car_model_id,
+                'car_brand_id'=> $request->car_brand_id,
                 'category_id' => $request->category_id,
                 'fuel_type_id' => $request->fuel_type_id,
                 'version_id' => $request->version_id,
-                'seller_id' => $request->seller_id ?? 1, // Use provided seller_id or default
+                'seller_id' => $request->seller_id,
                 'mileage' => $request->mileage,
                 'chassis_number' => trim(htmlspecialchars($request->chassis_number)),
                 'registration_year' => $request->registration_year,
                 'manufacture_year' => $request->manufacture_year,
-                'color' => trim(htmlspecialchars($request->color)),
+                'interior_color_id' => $request->interior_color_id,
+                'exterior_color_id' => $request->exterior_color_id,
                 'weight' => $request->weight,
-                'status' => $request->boolean('status'), // Ensure boolean
+                'status' => $request->boolean('status'),
                 'transmission' => trim(htmlspecialchars($request->transmission)),
-                'streering' => trim(htmlspecialchars($request->streering)),
-                'steating_capacity' => $request->steating_capacity,
+                'steering' => trim(htmlspecialchars($request->steering)),
+                'seating_capacity' => $request->seating_capacity,
                 'engine_code' => trim(htmlspecialchars($request->engine_code)),
                 'engine_size' => $request->engine_size,
                 'model_code' => trim(htmlspecialchars($request->model_code)),
@@ -114,7 +173,7 @@ class CarService
                 'dimensions' => $request->dimensions, // Assuming dimensions might be JSON string
                 'location' => trim(htmlspecialchars($request->location)),
                 'publication_status' => trim(htmlspecialchars($request->publication_status)),
-                'car_sells_status' => trim(htmlspecialchars($request->car_sells_status)),
+                'car_selling_status' => trim(htmlspecialchars($request->car_selling_status)),
             ]);
 
             // --- Handle Car Price ---
@@ -131,7 +190,6 @@ class CarService
                 $imageFile = $request->file('image');
                 $imageName = time().'_'.uniqid().'.'.$imageFile->getClientOriginalExtension();
                 $path = $imageFile->storeAs('cars', $imageName, 'public');
-
                 $car->images()->create([
                     'image_path' => Storage::url($path),
                     'is_main' => true, // Mark as main image
@@ -174,71 +232,28 @@ class CarService
     public function read(int $id)
     {
 
-        $car = Car::with(['version.carModel.brand', 'category', 'fuelType', 'seller', 'features', 'images', 'prices' => function ($query) {
-            $query->where('is_current', true);
-        }])->find($id);
-
+        $car = Car::with(['version.carModel.brand', 'category','exteriorColor','interiorColor', 'fuelType', 'seller', 'features', 'images','prices' => function ($query) {
+            $query->where('is_current', true);}])->find($id);
         if (! $car) {
             return null;
         }
-        $transformedCar = [
-            'id' => $car->id,
-            'brand_name' => $car->version->carModel->brand->brand_name ?? 'N/A',
-            'car_brand_id' => $car->version->carModel->brand->id,
-            'version_id' => $car->version->id,
-            'seller_id' => $car->seller->id,
-            'fuel_type_id' => $car->fuelType->id,
-            'model_name' => $car->version->carModel->model_name ?? 'N/A',
-            'category' => $car->category->category_name ?? 'N/A',
-            'category_id' => $car->category->id ?? 'N/A',
-            'fuel_type' => $car->fuelType->fuel_type ?? 'N/A',
-            'version_name' => $car->version->version_name ?? 'N/A',
-            'seller_name' => $car->seller->seller_name ?? 'N/A',
-            'mileage' => $car->mileage,
-            'chassis_number' => $car->chassis_number,
-            'registration_year' => $car->registration_year,
-            'manufacture_year' => $car->manufacture_year,
-            'price' => (float) ($car->prices->first()->price ?? $car->price),
-            'promo' => (float) ($car->prices->first()->discount ?? $car->promo ?? 0),
-            'color' => $car->color,
-            'weight' => $car->weight,
-            'status' => (bool) $car->status, // Cast to boolean for frontend
-            'transmission' => $car->transmission,
-            'streering' => $car->streering,
-            'steating_capacity' => $car->steating_capacity,
-            'engine_code' => $car->engine_code,
-            'engine_size' => $car->engine_size,
-            'model_code' => $car->model_code,
-            'wheel_driver' => $car->wheel_driver,
-            'm_3' => $car->m_3,
-            'doors' => $car->doors,
-            'dimensions' => $car->dimensions,
-            'location' => $car->location,
-            'publication_status' => $car->publication_status ?? 'pending',
-            'car_sells_status' => $car->car_sells_status ?? 'selling',
-            'features' => $car->features,
-            'created_at' => $car->created_at->format('Y-m-d H:i:s'),
-            'updated_at' => $car->updated_at->format('Y-m-d H:i:s'),
-            'image_url' => $car->images->where('is_main', true)->first()->image_path ?? null, // Get main image URL
-            'images' => $car->images->where('is_main', false)->pluck('id', 'image_path')->toArray(), // Get additional image URLs
-            'existing_images' => $car->images->where('is_main', false)->values(),
-        ];
-
-        return $transformedCar;
+        return CarResourceManagement::make($car);
     }
 
     public function update(Request $request, Car $car): Car
     {
+       
         $validator = $this->DataValidation($request, 'patch', $car);
         if ($validator->fails()) {
-            throw new \Illuminate\Validation\ValidationException($validator);
+            throw new ValidationException($validator);
         }
-
-        DB::beginTransaction(); // Start a transaction
-
+           
+        DB::beginTransaction();
         try {
-            // Map frontend form field names to backend database column names
+
             $car->update([
+
+
                 'category_id' => $request->category_id,
                 'fuel_type_id' => $request->fuel_type_id,
                 'version_id' => $request->version_id,
@@ -247,12 +262,13 @@ class CarService
                 'chassis_number' => trim(htmlspecialchars($request->chassis_number)),
                 'registration_year' => $request->registration_year,
                 'manufacture_year' => $request->manufacture_year,
-                'color' => trim(htmlspecialchars($request->color)),
+                'exterior_color_id' => $request->exterior_color_id,
+                'interior_color_id' => $request->interior_color_id,
                 'weight' => $request->weight,
                 'status' => $request->boolean('status'),
                 'transmission' => trim(htmlspecialchars($request->transmission)),
-                'streering' => trim(htmlspecialchars($request->streering)),
-                'steating_capacity' => $request->steating_capacity,
+                'steering' => trim(htmlspecialchars($request->steering)),
+                'seating_capacity' => $request->seating_capacity,
                 'engine_code' => trim(htmlspecialchars($request->engine_code)),
                 'engine_size' => $request->engine_size,
                 'model_code' => trim(htmlspecialchars($request->model_code)),
@@ -262,10 +278,10 @@ class CarService
                 'dimensions' => $request->dimensions, // Assuming dimensions might be JSON string
                 'location' => trim(htmlspecialchars($request->location)),
                 'publication_status' => trim(htmlspecialchars($request->publication_status)),
-                'car_sells_status' => trim(htmlspecialchars($request->car_sells_status)),
+                'car_selling_status' => trim(htmlspecialchars($request->car_selling_status)),
             ]);
 
-            // --- Handle Car Price Update ---
+        
             // Deactivate current price
             $car->prices()->update(['is_current' => false]);
             // Create new current price
@@ -277,17 +293,13 @@ class CarService
                 'is_current' => true,
             ]);
 
-            // --- Handle Main Image Update ---
-            // If a new main image is uploaded, delete the old main image and save the new one
             if ($request->hasFile('image')) {
-                // Delete old main image from storage and DB
                 $oldMainImage = $car->images()->where('is_main', true)->first();
                 if ($oldMainImage) {
                     Storage::disk('public')->delete(str_replace('/storage/', '', $oldMainImage->image_path));
                     $oldMainImage->delete();
                 }
 
-                // Upload new main image
                 $imageFile = $request->file('image');
                 $imageName = time().'_'.uniqid().'.'.$imageFile->getClientOriginalExtension();
                 $path = $imageFile->storeAs('cars', $imageName, 'public');
@@ -307,7 +319,7 @@ class CarService
                 foreach ($request->input('images_to_delete') as $imageIdToDelete) {
                     $image = Image::where('id', $imageIdToDelete)
                         ->where('car_id', $car->id)
-                        ->where('is_main', false) // Ensure we only delete additional images
+                        ->where('is_main', false) 
                         ->first();
                     if ($image) {
                         Storage::disk('public')->delete(str_replace('/storage/', '', $image->image_path));
@@ -316,14 +328,6 @@ class CarService
                 }
             }
 
-            // if ($request->hasFile('images')) { // Consider a separate field for images to delete
-            //     // Delete all existing non-main images for this car
-            //     $existingAdditionalImages = $car->images()->where('is_main', false)->get();
-            //     foreach ($existingAdditionalImages as $image) {
-            //         Storage::disk('public')->delete(str_replace('/storage/', '', $image->image_path));
-            //         $image->delete();
-            //     }
-            // }
             // Upload new additional images
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $imageFile) {
@@ -351,8 +355,9 @@ class CarService
 
             return $car;
         } catch (Exception $e) {
-            DB::rollBack(); // Rollback on error
-            throw $e; // Re-throw the exception
+           
+            DB::rollBack(); 
+            throw $e; 
         }
     }
 
@@ -385,13 +390,16 @@ class CarService
 
     public function DataValidation(Request $request, string $method, Car|bool|null $car = null): ?ValidatorReturn
     {
+        
         $currentYear = date('Y');
         $rules = [
             'category_id' => ['required', 'exists:categories,id'],
             'fuel_type_id' => ['required', 'exists:fuel_types,id'],
             'version_id' => ['required', 'exists:versions,id'],
             'car_brand_id' => ['required', 'exists:brands,id'],
-            'seller_id' => ['required', 'exists:sellers,id'], // Assuming seller_id is always sent
+            'seller_id' => ['required', 'exists:sellers,id'], 
+            'interior_color'=> ['nullable','exists:colors,id'],
+            'exterior_color'=> ['nullable','exists:colors,id'],
             'mileage' => ['required', 'numeric', 'min:0'],
             'chassis_number' => ['required', 'string', 'max:255', 'unique:cars,chassis_number'],
             'registration_year' => [
@@ -410,14 +418,13 @@ class CarService
                 },
             ],
             'manufacture_year' => ['nullable', 'numeric', 'min:1900', 'digits:4', 'max:'.$currentYear],
-            'price' => ['required', 'numeric', 'min:0'], // Price is now handled in car_prices table
-            'promo' => ['nullable', 'numeric', 'min:0'], // Promo is now handled as discount in car_prices
-            'color' => ['required', 'string', 'max:255'],
+            'price' => ['required', 'numeric', 'min:0'], 
+            'promo' => ['nullable', 'numeric', 'min:0'],
             'weight' => ['nullable', 'numeric', 'min:0', 'max:10000'],
-            'status' => ['nullable', 'boolean'], // Frontend sends true/false based on 'new'/'used'
+            'status' => ['nullable', 'boolean'], 
             'transmission' => ['required', 'string', 'max:255', 'in:automatic,manual'],
-            'streering' => ['required', 'in:right,left'],
-            'steating_capacity' => ['required', 'numeric', 'min:1', 'max:100'],
+            'steering' => ['required', 'in:right,left'],
+            'seating_capacity' => ['required', 'numeric', 'min:1', 'max:100'],
             'engine_code' => ['nullable', 'string', 'max:255'],
             'engine_size' => ['nullable', 'numeric', 'min:0', 'max:10000'],
             'model_code' => ['nullable', 'string', 'max:255'],
@@ -426,18 +433,18 @@ class CarService
             'doors' => ['nullable', 'integer', 'min:1', 'max:10'],
             'location' => ['nullable', 'string', 'max:255'],
             'publication_status' => ['required', 'in:published,pending,archived'],
-            'car_sells_status' => ['required', 'in:sold,selling,reserved'], // New field for selling status
-
-            // Main image
-            'image' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:1024'], // Single main image, 1MB max
-
-            // Additional images
-            'images' => ['nullable', 'array', 'max:6'], // Array of images, max 6 files
-            'images.*' => ['image', 'mimes:png,jpg,jpeg', 'max:2048'], // Each image max 2MB
-            'images_to_delete' => ['nullable', 'array'], // Array of image IDs to delete
-            'images_to_delete.*' => ['integer', 'exists:images,id'], // Each element must be an integer and exist in images table
+            'car_selling_status' => ['required', 'in:sold,selling,reserved'], 
+            'image' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:1024'], 
+            'images' => ['nullable', 'array', 'max:6'], 
+            'images.*' => ['image', 'mimes:png,jpg,jpeg', 'max:2048'],
+            'images_to_delete' => ['nullable', 'array'], 
+            'images_to_delete.*' => ['integer', 'exists:images,id'], 
 
             'features' => ['nullable', 'array'],
+              'dimensions'           => 'nullable|array',
+                'dimensions.width_mm'  => 'nullable|integer|min:1',
+                'dimensions.height_mm' => 'nullable|integer|min:1',
+                'dimensions.length_mm' => 'nullable|integer|min:1',
         ];
 
         switch (strtolower($method)) {

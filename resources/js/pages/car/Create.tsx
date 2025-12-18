@@ -3,13 +3,13 @@ import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import CreateCarForm from "@/components/car/create-form";
-import { Car,Brand,Feature,FuelType,Seller,CarModel,Category, Version, CarDetail } from "@/lib/object"; // Import Car type
+import { Brand,Feature,FuelType,Seller,CarModel,Category, Version,  Color, CarDetailData } from "@/lib/object"; // Import Car type
 
 
 
 
 interface CreateCarPageProps {
-  car?: CarDetail; // Optional car prop for editing
+  car?: CarDetailData; // Optional car prop for editing
   brands: Brand[];
   carModels: CarModel[];
   categories: Category[];
@@ -17,15 +17,16 @@ interface CreateCarPageProps {
   versions: Version[];
   sellers: Seller[];
   features: Feature[];
+  colors: Color[];
 }
 
-export default function Create({ car, brands, carModels, categories, fuelTypes, versions, sellers, features }: CreateCarPageProps) {
+export default function Create({ car, brands, carModels, categories, fuelTypes, versions, sellers, features,colors }: CreateCarPageProps) {
 
 
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
-      title: car ? `Edit Car: ${car.brand_name} ${car.model_name}` : 'Add New Car',
+      title: car ? `Edit Car: ${car.version.car_model.brand.brand_name} ${car.version.car_model.model_name}` : 'Add New Car',
       href: car ? route('car.edit', car.id) : route('car.create'),
     },
   ];
@@ -42,6 +43,7 @@ export default function Create({ car, brands, carModels, categories, fuelTypes, 
         versions={versions}
         sellers={sellers}
         features={features}
+        colors={colors}
       />
     </AppLayout>
   );

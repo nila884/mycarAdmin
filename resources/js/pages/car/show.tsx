@@ -2,18 +2,21 @@
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import {  CarDetail} from "@/lib/object"; // Import Car type
+import {  CarDetailData} from "@/lib/object"; // Import Car type
 import CarShowDetails from "@/components/car/car-show-details";
 
 
 
 
 interface CreateCarPageProps {
-  car?: CarDetail; // Optional car prop for editing
+  car: CarDetailData
 }
 
 export default function Show({ car}: CreateCarPageProps) {
 
+console.log(car);
+
+  
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: "car Details",
@@ -25,7 +28,7 @@ export default function Show({ car}: CreateCarPageProps) {
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={"Car details"} />
       <CarShowDetails
-        car={car as CarDetail}
+        car={car}
       />
     </AppLayout>
   );

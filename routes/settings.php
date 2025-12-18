@@ -1,20 +1,20 @@
 <?php
 
+use App\Http\Controllers\BrandController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ColorController;
+use App\Http\Controllers\CountryController;
+use App\Http\Controllers\FeatureController;
+use App\Http\Controllers\FuelController;
+use App\Http\Controllers\ModelController;
+use App\Http\Controllers\PortController;
+use App\Http\Controllers\SellerController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\CountryController;
-use App\Http\Controllers\PortController;
 use App\Http\Controllers\ShippingCostController;
-use App\Http\Controllers\FuelController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\BrandController;
-use App\Http\Controllers\ModelController;
 use App\Http\Controllers\VersionController;
-use App\Http\Controllers\FeatureController;
-use App\Http\Controllers\SellerController;
+use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
 
 Route::middleware('auth')->group(function () {
     Route::redirect('settings', 'settings/profile');
@@ -29,7 +29,6 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/appearance', function () {
         return Inertia::render('settings/appearance');
     })->name('appearance');
-
 
     Route::post('car/settings/category', [CategoryController::class, 'store'])->name('carcategory.store');
     Route::patch('/car/settings/category/{category}', [CategoryController::class, 'update'])->name('carcategory.update');
@@ -66,7 +65,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('car/settings/seller/{seller}', [SellerController::class, 'update'])->name('carseller.update');
     Route::delete('car/settings/seller/{seller}', [SellerController::class, 'destroy'])->name('carseller.destroy');
 
- Route::get('shipping/countries/list', [CountryController::class, 'index'])->name('country.index');
+    Route::get('shipping/countries/list', [CountryController::class, 'index'])->name('country.index');
     Route::post('shipping/countries', [CountryController::class, 'store'])->name('country.store');
     Route::patch('shipping/countries/{country}', [CountryController::class, 'update'])->name('country.update');
     Route::delete('shipping/countries/{country}', [CountryController::class, 'destroy'])->name('country.destroy');
@@ -80,5 +79,9 @@ Route::middleware('auth')->group(function () {
     Route::post('shipping/prices', [ShippingCostController::class, 'store'])->name('shipping.store');
     Route::patch('shipping/prices/{shippingCost}', [ShippingCostController::class, 'update'])->name('shipping.update');
     Route::delete('shipping/prices/{shippingCost}', [ShippingCostController::class, 'destroy'])->name('shipping.destroy');
-   
+
+    Route::get('car/settings/color', [ColorController::class, 'index'])->name('color.index');
+    Route::post('car/settings/color', [ColorController::class, 'store'])->name('color.store');
+    Route::patch('car/settings/color/{color}', [ColorController::class, 'update'])->name('color.update');
+    Route::delete('car/settings/color/{color}', [ColorController::class, 'destroy'])->name('color.destroy');
 });

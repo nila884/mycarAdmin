@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Inertia\Inertia;
+use App\Classes\Services\SellerService;
+use App\Http\Resources\SellerResource;
 use App\Models\Seller;
-use App\Classes\Services\SellerService; // Import your service class
-use Illuminate\Validation\ValidationException; // Important for handling validation errors from service
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException; // Import your service class
+use Inertia\Inertia; // Important for handling validation errors from service
 
 class SellerController extends Controller
 {
@@ -47,11 +48,11 @@ class SellerController extends Controller
 
             // 3. Redirect back or to an index page with a success message
             return redirect()->route('carseller.index') // Assuming 'carseller.index' is your route name
-                             ->with('success', 'Seller created successfully!');
+                ->with('success', 'Seller created successfully!');
         } catch (\Exception $e) {
             // Handle any other exceptions during creation
-            Log::error("Error creating seller: " . $e->getMessage()); // Log the error
-          
+            Log::error('Error creating seller: '.$e->getMessage()); // Log the error
+
             return back()->withErrors(['general' => 'Failed to create seller. Please try again.']);
         }
     }
@@ -75,10 +76,11 @@ class SellerController extends Controller
 
             // 3. Redirect back or to an index page with a success message
             return redirect()->route('carseller.index')
-                             ->with('success', 'Seller updated successfully!');
+                ->with('success', 'Seller updated successfully!');
         } catch (\Exception $e) {
             // Handle any other exceptions during update
-            Log::error("Error updating seller: " . $e->getMessage()); // Log the error
+            Log::error('Error updating seller: '.$e->getMessage()); // Log the error
+
             return back()->withErrors(['general' => 'Failed to update seller. Please try again.']);
         }
     }
@@ -90,11 +92,40 @@ class SellerController extends Controller
     {
         try {
             $this->sellerService->Delete($seller);
+
             return redirect()->route('carseller.index')
-                             ->with('success', 'Seller deleted successfully!');
+                ->with('success', 'Seller deleted successfully!');
         } catch (\Exception $e) {
-            Log::error("Error deleting seller: " . $e->getMessage()); // Log the error
+            Log::error('Error deleting seller: '.$e->getMessage()); // Log the error
+
             return back()->withErrors(['general' => 'Failed to delete seller. Please try again.']);
         }
+    }
+
+    /**
+     * Display the details of a specific car.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Resources\Json\JsonResource
+     */
+    public function apiSellerProfile($id)
+    {
+
+        $dbSeller = Seller::with(['user'])->findOrFail($id);
+
+        if (! $dbSeller) {
+            return response()->json(
+                [
+                    'message' => 'Seller not found',
+                ], 404
+            );
+        } else {
+            return response()->json(
+                [
+                    'seller' => SellerResource::make($dbSeller),
+                ]
+            );
+        }
+
     }
 }

@@ -16,12 +16,9 @@ class CarResource extends JsonResource
     {
         return [
             'id' => $this->id,
-
             'location' => $this->location,
-            'status' => $this->status,
             'image_main' => new ImageResource($this->whenLoaded('images')->firstWhere('is_main', true)),
             'price' => new CarPriceResource($this->whenLoaded('prices')->firstWhere('is_current', true)),
-
             'spect' => [
                 'engine_code' => $this->engine_code,
                 'engine_size' => $this->engine_size,
@@ -38,6 +35,7 @@ class CarResource extends JsonResource
                 'steering' => $this->streering,
                 'seating_capacity' => $this->steating_capacity,
                 'doors' => $this->doors,
+                'dimensions' => $this->dimensions,
             ],
             'category' => CategoryResource::make($this->whenLoaded('category')),
             'fuel_type' => FuelTypeResource::make($this->whenLoaded('fuelType')),

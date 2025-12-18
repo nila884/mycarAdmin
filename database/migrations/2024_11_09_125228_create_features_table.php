@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('feature_name');
             $table->string('description');
+            $table->boolean('is_active')->default(true);
+            $table->boolean('is_main')->default(false);
             $table->string('icon')->nullable();
             $table->timestamps();
         });

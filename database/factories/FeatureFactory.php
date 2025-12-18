@@ -86,6 +86,7 @@ class FeatureFactory extends Factory
 
             'feature_name' => $features[array_rand($features)]['feature_name'],
             'description' => $features[array_rand($features)]['description'],
+            'is_main' => $this->faker->boolean(30),
             'icon' => function (array $attributes) use ($featuresIcon) {
                 return $featuresIcon->random();
             },

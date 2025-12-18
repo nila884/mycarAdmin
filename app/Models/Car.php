@@ -11,7 +11,6 @@ class Car extends Model
 
     protected $fillable = [
         'id',
-
         'category_id',
         'fuel_type_id',
         'version_id',
@@ -20,12 +19,13 @@ class Car extends Model
         'chassis_number',
         'registration_year',
         'manufacture_year',
-        'color',
+        'car_selling_status',
         'weight',
         'status',
         'transmission',
-        'streering',
-        'steating_capacity',
+        'steering',
+        'seating_capacity',
+        'publication_status',
         'engine_code',
         'engine_size',
         'model_code',
@@ -33,6 +33,19 @@ class Car extends Model
         'm_3',
         'doors',
         'location',
+        'dimensions',
+        'exterior_color_id',
+        'interior_color_id'
+
+
+    ];
+
+    /**
+     * @var array
+     */
+    protected $casts = [
+
+        'dimensions' => 'array',
     ];
 
     public function category()
@@ -83,5 +96,15 @@ class Car extends Model
     public function imageMain()
     {
         return $this->hasOne(Image::class)->where('is_main', true);
+    }
+
+    public function interiorColor()
+    {
+        return $this->belongsTo(Color::class);
+    }
+
+    public function exteriorColor()
+    {
+        return $this->belongsTo(Color::class);
     }
 }

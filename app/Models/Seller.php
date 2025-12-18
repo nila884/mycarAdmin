@@ -17,6 +17,7 @@ class Seller extends Model
         'address',
         'country',
         'avatar',
+        'user',
     ];
 
     public function user()

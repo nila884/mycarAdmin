@@ -25,9 +25,10 @@ class SellerFactory extends Factory
     public function definition()
     {
         return [
-
+            'seller_name' => $this->faker->name(),
             'phone' => $this->faker->phoneNumber(),
             'description' => $this->faker->paragraph(),
+
             'address' => $this->faker->address(),
             'country' => $this->faker->country(),
             'avatar' => 'public/storage/cars/avatar.webp',
