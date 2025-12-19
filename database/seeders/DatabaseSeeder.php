@@ -102,7 +102,7 @@ class DatabaseSeeder extends Seeder
         $colorsIds= Color::pluck('id');
         
 
-        $cars = Car::factory(150)->create([
+        $cars = Car::factory(4000)->create([
 
             'category_id' => function (array $attributes) use ($categoryIds) {
                 return $categoryIds->random();

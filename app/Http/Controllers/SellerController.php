@@ -50,8 +50,7 @@ class SellerController extends Controller
             return redirect()->route('carseller.index') // Assuming 'carseller.index' is your route name
                 ->with('success', 'Seller created successfully!');
         } catch (\Exception $e) {
-            // Handle any other exceptions during creation
-            Log::error('Error creating seller: '.$e->getMessage()); // Log the error
+          
 
             return back()->withErrors(['general' => 'Failed to create seller. Please try again.']);
         }
@@ -78,8 +77,6 @@ class SellerController extends Controller
             return redirect()->route('carseller.index')
                 ->with('success', 'Seller updated successfully!');
         } catch (\Exception $e) {
-            // Handle any other exceptions during update
-            Log::error('Error updating seller: '.$e->getMessage()); // Log the error
 
             return back()->withErrors(['general' => 'Failed to update seller. Please try again.']);
         }
@@ -96,7 +93,6 @@ class SellerController extends Controller
             return redirect()->route('carseller.index')
                 ->with('success', 'Seller deleted successfully!');
         } catch (\Exception $e) {
-            Log::error('Error deleting seller: '.$e->getMessage()); // Log the error
 
             return back()->withErrors(['general' => 'Failed to delete seller. Please try again.']);
         }

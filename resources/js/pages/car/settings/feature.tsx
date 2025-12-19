@@ -47,8 +47,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Feature({ features }: FeatureProps) {
-
-    
     function handleDelete(id: number) {
         if (!window.confirm('Are you sure you want to delete this feature?')) return;
 

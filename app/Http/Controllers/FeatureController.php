@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Classes\Services\FeatureService;
-use App\Http\Resources\FeatureResource;
-use App\Models\Feature;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request; // Import your service
-use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Feature;
+use App\Classes\Services\FeatureService; // Import your service
+use App\Http\Resources\FeatureResource;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 class FeatureController extends Controller
 {
@@ -35,7 +35,7 @@ class FeatureController extends Controller
      */
     public function store(Request $request)
     {
-
+        
         $validator = $this->featureService->DataValidation($request, 'post');
 
         if ($validator->fails()) {
@@ -44,7 +44,6 @@ class FeatureController extends Controller
 
         try {
             $this->featureService->Create($request);
-
             return redirect()->route('carfeature.index')->with('success', 'Car feature created successfully!');
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to create car feature. Please try again.']);
@@ -64,7 +63,6 @@ class FeatureController extends Controller
 
         try {
             $this->featureService->update($request, $feature);
-
             return redirect()->route('carfeature.index')->with('success', 'Car feature updated successfully!');
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to update car feature. Please try again.']);
@@ -78,21 +76,23 @@ class FeatureController extends Controller
     {
         try {
             $this->featureService->delete($feature);
-
             return redirect()->route('carfeature.index')->with('success', 'Car feature deleted successfully!');
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to delete car feature. Please try again.']);
         }
     }
 
-    /**
+
+       /**
      * Return a listing of all brands for API consumption.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function apiIndex(): JsonResponse
     {
 
         $features = Feature::orderBy('feature_name', 'asc')->get();
-
+     
         return FeatureResource::collection($features)->response();
-    }
+    }      
 }
