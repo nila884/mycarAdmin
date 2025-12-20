@@ -1,4 +1,4 @@
-// @/components/car/columns.tsx
+// @/components/user/columns.tsx
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
@@ -12,12 +12,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react"; // For the action ellipsis icon
-import{CarDetailData} from '@/lib/object'
+import { Role, UserData } from "@/lib/object";
 
-// Define the Car type based on your Car.php and create-form.tsx
-// I've included most fields from create-form.tsx and some from Car.php
 
-export const columns: ColumnDef<CarDetailData>[] = [
+// Define the user type based on your user.php and create-form.tsx
+// I've included most fields from create-form.tsx and some from user.php
+
+export const columns: ColumnDef<UserData>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -40,70 +41,50 @@ export const columns: ColumnDef<CarDetailData>[] = [
   },
 
   {
-    id: "brand",
-    accessorKey: "version.car_model.brand.brand_name",
+    id: "name",
+    accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Brand" />
+      <DataTableColumnHeader column={column} title="Name" />
     ),
   },
 
   {
-    id: "model",
-    accessorKey: "version.car_model.model_name",
+    id: "email",
+    accessorKey: "email",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Model" />
+      <DataTableColumnHeader column={column} title="Email" />
     ),
   },
 
-  {
-  id: "price",
-  accessorKey: "price.final_price",
+{
+  id: "roles",
+  accessorKey: "roles",
   header: ({ column }) => (
-    <DataTableColumnHeader column={column} title="Price" />
+    <DataTableColumnHeader column={column} title="Roles" />
   ),
   cell: ({ getValue }) => {
-    const amount = getValue<number>()
-    if (!amount) return <div className="text-right">N/A</div>
+    const roles = getValue<{ id: number; name: string }[]>()
+
+    if (!roles?.length) return <span className="text-muted-foreground">—</span>
 
     return (
-      <div className="text-center font-medium">
-        {new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(amount)}
+      <div className="flex flex-wrap gap-1">
+        {roles.map(role => (
+          <span
+            key={role.id}
+            className="rounded bg-muted px-2 py-0.5 text-xs font-medium"
+          >
+            {role.name}
+          </span>
+        ))}
       </div>
     )
   },
+   enableSorting: false,
 },
 
- {
-  id: "status",
-  accessorKey: "spect.status",
-  header: ({ column }) => (
-    <DataTableColumnHeader column={column} title="Status" />
-  ),
-  cell: ({ getValue }) => (
-    <div className="font-medium text-center">
-      {getValue<number>() === 1 ? "New" : "Used"}
-    </div>
-  ),
-},
 
-  {
-    id: "publication_status",
-    accessorKey: "publication_status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Publication Status" />
-    ),
-  },
 
-  {
-    id: "selling_status",
-    accessorKey: "car_selling_status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Selling Status" />
-    ),
-  },
 
   {
     id: "created_at",
@@ -125,12 +106,12 @@ export const columns: ColumnDef<CarDetailData>[] = [
     id: "actions",
     enableSorting: false,
     cell: ({ row }) => {
-      const car = row.original
+      const user = row.original
 
       const handleDelete = () => {
-        if (!confirm("Are you sure you want to delete this car?")) return
+        if (!confirm("Are you sure you want to delete this user?")) return
 
-        router.delete(route("car.destroy", car.id))
+        router.delete(route("user.destroy", user.id))
       }
 
       return (
@@ -142,15 +123,15 @@ export const columns: ColumnDef<CarDetailData>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link href={route("car.show", car.id)}>Details</Link>
+              {/* <Link href={route("user.show", user.id)}>Details</Link> */}
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href={route("car.edit", car.id)}>Edit</Link>
+              {/* <Link href={route("user.edit", user.id)}>Edit</Link> */}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+            {/* <DropdownMenuItem onClick={handleDelete} className="text-red-600">
               Delete
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       )

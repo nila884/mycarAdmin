@@ -182,3 +182,15 @@ export type Image={
   image_path:string;
   is_main:boolean;
 }
+export type Role={
+id:string
+name: string;
+}
+export type UserData={
+  id:string;
+  name:string;
+  email:string;
+  roles:Role[];
+  created_at:string;
+  updated_at:string;
+}

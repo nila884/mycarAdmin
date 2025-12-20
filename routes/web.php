@@ -25,6 +25,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('shipping/shipping');
     })->name('shipping');
 
+
+        Route::get('user/list', [UserController::class, 'index'])->name('user.index');
+
     Route::get('car/list', [CarController::class, 'index'])->name('car.index');
     Route::post('car/store', [CarController::class, 'store'])->name('car.store');
     Route::get('car/create', [CarController::class, 'create'])->name('car.create');

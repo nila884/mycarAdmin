@@ -16,46 +16,44 @@ use Spatie\Permission\Models\Role;
 
 class UserService
 {
-    public function Index($data, $query)
-    {
-        // $users =  User::orderBy('id', 'desc')->paginate(15);
-        // return $users;
+    public function index()
+{
+    $query = User::query()->with('roles');
 
-        if (count($data) > 0) {
-            if ($user = $data['user'] ?? '') {
-                $query->orWhere(DB::raw("concat(first_name, ' ',last_name)"), 'LIKE', '%'.$user.'%')
-                    ->orWhere(DB::raw("concat(last_name, ' ',fist_name)"), 'LIKE', '%'.$user.'%')
-                    ->orWhere('phone', '=', $user)
-                    ->orWhere('email', 'LIKE', '%'.$user.'%');
-                // dd($query->get());
-
-            }
-            if ($status = $data['status'] ?? '') {
-                $query->where('users.status', $status);
-            }
-
-            if ($role = $data['role'] ?? '') {
-                $query->where('users.role', $role);
-                // dd($query->get());
-            }
-            //   if ($simple_date = $data['simple_date'] ?? "") {
-            //     $query
-            //       ->where("users.created_at","=", Carbon::parse(trim(htmlspecialchars( $simple_date))));
-            //   }
-            //   if ($date = $data["date"] ?? "") {
-            //     $dateEx = explode("to", $data['date'], 2);
-            //     $start = Carbon::parse(trim(htmlspecialchars($dateEx[0])));
-            //     $end = Carbon::parse(trim(htmlspecialchars($dateEx[1])));
-            //     if ($start != $end) {
-            //       $query
-            //         ->where("users.created_at", ">=", $start)
-            //         ->where("users.created_at", "<=", $end);
-            //     }
-            //   }
-        }
-
-        return $query;
+    if ($search = request('search')) {
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%");
+        });
     }
+
+    // Sorting
+    if ($sorts = request('sort')) {
+        foreach (json_decode($sorts, true) as $sort) {
+            match ($sort['id']) {
+                'name' =>
+                    $query->orderBy('name', $sort['desc'] ? 'desc' : 'asc'),
+
+                'email' =>
+                    $query->orderBy('email', $sort['desc'] ? 'desc' : 'asc'),
+
+                'created_at' =>
+                    $query->orderBy('created_at', $sort['desc'] ? 'desc' : 'asc'),
+
+                'updated_at' =>
+                    $query->orderBy('updated_at', $sort['desc'] ? 'desc' : 'asc'),
+
+                default => null,
+            };
+        }
+    } else {
+        $query->latest('id');
+    }
+
+    return $query
+        ->paginate(15)
+        ->withQueryString();
+}
 
     public function Create(Request $request)
     {
@@ -128,120 +126,120 @@ class UserService
         return $user;
     }
 
-    /**
-     * Handles user registration, conditional seller profile creation, and role assignment.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function registerUser(Request $request): User
-    {
+    // /**
+    //  * Handles user registration, conditional seller profile creation, and role assignment.
+    //  *
+    //  * @throws \Illuminate\Validation\ValidationException
+    //  */
+    // public function registerUser(Request $request): User
+    // {
 
-        // 1. Validation Logic
-        $rules = [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Password::defaults()],
-            'user_type' => 'required|string|in:user,seller',
-        ];
+        // // 1. Validation Logic
+        // $rules = [
+        //     'name' => 'required|string|max:255',
+        //     'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+        //     'password' => ['required', 'confirmed', Password::defaults()],
+        //     'user_type' => 'required|string|in:user,seller',
+        // ];
 
-        // Conditional Validation (Only for Sellers)
-        if ($request->user_type === 'seller') {
-            $rules = array_merge($rules, [
-                'seller_name' => 'required|string|max:255',
-                'phone' => 'required|string|max:50',
-                'country' => 'required|string|max:255',
-                'address' => 'required|string|max:255',
-            ]);
-        }
+        // // Conditional Validation (Only for Sellers)
+        // if ($request->user_type === 'seller') {
+        //     $rules = array_merge($rules, [
+        //         'seller_name' => 'required|string|max:255',
+        //         'phone' => 'required|string|max:50',
+        //         'country' => 'required|string|max:255',
+        //         'address' => 'required|string|max:255',
+        //     ]);
+        // }
 
-        // Perform validation here (throws exception on failure)
-        $request->validate($rules);
+        // // Perform validation here (throws exception on failure)
+        // $request->validate($rules);
 
-        // We wrap the creation process in a transaction for safety
-        DB::beginTransaction();
-        try {
-            // 2. Create the User
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
+        // // We wrap the creation process in a transaction for safety
+        // DB::beginTransaction();
+        // try {
+        //     // 2. Create the User
+        //     $user = User::create([
+        //         'name' => $request->name,
+        //         'email' => $request->email,
+        //         'password' => Hash::make($request->password),
+        //     ]);
 
-            // 3. Conditional Seller Creation
-            if ($request->user_type === 'seller') {
-                Seller::create([
-                    'seller_name' => $request->seller_name,
-                    'phone' => $request->phone,
-                    'email' => $user->email,
-                    'country' => $request->country,
-                    'address' => $request->address,
-                ]);
-            }
+        //     // 3. Conditional Seller Creation
+        //     if ($request->user_type === 'seller') {
+        //         Seller::create([
+        //             'seller_name' => $request->seller_name,
+        //             'phone' => $request->phone,
+        //             'email' => $user->email,
+        //             'country' => $request->country,
+        //             'address' => $request->address,
+        //         ]);
+        //     }
 
-            // 4. Spatie Role Assignment
-            $roleName = $request->user_type; // 'seller' or 'simple_user'
+        //     // 4. Spatie Role Assignment
+        //     $roleName = $request->user_type; // 'seller' or 'simple_user'
 
-            $role = Role::where('name', $roleName)->first();
+        //     $role = Role::where('name', $roleName)->first();
 
-            if ($role) {
-                $user->assignRole($role);
-            }
+        //     if ($role) {
+        //         $user->assignRole($role);
+        //     }
 
-            DB::commit();
+        //     DB::commit();
 
-            return $user;
+        //     return $user;
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            // Optional: Re-throw a generic exception or log the error
-            throw new Exception('User registration failed: '.$e->getMessage());
-        }
-    }
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     // Optional: Re-throw a generic exception or log the error
+        //     throw new Exception('User registration failed: '.$e->getMessage());
+        // }
+    // }
 
-    public function Delete(User $user): bool
-    {
-        if ($user->id === 1) {
-            if ($request->has('role_id') || $request->has('status')) {
-                abort(403, 'The role or status of the Super Admin (ID 1) cannot be changed.');
-            }
-        }
+    // public function Delete(User $user): bool
+    // {
+        // if ($user->id === 1) {
+        //     if ($request->has('role_id') || $request->has('status')) {
+        //         abort(403, 'The role or status of the Super Admin (ID 1) cannot be changed.');
+        //     }
+        // }
 
-        return $user->delete();
-    }
+        // return $user->delete();
+    // }
 
-    /**
-     * Validation
-     */
-    public function DataValidation(Request $request, string $method, User|bool|null $user = null, $pswd = false): ?ValidatorReturn
-    {
-        if ($pswd) {
-            return Validator::make($request->all(), [
-                'password' => ['required', Password::min(8)->numbers()->letters()->mixedCase()],
-            ]);
-        }
-        switch (strtolower($method)) {
-            case 'post':
-                return Validator::make($request->all(), [
-                    'first_name' => ['required', 'string'],
-                    'last_name' => ['required', 'string'],
-                    'email' => ['required', 'unique:users,email'],
-                    'phone' => ['required', 'unique:users,phone'],
-                    'password' => ['required', Password::min(8)->numbers()->letters()->mixedCase()],
-                    'country_id' => ['required'],
-                ]);
-            case 'patch':
-                return Validator::make($request->all(), [
-                    'first_name' => ['required', 'string'],
-                    'last_name' => ['required', 'string'],
-                    'email' => ['required', Rule::unique('users', 'email')->ignore($user->id)],
-                    'phone' => ['required',  Rule::unique('users', 'phone')->ignore($user->id)],
-                    'status' => ['required'],
-                    'role' => ['required'],
-                    'country_id' => ['required', 'exists:countries,id'],
+    // /**
+    //  * Validation
+    //  */
+    // public function DataValidation(Request $request, string $method, User|bool|null $user = null, $pswd = false): ?ValidatorReturn
+    // {
+    //     if ($pswd) {
+    //         return Validator::make($request->all(), [
+    //             'password' => ['required', Password::min(8)->numbers()->letters()->mixedCase()],
+    //         ]);
+    //     }
+    //     switch (strtolower($method)) {
+    //         case 'post':
+    //             return Validator::make($request->all(), [
+    //                 'first_name' => ['required', 'string'],
+    //                 'last_name' => ['required', 'string'],
+    //                 'email' => ['required', 'unique:users,email'],
+    //                 'phone' => ['required', 'unique:users,phone'],
+    //                 'password' => ['required', Password::min(8)->numbers()->letters()->mixedCase()],
+    //                 'country_id' => ['required'],
+    //             ]);
+    //         case 'patch':
+    //             return Validator::make($request->all(), [
+    //                 'first_name' => ['required', 'string'],
+    //                 'last_name' => ['required', 'string'],
+    //                 'email' => ['required', Rule::unique('users', 'email')->ignore($user->id)],
+    //                 'phone' => ['required',  Rule::unique('users', 'phone')->ignore($user->id)],
+    //                 'status' => ['required'],
+    //                 'role' => ['required'],
+    //                 'country_id' => ['required', 'exists:countries,id'],
 
-                ]);
-            default:
-                return null;
-        }
-    }
+    //             ]);
+    //         default:
+    //             return null;
+    //     }
+    // }
 }
