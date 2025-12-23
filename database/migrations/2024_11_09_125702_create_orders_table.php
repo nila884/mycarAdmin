@@ -11,23 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
-            $table->id();
-            $table->string('order_number');
-            $table->string('customer_name');
-            $table->string('customer_email');
-            $table->string('customer_phone');
-            $table->string('customer_country');
-            $table->string('customer_adress');
-            $table->unsignedBigInteger('shipping_id')->index();
-            $table->foreign('shipping_id')->references('id')->on('shipping_adresses')->onDelete('cascade');
-            $table->string('total_amount');
-            $table->enum('order_status', ['pending', 'completed', 'canceled'])->default('pending');
-            $table->enum('delivery_status', ['not_shipped', 'shipped', 'delivered'])->default('not_shipped');
-            $table->enum('payment_method', ['credit_card', 'paypal', 'bank_transfer', 'cash'])->default('credit_card');
-            $table->string('order_date');
-            $table->timestamps();
-        });
+                Schema::create('orders', function (Blueprint $table) {
+                    $table->id();
+                    $table->string('order_number')->unique();
+                    $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Fixed Type
+    
+                    $table->foreignId('delivery_tariff_id')->constrained('delivery_tariffs'); // Fixed Table Name
+                    
+                    $table->decimal('total_amount', 12, 2); // Fixed from String to Decimal
+                    $table->enum('order_status', ['pending', 'completed', 'canceled'])->default('pending');
+                    $table->enum('delivery_status', ['not_shipped', 'shipped', 'delivered'])->default('not_shipped');
+                    $table->enum('payment_method', ['bank_transfer', 'credit_card'])->default('bank_transfer');
+                    $table->timestamps(); 
+                });
     }
 
     /**

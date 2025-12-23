@@ -35,7 +35,8 @@ class Car extends Model
         'location',
         'dimensions',
         'exterior_color_id',
-        'interior_color_id'
+        'interior_color_id',
+        'origin_country_id',
 
 
     ];
@@ -107,4 +108,11 @@ class Car extends Model
     {
         return $this->belongsTo(Color::class);
     }
+
+        public function originCountry()
+    {
+        return $this->belongsTo(Country::class,'origin_country_id');
+    }
+
+
 }

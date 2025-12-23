@@ -17,7 +17,7 @@ class Port extends Model
     ];
 
 
-        public function country()
+public function country()
     {
         return $this->belongsTo(Country::class);
     }
@@ -25,7 +25,12 @@ class Port extends Model
 public function currentShippingCost()
     {
         // This is a HasOne relationship constrained to only fetch the record where is_current is true (or 1)
-        return $this->hasOne(ShippingCost::class)
+        return $this->hasOne(ShippingRate::class)
                     ->where('is_current', 1);
     }
+public function servedCountries()
+{
+    return $this->belongsToMany(Country::class, 'country_gateway_port');
+}
+
 }

@@ -9,10 +9,12 @@ use App\Models\carModel;
 use App\Models\CarPrice;
 use App\Models\Category;
 use App\Models\Color;
+use App\Models\Country;
 use App\Models\EnginePower;
 use App\Models\Feature;
 use App\Models\FuelType;
 use App\Models\Image;
+use App\Models\Port;
 use App\Models\Seller;
 use App\Models\User;
 use App\Models\Version;
@@ -28,6 +30,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             InitSeeder::class,
+            ShippingLogisticSeeder::class
         ]);
 
         // create user
@@ -100,9 +103,11 @@ class DatabaseSeeder extends Seeder
         $sellerIds = Seller::pluck('id');
         $versionIds = Version::pluck('id');
         $colorsIds= Color::pluck('id');
+        $countriesIds= Country::pluck('id');
+        $portsIds = Port::pluck('id');
         
 
-        $cars = Car::factory(4000)->create([
+        $cars = Car::factory(100)->create([
 
             'category_id' => function (array $attributes) use ($categoryIds) {
                 return $categoryIds->random();
@@ -122,6 +127,12 @@ class DatabaseSeeder extends Seeder
             'interior_color_id' => function(array $attributes) use ($colorsIds){
                 return $colorsIds->random();
             },
+            'origin_country_id' => function(array $attributes)use($countriesIds){
+                return $countriesIds->random();
+            },
+            // 'origin_port_id ' => function(array $attributes)use($portsIds){
+            //     return $portsIds->random();
+            // }
         ]);
 
         foreach ($cars as $car) {

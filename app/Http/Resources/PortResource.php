@@ -18,12 +18,8 @@ class PortResource extends JsonResource
             'name' => $this->name,
             'code' => $this->code,
             'country_id' => $this->country_id,
-            'cost' => $this->whenLoaded('currentShippingCost', function () {
-                if (!$this->currentShippingCost) {
-                    return ShippingCostResource::make(null);
-                }
-                return ShippingCostResource::make($this->currentShippingCost);
-            }),
+            'updated_at' => $this->updated_at
+          
             
         ];
     }

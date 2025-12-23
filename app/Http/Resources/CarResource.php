@@ -43,7 +43,7 @@ class CarResource extends JsonResource
             'seller' => SellerResource::make($this->whenLoaded('seller')),
             'features' => FeatureResource::collection($this->whenLoaded('features')),
             'images' => ImageResource::collection($this->whenLoaded('images')),
-
+            'origin_country'=>CountryResource::make($this->whenLoaded('originCountry')),
         ];
     }
 }

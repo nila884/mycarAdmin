@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('countries', function (Blueprint $table) {
-           $table->longText('import_regulation_information')->nullable()->after('flags');
-        });
+        Schema::create('country_gateway_port', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('country_id')->constrained('countries')->onDelete('cascade');
+        $table->foreignId('port_id')->constrained('ports')->onDelete('cascade');
+        $table->timestamps();
+    });
     }
 
     /**
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('countries', function (Blueprint $table) {
-            $table->dropColumn('import_regulation_information');
-        });
+        //
     }
 };

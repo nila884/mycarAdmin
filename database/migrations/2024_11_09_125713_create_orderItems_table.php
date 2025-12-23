@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_items', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('order_id');
-            $table->unsignedBigInteger('car_id');
-            $table->string('price');
-            $table->string('shipping_fees');
-            $table->foreign('car_id')->references('id')->on('cars')->onDelete('cascade');
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
-            $table->timestamps();
-        });
+            Schema::create('order_items', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('order_id')->constrained()->onDelete('cascade');
+                $table->foreignId('car_id')->constrained();
+                $table->decimal('unit_price', 12, 2);      // Snapshot of car price
+                $table->decimal('shipping_fees', 12, 2);   // Snapshot of the calculated route cost
+                $table->decimal('tax_amount', 12, 2)->default(0);
+                $table->timestamps();
+            });
     }
 
     /**

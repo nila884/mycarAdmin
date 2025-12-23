@@ -53,7 +53,9 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('colors')
                 ->nullOnDelete();
-
+            $table->foreignId('origin_country_id')->constrained('countries');
+            $table->foreignId('origin_port_id')->nullable()->constrained('ports'); 
+            $table->enum('shipping_type', ['sea', 'land', 'local'])->default('sea');
 
                     $table->index('publication_status');
                     $table->index('car_selling_status');

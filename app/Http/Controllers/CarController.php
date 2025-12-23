@@ -371,8 +371,9 @@ class CarController extends Controller
      */
     public function carDetail($id)
     {
+    
 
-        $car = Car::with(['version.carModel.brand', 'category', 'fuelType', 'seller', 'features', 'images', 'prices'])
+        $car = Car::with(['version.carModel.brand','originCountry' ,'category', 'fuelType', 'seller', 'features', 'images', 'prices'])
             ->find($id);
 
         if (! $car) {

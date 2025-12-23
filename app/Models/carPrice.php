@@ -19,17 +19,19 @@ class CarPrice extends Model
     public function getFinalPrice()
     {
 
-        if (! $this->discount || ! $this->discount_type) {
-            return $this->price;
-        }
+if (! $this->discount || ! $this->discount_type) {
+        return round($this->price, 2);
+    }
 
-        if ($this->discount_type === 'percent') {
-            return $this->price - ($this->price * $this->discount / 100);
-        }
-        if ($this->discount_type === 'amount') {
-            return max(0, $this->price - $this->discount);
-        }
+    $finalPrice = $this->price;
 
-        return $this->price - $this->discount;
+    if ($this->discount_type === 'percent') {
+        $finalPrice = $this->price - ($this->price * $this->discount / 100);
+    } elseif ($this->discount_type === 'amount') {
+        $finalPrice = $this->price - $this->discount;
+    } else {
+        $finalPrice = $this->price - $this->discount;
+    }
+    return round(max(0, $finalPrice), 0);
     }
 }

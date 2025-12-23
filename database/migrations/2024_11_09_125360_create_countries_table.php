@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('shipping_adresses', function (Blueprint $table) {
+        Schema::create('countries', function (Blueprint $table) {
             $table->id();
-            $table->string('adress_name');
-            $table->string('weight_range');
-            $table->string('tarif_per_tone');
-            $table->unsignedBigInteger('country_id')->index();
-            $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade');
+            $table->string('country_name');
+            $table->string('code');
+            $table->string('prefix');
+            $table->string('currency')->nullable();
+            $table->longText('import_regulation_information')->nullable();
+            $table->string('flags')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('countries');
     }
 };

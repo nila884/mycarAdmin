@@ -194,3 +194,121 @@ export type UserData={
   created_at:string;
   updated_at:string;
 }
+
+export interface CountryObject {
+    id: number;
+    country_name: string;
+    code: string; // e.g., 'JP', 'RW'
+    prefix: string; // e.g., '+81'
+    currency: string | null;
+    import_regulation_information: string | null;
+    flags: string | null;
+    gateway_ports? : PortObject[];
+    cities?: CityObject[];
+    created_at?: string;
+    updated_at?: string;
+}
+
+
+export interface PortObject {
+    id: number;
+    name: string;
+    code: string | null;
+    country_id: number;
+    country?: CountryObject; 
+    updated_at?: string;
+    created_at?: string;
+}
+
+
+export interface ShippingRateObject {
+    id: number;
+    transport_mode: 'sea' | 'land';
+    from_country_id: number;
+    from_country?: CountryObject;
+    from_port_id: number | null;
+    from_port?: PortObject | null;
+    to_country_id: number;
+    to_country?: CountryObject;
+    to_port_id: number | null;
+    to_port?: PortObject | null;
+    price_roro: string; 
+    price_container: string;
+    
+    is_current: boolean;
+    updated_at: string;
+}
+
+// export interface DeliveryTariffObject {
+//     id: number;
+//     adress_name: string;
+//     country_id: number; 
+//     country?: CountryObject;
+//     from_port_id: number | null; 
+//     from_country_id: number | null;
+//     tarif_per_tone: string;
+//     driver_fee: string;    
+//     clearing_fee: string;  
+    
+//     weight_range: string | null;
+    
+//     origin_display?: string; 
+// }
+
+
+export interface CityObject {
+    id: number;
+    name: string;
+    country_id: number;
+    is_hub: boolean;
+}
+
+
+
+
+export interface DeliveryDriverAgencyObject {
+    id: number | null;
+    name: string;
+    business_registration_number: string;
+    tax_identification_number?: string;
+    person?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    fleet_size: number | string;
+    is_active: boolean;
+    // Relationships can be added here if agencies are linked to countries
+    country?: CountryObject; 
+}
+
+
+export interface DeliveryTariffObject {
+    id: number | null;
+    
+    // Raw Data
+    service_type: 'self_pickup' | 'individual_driver' | 'agency';
+    delivery_method: 'drive_away' | 'car_carrier' | 'container';
+    adress_name: string;
+    tarif_per_tone: number;
+    driver_fee: number;
+    clearing_fee: number;
+    agency_service_fee: number;
+    weight_range: string;
+
+    // IDs for Form Binding
+    from_country_id: string | number;
+    from_port_id: string | number | null;
+    from_city_id: string | number | null;
+    country_id: string | number;
+    to_city_id: string | number | null;
+    delivery_driver_agency_id: string | number | null;
+
+    // Full Nested Relationships
+    country?: any;
+    origin_country?: any;
+    origin_port?: any;
+    from_city?: any;
+    to_city?: any;
+    delivery_driver_agency?: any;
+}
+

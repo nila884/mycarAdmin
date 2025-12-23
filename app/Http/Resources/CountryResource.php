@@ -14,16 +14,15 @@ class CountryResource extends JsonResource
     public function toArray(Request $request): array
     {
          return [
-       'id' => $this->id,
-            'name' => $this->country_name,
+            'id' => $this->id,
+            'country_name' => $this->country_name,
             'code' => $this->code,
             'prefix' => $this->prefix,
             'currency' => $this->currency,
             'import_regulation_information' => $this->import_regulation_information,
-            // Construct the public URL for the flag file
             'flags_url' => $this->flags ? Storage::url('country/' . $this->flags) : null, 
-            // Include user count if the relation is eager loaded (e.g., Country::withCount('users'))
-            'users_count' => $this->whenCounted('users'),
+            'gateway_ports' => PortResource::collection($this->whenLoaded('gatewayPorts')),
+           
         ];
     }
 }

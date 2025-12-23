@@ -1,123 +1,107 @@
-// src/pages/car/settings/shipping-cost.tsx
-
+import React from 'react';
 import { Head, router } from '@inertiajs/react';
-import HeadingSmall from '@/components/heading-small';
-import { type BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
+import ShippingLayout from '@/layouts/shipping/layout';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Trash2, Ship, Truck, ArrowRight } from 'lucide-react';
 import { timeFormat } from '@/lib/utils';
-import { X } from 'lucide-react';
-import { PortItem } from '@/pages/shipping/ports/list';
-import ShippingCostForm from '@/components/shipping/cost/costForm';
-import ShippingLayout from '@/layouts/shipping/layout';
+import { CountryObject, PortObject, ShippingRateObject } from '@/lib/object';
+import ShippingRateForm from '@/components/shipping/rate/shippingRateForm';
 
-interface ShippingCostItem {
-    id: number;
-    price_roro: string; 
-    price_container: string;
-    is_current: boolean;
-    port_id: number;
-    port: PortItem; 
-    created_at: string;
-    updated_at: string;
+interface Props {
+    shipping_rates: ShippingRateObject[];
+    countries: CountryObject[];
+    ports: PortObject[];
 }
 
-interface ShippingCostProps {
-    costs: ShippingCostItem[]; // Assuming the Index method returns a collection
-    ports: PortItem[];
-}
+export default function ShippingRateList({ shipping_rates, countries, ports }: Props) {
+    
+    const handleDelete = (id: number) => {
+        if (confirm('Delete this shipping route?')) {
+            router.delete(route('shipping-rates.destroy', id));
+        }
+    };
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Shipping Cost Settings',
-        href: 'shipping/prices/list',
-    },
-];
+    return (
+        <AppLayout>
+            <Head title="Ocean Freight Rates" />
+            <ShippingLayout>
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 className="text-2xl font-bold tracking-tight">Shipping Rates</h2>
+                        <p className="text-muted-foreground">Define ocean freight costs from global origins to entry ports.</p>
+                    </div>
+                    <ShippingRateForm countries={countries} ports={ports} />
+                </div>
 
-export default function ShippingCostIndex({ costs,ports }: ShippingCostProps) {
-
-
-  function handleDelete(id: number) {
-    if (!window.confirm('Are you sure you want to delete this shipping cost record?')) return;
-
-    router.delete(`/shipping/prices/${id}`, {
-      preserveScroll: true,
-      onSuccess: () => {
-        // Optional: show a toast notification here
-      },
-    });
-  }
-
-  return (
-    <AppLayout breadcrumbs={breadcrumbs}>
-      <ShippingLayout>
-        <Head title="Shipping Cost Settings" />
-        <HeadingSmall title="Shipping Cost Management" />
-        
-        <div className="flex justify-end mb-4">
-          {/* You need to create this component in components/car/settings/shipping-cost/create.tsx */}
-          <ShippingCostForm  ports={ports}  />
-        </div>
-
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Country</TableHead>
-                <TableHead>Port</TableHead>
-                <TableHead>Roro Price</TableHead>
-                 <TableHead>Container Price</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last Updated</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {costs.length > 0 ? (
-                costs.map((cost) => (
-                  <TableRow key={cost.id} className={cost.is_current ? 'bg-green-50/50' : ''}>
-                    <TableCell>{cost.port.country.country_name}</TableCell>
-                    <TableCell className="font-medium">{cost.port.name}</TableCell>
-                    <TableCell className={cost.is_current ? 'font-bold text-green-600' : 'text-gray-700'}>
-                      ${cost.price_roro}
-                    </TableCell>
-                    <TableCell className={cost.is_current ? 'font-bold text-green-600' : 'text-gray-700'}>
-                      ${cost.price_container}
-                    </TableCell>
-                    <TableCell>
-                      {cost.is_current ? (
-                        <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                          CURRENT
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
-                          Inactive
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>{timeFormat(cost.updated_at)}</TableCell>
-                    <TableCell className="text-right">
-                      {/* You need to create this component */}
-                      <ShippingCostForm cost={cost}  ports={ports}  />
-                      <Button className='ml-2' size="icon" variant="destructive" onClick={() => handleDelete(cost.id)}>
-                        <X/>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center">
-                    No shipping costs found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-          
-        </div>
-      </ShippingLayout>
-    </AppLayout>
-  );
+                <div className="rounded-md border bg-white overflow-hidden">
+                    <Table>
+                        <TableHeader className="bg-slate-50">
+                            <TableRow>
+                                <TableHead>Route Path</TableHead>
+                                <TableHead>Mode</TableHead>
+                                <TableHead>RoRo Price</TableHead>
+                                <TableHead>Container Price</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {shipping_rates.length > 0 ? shipping_rates.map((rate) => (
+                                <TableRow key={rate.id} className="hover:bg-slate-50/50">
+                                    <TableCell>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-semibold">{rate.from_country?.country_name}</span>
+                                            <ArrowRight className="w-3 h-3 text-slate-400" />
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-medium text-blue-600">
+                                                    {rate.to_port?.name || rate.to_country?.country_name}
+                                                </span>
+                                                <span className="text-[10px] text-slate-400 uppercase">Gateway</span>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline" className="gap-1 font-normal">
+                                            {rate.transport_mode === 'sea' ? <Ship className="w-3 h-3"/> : <Truck className="w-3 h-3"/>}
+                                            {rate.transport_mode.toUpperCase()}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="font-mono font-bold text-slate-700">${rate.price_roro}</TableCell>
+                                    <TableCell className="font-mono font-bold text-slate-700">${rate.price_container}</TableCell>
+                                    <TableCell>
+                                        {rate.is_current ? 
+                                            <Badge className="bg-green-600 hover:bg-green-600">Active</Badge> : 
+                                            <Badge variant="secondary">History</Badge>
+                                        }
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-1">
+                                            <ShippingRateForm rate={rate} countries={countries} ports={ports} />
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                className="text-slate-400 hover:text-red-600"
+                                                onClick={() => handleDelete(rate.id)}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            )) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="h-32 text-center text-slate-500">
+                                        No shipping rates found. Configure your first route to start calculations.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            </ShippingLayout>
+        </AppLayout>
+    );
 }

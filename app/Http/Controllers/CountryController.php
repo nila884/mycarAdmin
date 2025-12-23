@@ -10,6 +10,8 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Http\JsonResponse;
 use App\Models\Port;
 use App\Http\Resources\PortResource;
+use App\Models\DeliveryTariff;
+use App\Models\ShippingRate;
 
 class CountryController extends Controller
 {
@@ -25,6 +27,7 @@ class CountryController extends Controller
        
         return Inertia::render('shipping/countries/list', [
             'countries' => $this->countryService->Index(),
+            'ports' => PortResource::collection(Port::all()),
         ]);
     }
 
@@ -66,14 +69,27 @@ class CountryController extends Controller
     public function shippingDetails(): JsonResponse
     {
         $countries = Country::orderBy('country_name', 'asc')->get();
-     
-        $portsQuery= Port::query();
-        $portsQuery->with('currentShippingCost')->with('country');
-        $ports = $portsQuery->get();
+        $ports =Port::orderBy('name', 'asc')->get();
+        $shippingRates= ShippingRate::where('is_current', true)->get();
+        $deliveryTarrifs= DeliveryTariff::all();
          
         return response()->json([
             'countries' => CountryResource::collection($countries),
             'ports' => PortResource::collection($ports),
+            'shipping_rates'=>$shippingRates,
+            'delivery_tarrifs'=>$deliveryTarrifs,
+
         ]);
+    }
+
+    public function updateGateways(Request $request, $id)
+    {
+        $request->validate([
+            'port_ids' => 'array',
+            'port_ids.*' => 'exists:ports,id',
+        ]);
+        $this->countryService->setCountryGatewayPort($id, $request->port_ids);
+
+        return back()->with('success', 'Gateway network updated.');
     }
 }

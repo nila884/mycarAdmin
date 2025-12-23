@@ -22,6 +22,16 @@ const sidebarNavItems: NavItem[] = [
         href: '/shipping/prices/list',
         icon: null,
     },
+    {
+        title: 'Delivery tariffs',
+        href: '/shipping/tariffs/list',
+        icon: null,
+    },    
+    {
+        title: 'Delivery agencies',
+        href: '/shipping/agencies/list',
+        icon: null,
+    },
     
 ];
 

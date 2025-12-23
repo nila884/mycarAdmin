@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CityController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\DeliveryDriverAgencyController;
+use App\Http\Controllers\DeliveryTariffController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\FuelController;
 use App\Http\Controllers\ModelController;
@@ -11,7 +14,7 @@ use App\Http\Controllers\PortController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
-use App\Http\Controllers\ShippingCostController;
+use App\Http\Controllers\ShippingRateController;
 use App\Http\Controllers\VersionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -69,16 +72,36 @@ Route::middleware('auth')->group(function () {
     Route::post('shipping/countries', [CountryController::class, 'store'])->name('country.store');
     Route::patch('shipping/countries/{country}', [CountryController::class, 'update'])->name('country.update');
     Route::delete('shipping/countries/{country}', [CountryController::class, 'destroy'])->name('country.destroy');
+    Route::post('countries/{country}/gateways', [CountryController::class, 'updateGateways'])->name('country.gateways.update');
+
 
     Route::get('shipping/ports/list', [PortController::class, 'index'])->name('port.index');
     Route::post('shipping/ports', [PortController::class, 'store'])->name('port.store');
     Route::patch('shipping/ports/{port}', [PortController::class, 'update'])->name('port.update');
     Route::delete('shipping/ports/{port}', [PortController::class, 'destroy'])->name('port.destroy');
 
-    Route::get('shipping/prices/list', [ShippingCostController::class, 'index'])->name('shipping.index');
-    Route::post('shipping/prices', [ShippingCostController::class, 'store'])->name('shipping.store');
-    Route::patch('shipping/prices/{shippingCost}', [ShippingCostController::class, 'update'])->name('shipping.update');
-    Route::delete('shipping/prices/{shippingCost}', [ShippingCostController::class, 'destroy'])->name('shipping.destroy');
+
+    // --- City Management (for Country List precision) ---
+    Route::post('/cities', [CityController::class, 'store'])->name('cities.store');
+    Route::delete('/cities/{city}', [CityController::class, 'destroy'])->name('cities.destroy');
+
+    // --- Delivery Driver Agencies (Business registration & Fleet) ---
+    Route::get('shipping/agencies/list', [DeliveryDriverAgencyController::class,'index'])->name('delivery-driver-agency.index');
+    Route::post('shipping/agencies', [DeliveryDriverAgencyController::class,'store'])->name('delivery-driver-agency.store');
+    Route::patch('shipping/agencies/{agency}', [DeliveryDriverAgencyController::class,'update'])->name('delivery-driver-agency.update');
+    Route::delete('shipping/agencies/{agency}', [DeliveryDriverAgencyController::class,'destroy'])->name('delivery-driver-agency.destroy');
+
+
+    Route::get('shipping/prices/list', [ShippingRateController::class, 'index'])->name('shipping-rates.index');
+    Route::post('shipping/prices', [ShippingRateController::class, 'store'])->name('shipping-rates.store');
+    Route::patch('shipping/prices/{shippingRate}', [ShippingRateController::class, 'update'])->name('shipping-rates.update');
+    Route::delete('shipping/prices/{shippingRate}', [ShippingRateController::class, 'destroy'])->name('shipping-rates.destroy');
+
+
+    Route::get('shipping/tariffs/list', [DeliveryTariffController::class, 'index'])->name('delivery-tariffs.index');
+    Route::post('shipping/tariffs', [DeliveryTariffController::class, 'store'])->name('delivery-tariffs.store');
+    Route::patch('shipping/tariffs/{deliveryTariff}', [DeliveryTariffController::class, 'update'])->name('delivery-tariffs.update');
+    Route::delete('shipping/tariffs/{deliveryTariff}', [DeliveryTariffController::class, 'destroy'])->name('delivery-tariffs.destroy');
 
     Route::get('car/settings/color', [ColorController::class, 'index'])->name('color.index');
     Route::post('car/settings/color', [ColorController::class, 'store'])->name('color.store');
