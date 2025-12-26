@@ -8,8 +8,10 @@ use App\Models\ShippingRate;
 use App\Models\Country;
 use App\Models\Port;
 use App\Classes\Services\ShippingRateService;
+use App\Http\Resources\ShippingRateResource;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ShippingRateController extends Controller
 {
@@ -26,7 +28,7 @@ class ShippingRateController extends Controller
     public function index()
     {
         return Inertia::render('shipping/prices/list', [
-            'shipping_rates' => $this->service->Index(),
+            'shipping_rates' => ShippingRateResource::collection( $this->service->Index()),
             'countries' => Country::orderBy('country_name')->get(),
             'ports' => Port::orderBy('name')->get(),
         ]);
@@ -60,5 +62,11 @@ class ShippingRateController extends Controller
         $this->service->Delete($shippingRate);
 
         return redirect()->back()->with('success', 'Shipping rate deleted successfully.');
+    }
+
+    public function apiGetShippingRatesClient() :JsonResponse{
+        $rates=ShippingRateResource::collection( $this->service->Index());
+        return response()->json($rates);
+
     }
 }

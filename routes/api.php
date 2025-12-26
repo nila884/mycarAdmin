@@ -3,11 +3,16 @@
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ClientShippingController;
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\DeliveryTariffController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\FuelController;
 use App\Http\Controllers\ModelController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PortController;
 use App\Http\Controllers\SellerController;
+use App\Http\Controllers\ShippingRateController;
 use App\Http\Controllers\VersionController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,7 +37,12 @@ Route::get('cars/detail/{id}', [CarController::class, 'carDetail'])->name('api.c
 
 Route::get('m/cars/home', [CarController::class, 'carsHomeMobile'])->name('api.cars.home.mobile');
 
-Route::get('shipping-details', [CountryController::class, 'shippingDetails'])->name('api.cars.shipping.details');
+Route::get('shipping-details/tariffs', [DeliveryTariffController::class, 'apiGetDeliveryTariffsClient'])->name('api.cars.delivery.tariffs');
+Route::get('shipping-details/rates', [ShippingRateController::class, 'apiGetShippingRatesClient'])->name('api.cars.shipping.rate');
+Route::get('countries', [CountryController::class, 'apiGetCountriesClient'])->name('api.countries');
+Route::get('ports', [PortController::class, 'apiIndex'])->name('api.ports');
+
+Route::post('price-quote-request', [OrderController::class, 'store'])->name('api.request.quotes');
 
 
 

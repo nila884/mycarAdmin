@@ -14,7 +14,7 @@ class ShippingRateService
 {
     public function Index()
     {
-        return ShippingRateResource::collection( ShippingRate::with('originCountry','originPort','destinationCountry','destinationPort')->get());
+        return ShippingRate::with('originCountry','originPort','destinationCountry','destinationPort')->get();
     }
 
     public function DataValidation(Request $request, string $method, ?ShippingRate $Rate = null): ?ValidatorReturn

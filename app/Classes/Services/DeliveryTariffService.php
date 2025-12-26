@@ -9,8 +9,8 @@ class DeliveryTariffService
 {
     public function Index()
     {
-        // Now eager loads cities and agencies for precision data
-        return DeliveryTariffResource::collection(
+       
+        return 
        DeliveryTariff::with([
             'country', 
             'originCountry', 
@@ -18,8 +18,8 @@ class DeliveryTariffService
             'fromCity', 
             'toCity', 
             'deliveryDriverAgency'
-        ])->get()
-        );
+        ])->get();
+       
     }
 
     public function validateRequest(Request $request)

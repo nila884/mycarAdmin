@@ -16,6 +16,7 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        dd("request price quote");
         $validated = $request->validate([
             'car_ids' => 'required|array',
             'car_ids.*' => 'exists:cars,id',

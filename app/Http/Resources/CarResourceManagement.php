@@ -44,6 +44,7 @@ class CarResourceManagement extends JsonResource
             'category' => $this->whenLoaded('category'),          
             'car_selling_status' => $this->car_selling_status,
             'publication_status' => $this->publication_status,
+            'origin_country'=>CountryResource::make($this->whenLoaded('originCountry')),
             'updated_at' => $this->updated_at?->format('Y-m-d'),
             'created_at' => $this->created_at?->format('Y-m-d'),
 

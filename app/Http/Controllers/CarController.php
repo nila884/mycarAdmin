@@ -198,7 +198,7 @@ class CarController extends Controller
      */
     public function carsSearch(Request $request)
     {
-        // dd($request);
+      
         $brandId = $request->query('brand');
         $modelId = $request->query('model');
         $versionId = $request->query('version');
@@ -252,7 +252,8 @@ class CarController extends Controller
         });
 
         // Get the final collection of cars.
-        $cars = $query->get();
+        $cars = $query->paginate(30);
+        $cars->through(fn ($car) => new CarResourceManagement($car));
         if ($cars->isEmpty()) {
             return response()->json(
                 [

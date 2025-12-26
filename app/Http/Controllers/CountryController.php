@@ -66,21 +66,21 @@ class CountryController extends Controller
         return CountryResource::collection($countries)->response();
     }
 
-    public function shippingDetails(): JsonResponse
-    {
-        $countries = Country::orderBy('country_name', 'asc')->get();
-        $ports =Port::orderBy('name', 'asc')->get();
-        $shippingRates= ShippingRate::where('is_current', true)->get();
-        $deliveryTarrifs= DeliveryTariff::all();
+    // public function shippingDetails(): JsonResponse
+    // {
+    //     $countries = Country::orderBy('country_name', 'asc')->get();
+    //     $ports =Port::orderBy('name', 'asc')->get();
+    //     $shippingRates= ShippingRate::where('is_current', true)->get();
+    //     $deliveryTarrifs= DeliveryTariff::all();
          
-        return response()->json([
-            'countries' => CountryResource::collection($countries),
-            'ports' => PortResource::collection($ports),
-            'shipping_rates'=>$shippingRates,
-            'delivery_tarrifs'=>$deliveryTarrifs,
+    //     return response()->json([
+    //         'countries' => CountryResource::collection($countries),
+    //         'ports' => PortResource::collection($ports),
+    //         'shipping_rates'=>$shippingRates,
+    //         'delivery_tarrifs'=>$deliveryTarrifs,
 
-        ]);
-    }
+    //     ]);
+    // }
 
     public function updateGateways(Request $request, $id)
     {
@@ -91,5 +91,10 @@ class CountryController extends Controller
         $this->countryService->setCountryGatewayPort($id, $request->port_ids);
 
         return back()->with('success', 'Gateway network updated.');
+    }
+
+    public function apiGetCountriesClient():JsonResponse{
+        $countries= CountryResource::collection( Country::with('gatewayPorts')->orderBy('country_name', 'asc')->get());
+        return response()->json($countries);
     }
 }

@@ -18,10 +18,10 @@ class CarListingResource extends JsonResource
         return [
             'id' => $this->id,
             'car_selling_status' => $this->car_selling_status,
-            'location' => $this->location,
+            'location' => $this->orign,
             'image_main' => new ImageResource($this->whenLoaded('images')->firstWhere('is_main', true)),
             'price' => new CarPriceResource($this->whenLoaded('prices')->firstWhere('is_current', true)),
-
+            'origin_country'=>new CountryResource($this->whenLoaded('originCountry') ),
             'spect' => [
 
                 'manufacture_year' => $this->manufacture_year,
