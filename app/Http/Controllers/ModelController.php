@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\CarModel; // Ensure correct casing for CarModel
-use App\Classes\Services\carModelService; // Import your service
+use App\Classes\Services\CarModelService; // Import your service
 use App\Classes\Services\BrandService; // Import BrandService to get brands
 use Illuminate\Validation\ValidationException;
 use App\Http\Resources\ModelResource; // Import ModelResource for API responses
@@ -17,7 +17,7 @@ class ModelController extends Controller
     protected $carModelService;
     protected $brandService; // Inject BrandService
 
-    public function __construct(carModelService $carModelService, BrandService $brandService)
+    public function __construct(CarModelService $carModelService, BrandService $brandService)
     {
         $this->carModelService = $carModelService;
         $this->brandService = $brandService;

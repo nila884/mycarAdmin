@@ -2,8 +2,8 @@
 
 namespace App\Classes\Services;
 
-use Carbon\Carbon;
-use App\Models\carModel; // Ensure correct casing for carModel model
+
+use App\Models\CarModel; // Ensure correct casing for carModel model
 use App\Models\Brand; // Import Brand model to fetch brands
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -11,7 +11,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator as ValidatorReturn;
 use Illuminate\Support\Str; // For slugging if needed, though not directly used for model_name here
 
-class carModelService
+class CarModelService
 {
     public function Index()
     {
@@ -42,7 +42,7 @@ class carModelService
             return null; // Or throw an exception
         }
 
-        return carModel::create([
+        return CarModel::create([
             "model_name" => $name,
             "brand_id" => $brand->id // Use the found brand ID
         ]);
