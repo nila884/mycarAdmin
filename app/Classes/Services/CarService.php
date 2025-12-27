@@ -32,6 +32,7 @@ class CarService
             'seller',
             'features',
             'images',
+            'originCountry',
             'prices' => fn ($q) => $q->where('is_current', true),
         ])
         ->leftJoin('versions', 'cars.version_id', '=', 'versions.id')
@@ -137,11 +138,11 @@ class CarService
     public function Create(Request $request)
     {
         $validator = $this->DataValidation($request, 'post');
-        // dd($validator->errors()->getMessages());
+        
         if ($validator->fails()) {
+         
             throw new \Illuminate\Validation\ValidationException($validator);
         }
-
         DB::beginTransaction(); // Start a transaction
 
         try {
@@ -154,6 +155,7 @@ class CarService
                 'version_id' => $request->version_id,
                 'seller_id' => $request->seller_id,
                 'mileage' => $request->mileage,
+                'origin_country_id'=> $request->origin_country_id,
                 'chassis_number' => trim(htmlspecialchars($request->chassis_number)),
                 'registration_year' => $request->registration_year,
                 'manufacture_year' => $request->manufacture_year,
@@ -224,6 +226,7 @@ class CarService
 
             return $car;
         } catch (Exception $e) {
+            dd($e);
             DB::rollBack();
             throw $e;
         }
@@ -232,7 +235,7 @@ class CarService
     public function read(int $id)
     {
 
-        $car = Car::with(['version.carModel.brand', 'category','exteriorColor','interiorColor', 'fuelType', 'seller', 'features', 'images','prices' => function ($query) {
+        $car = Car::with(['version.carModel.brand', 'category','exteriorColor','interiorColor', 'originCountry','fuelType', 'seller', 'features', 'images','prices' => function ($query) {
             $query->where('is_current', true);}])->find($id);
         if (! $car) {
             return null;
@@ -266,6 +269,7 @@ class CarService
                 'interior_color_id' => $request->interior_color_id,
                 'weight' => $request->weight,
                 'status' => $request->boolean('status'),
+                'origin_country_id'=> $request->origin_country_id,
                 'transmission' => trim(htmlspecialchars($request->transmission)),
                 'steering' => trim(htmlspecialchars($request->steering)),
                 'seating_capacity' => $request->seating_capacity,
@@ -445,6 +449,7 @@ class CarService
                 'dimensions.width_mm'  => 'nullable|integer|min:1',
                 'dimensions.height_mm' => 'nullable|integer|min:1',
                 'dimensions.length_mm' => 'nullable|integer|min:1',
+            'origin_country_id' => ['required', 'exists:countries,id']
         ];
 
         switch (strtolower($method)) {
