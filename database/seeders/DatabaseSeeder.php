@@ -85,7 +85,7 @@ class DatabaseSeeder extends Seeder
         $colors= Color::factory(5)->create();
         foreach ($brands as $brand) {
 
-            carModel::factory(4)->create([
+            CarModel::factory(4)->create([
                 'brand_id' => $brand->id,
             ]);
         }
