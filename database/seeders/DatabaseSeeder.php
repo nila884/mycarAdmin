@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Brand;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Car; // Ensure to import the VersionSeeder
-use App\Models\carModel;
+use App\Models\CarModel;
 use App\Models\CarPrice;
 use App\Models\Category;
 use App\Models\Color;
