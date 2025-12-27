@@ -101,6 +101,7 @@ export interface CarDetailData {
   version:Version;
   category: Category;
   seller:Seller;
+  country:CountryObject;
   fuel_type: FuelType;
   spect:{
             chassis_number: string;

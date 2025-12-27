@@ -15,7 +15,7 @@ class CarModelFactory extends Factory
      *
      * @var string
      */
-    protected $model = carModel::class;
+    protected $model = CarModel::class;
 
     /**
      * Define the model's default state.

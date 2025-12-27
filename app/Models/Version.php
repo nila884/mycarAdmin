@@ -17,7 +17,7 @@ class Version extends Model
 
     public function CarModel()
     {
-        return $this->belongsTo(carModel::class);
+        return $this->belongsTo(CarModel::class);
     }
 
     public function cars()

@@ -11,6 +11,7 @@ use App\Models\Car;
 use App\Models\CarModel;
 use App\Models\Category;
 use App\Models\Color;
+use App\Models\Country;
 use App\Models\Feature;
 use App\Models\FuelType;
 use App\Models\Seller;
@@ -73,6 +74,7 @@ class CarController extends Controller
         $sellers = Seller::all(['id', 'seller_name']);
         $features = Feature::all(['id', 'feature_name']);
         $colors= Color::all(['id','name','hex_code']);
+        $coutries= Country::all(['id','country_name']);
         $versions = Version::with('carModel:id,model_name')->get()->map(function ($version) {
             return [
                 'id' => $version->id,
@@ -91,6 +93,7 @@ class CarController extends Controller
             'sellers' => $sellers,
             'features' => $features,
             'colors'=> $colors,
+            'countries'=>$coutries,
         ]);
     }
 
@@ -99,7 +102,7 @@ class CarController extends Controller
      */
     public function store(Request $request)
     {
-
+          
         try {
           $car=  $this->carService->Create($request);
             return redirect()->route('car.index')

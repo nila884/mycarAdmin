@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
-import { Brand, CarModel, Category, Feature, FuelType, Seller, Version, CarDetail, Image, CarDetailData, Color } from "@/lib/object";
+import { Brand, CarModel, Category, Feature, FuelType, Seller, Version,  Image, CarDetailData, Color, CountryObject } from "@/lib/object";
 import { string } from "zod";
 import { Switch } from "../ui/switch";
 
@@ -20,6 +20,7 @@ interface CreateFormProps {
     features: Feature[];
     sellers: Seller[];
     car?: CarDetailData;
+    countries: CountryObject[];
     colors: Color[];
 }
 
@@ -33,6 +34,7 @@ type CarForm = {
     interior_color_id:string;
     fuel_type_id: string;
     seller_id: string;
+    origin_country_id: string;
     mileage: number|null;
     chassis_number: string;
     registration_year: number|null;
@@ -86,6 +88,7 @@ const getInitialFormData = (car?: CarDetailData): CarForm => {
         category_id: car?.category.id?.toString() || "",
         fuel_type_id: car?.fuel_type.id?.toString() || "",
         seller_id: car?.seller.id?.toString() || "",
+        origin_country_id: car?.country.id?.toString() || "",
         interior_color_id: car?.interior_color?.id.toString()||"",
         exterior_color_id: car?.exterior_color?.id.toString()||"",
         mileage: car?.spect.mileage || null,
@@ -124,7 +127,7 @@ const getInitialFormData = (car?: CarDetailData): CarForm => {
     };
 };
 
-const CreateCarForm = ({ brands, carModels, categories, versions, features, fuelTypes, sellers,colors, car }: CreateFormProps) => {
+const CreateCarForm = ({ brands, carModels, categories, versions, features, fuelTypes, sellers,colors,countries, car }: CreateFormProps) => {
     const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
 
     const [selectedBrandId, setSelectedBrandId] = useState<string>('');
@@ -632,7 +635,34 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
                         </Select>
                         <InputError message={errors.seller_id} className="mt-2" />
                     </div>
+
+                                    <div className="grid gap-2">
+                        <Label htmlFor="origin_country_id">Origin country</Label>
+                        <Select
+                            onValueChange={(value) => setData('origin_country_id', value)}
+                            value={data.origin_country_id}
+                        >
+                            <SelectTrigger id="origin_country_id" disabled={processing}>
+                                <SelectValue placeholder="Select origin country" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {countries.length > 0 ? (countries.map((c) => (
+                                    <SelectItem key={c.id.toString()} value={c.id.toString()}>
+                                        {c.country_name}
+                                    </SelectItem>
+                                ))) : (
+                                    <SelectItem value="placeholder" disabled>
+                                        No countries available
+                                    </SelectItem>
+                                )}
+                            </SelectContent>
+                        </Select>
+                        <InputError message={errors.origin_country_id} className="mt-2" />
+                    </div>
                 </div>
+
+
+
 
                 <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-4">
                     {/* Chassis Number Input */}

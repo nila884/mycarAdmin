@@ -3,7 +3,7 @@ import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import CreateCarForm from "@/components/car/create-form";
-import { Brand,Feature,FuelType,Seller,CarModel,Category, Version,  Color, CarDetailData } from "@/lib/object"; // Import Car type
+import { Brand,Feature,FuelType,Seller,CarModel,Category, Version,  Color, CarDetailData, CountryObject } from "@/lib/object"; // Import Car type
 
 
 
@@ -18,9 +18,10 @@ interface CreateCarPageProps {
   sellers: Seller[];
   features: Feature[];
   colors: Color[];
+  countries: CountryObject[];
 }
 
-export default function Create({ car, brands, carModels, categories, fuelTypes, versions, sellers, features,colors }: CreateCarPageProps) {
+export default function Create({ car, brands, carModels, categories, fuelTypes, versions, sellers, features,colors,countries }: CreateCarPageProps) {
 
 
 
@@ -44,6 +45,7 @@ export default function Create({ car, brands, carModels, categories, fuelTypes, 
         sellers={sellers}
         features={features}
         colors={colors}
+        countries={countries}
       />
     </AppLayout>
   );
