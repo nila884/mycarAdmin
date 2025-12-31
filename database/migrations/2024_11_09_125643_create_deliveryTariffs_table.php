@@ -38,6 +38,7 @@ Schema::create('delivery_tariffs', function (Blueprint $table) {
         $table->decimal('agency_service_fee', 12, 2)->default(0); 
         
         $table->string('weight_range')->nullable();
+        $table->boolean('is_current')->default(false);
         $table->timestamps();
     });
     }

@@ -14,7 +14,7 @@ class DeliveryTariff extends Model
     'from_country_id', 'from_port_id', 'from_city_id',
     'country_id', 'to_city_id', 'adress_name',
     'service_type', 'delivery_method', 'delivery_driver_agency_id',
-    'tarif_per_tone', 'driver_fee', 'clearing_fee', 'agency_service_fee'
+    'tarif_per_tone', 'driver_fee', 'clearing_fee', 'agency_service_fee', 'is_current',
 ];
 
     public function country(): BelongsTo {

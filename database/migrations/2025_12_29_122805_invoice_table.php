@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('order_id')->constrained();
+    $table->foreignId('order_id')->unique()->constrained();
     $table->string('invoice_number')->unique();
-    $table->decimal('total_amount', 12, 2);
-    $table->enum('status', ['unpaid', 'paid', 'cancelled'])->default('unpaid');
+    $table->decimal('amount_due', 12, 2);
+    $table->enum('payment_status', ['unpaid', 'partial', 'paid'])->default('unpaid');
+    $table->string('pdf_path')->nullable(); // Path to the generated PDF
     $table->timestamps();
 });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('invoices');
     }
 };

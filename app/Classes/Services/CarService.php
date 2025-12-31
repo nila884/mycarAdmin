@@ -22,7 +22,7 @@ class CarService
   public function Index()
 {
     $query = Car::query()
-        ->select('cars.*') // ✅ prevents DISTINCT issues
+        ->select('cars.*') 
         ->with([
             'version.carModel.brand',
             'category',

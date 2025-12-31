@@ -1,81 +1,216 @@
 <?php
 namespace App\Classes\Services;
 
-use App\Models\{Order, OrderItem, Invoice, Car, ShippingRate, DeliveryTariff};
+use App\Http\Resources\OrderResource;
+use App\Models\Order;
+use App\Models\Car;
+use App\Models\ShippingRate;
+use App\Models\DeliveryTariff;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 
 class OrderService
 {
-    public function createOrder(array $data)
+    protected $invoiceService,$carService;
+
+    public function __construct(InvoiceService $invoiceService)
     {
-        return DB::transaction(function () use ($data) {
-            // 1. Setup the Base Order
+        $this->invoiceService = $invoiceService;
+    }
+
+    /**
+     * Business Logic: Create a Quotation Snapshot
+     */
+    public function createOrderSnapshot(array $data, int $userId)
+    {
+      
+        $validator = Validator::make($data, [
+            'car_id'=>'required|exists:cars,id',
+            'car_price' => 'required',
+            'total_price' => 'required',
+            'shipping_rate_id' => 'required|exists:shipping_rates,id',
+            'delivery_tariff_id' => 'required|exists:delivery_tariffs,id',
+            'shipping_method' => 'required|in:roro,container',
+            'car_weight'=>'required'
+        ]);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+
+        return DB::transaction(function () use ($data, $userId) {
+            $car = Car::with(['version.carModel.brand','prices'=> function ($query) {
+                            $query->where('is_current', true);}
+                            ])->findOrFail($data['car_id']);
+            $seaRate = ShippingRate::findOrFail($data['shipping_rate_id']);
+            $tariff = DeliveryTariff::findOrFail($data['delivery_tariff_id']);
+            $fobPrice = $car->prices->first()->price - ($car->prices->first()->discount ?? 0);
+            $seaFreight = ($data['shipping_method'] === 'roro') ? $seaRate->price_roro : $seaRate->price_container;  
+            $weightInTons = $car->weight / 1000;
+            $landTransit = ($tariff->tarif_per_tone * $weightInTons) + $tariff->driver_fee + $tariff->agency_service_fee;
             $order = Order::create([
-                'order_number' => 'ORD-' . strtoupper(Str::random(8)),
-                'user_id' => auth()->id(),
-                'delivery_tariff_id' => $data['delivery_tariff_id'], // The city/port choice
-                'total_amount' => 0, // Will update after calculating items
+                'order_number' => 'QT-' . strtoupper(Str::random(12)), // Reference code stays uppercase
+                'user_id' => $userId,
+                'car_id' => $car->id,
+                'fob_price' => $fobPrice,
+                'sea_freight' => $seaFreight,
+                'land_transit' => $landTransit,
+                'clearing_fee' => $tariff->clearing_fee,
+                'total_amount' => $fobPrice + $seaFreight + $landTransit + $tariff->clearing_fee,
+                'origin_port' => Str::lower('YOKOHAMA, JAPAN'),
+                'destination_port' => Str::lower($seaRate->toPort->name ?? 'tba'),
+                'final_destination_city' => Str::lower($tariff->toCity->name ?? 'tba'),
+                'shipping_method' => Str::lower($data['shipping_method']),
+                'status' => 'quote',
+                'expires_at' => now()->addDays(30),
             ]);
+           
+            $pdfData = [
+            'order' => $order,
+            'car' => $car,
+            'user' => Auth::user(),
+            // Mapping fields to match the reference PDF structure 
+            'issue_date' => now()->format('d-M-Y'),
+            'valid_until' => $order->expires_at->format('d-M-Y'),
+            'bank_details' => [
+                'name' => 'SUMITOMO MITSUI BANKING CORPORATION',
+                'swift' => 'SMBCJPJT',
+                'account' => '988-5000137',
+                'name_on_account' => 'BE FORWARD CO.LTD,.'
+            ]
+        ];
+        $pdf = Pdf::loadView('pdf.quotation', $pdfData);
+        
+        $fileName = 'quotes/' . $order->order_number . '.pdf';
+        Storage::disk('public')->put($fileName, $pdf->output());
 
-            $grandTotal = 0;
-
-            foreach ($data['car_ids'] as $carId) {
-                $car = Car::findOrFail($carId);
-                
-                // Get Car Price (Snapshot)
-                $unitPrice = $car->prices()->where('is_current', true)->first()->price ?? 0;
-
-                // 2. Calculate Dynamic Shipping (RORO vs Container)
-                $shippingFees = $this->calculateTotalShipping(
-                    $car, 
-                    $data['shipping_method'], // 'price_roro' or 'price_container'
-                    $data['delivery_tariff_id']
-                );
-
-                // 3. Create Item Snapshot (Locks the price forever)
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'car_id' => $car->id,
-                    'unit_price' => $unitPrice,
-                    'shipping_fees' => $shippingFees,
-                ]);
-
-                $grandTotal += ($unitPrice + $shippingFees);
-            }
-
-            // 4. Update Order and Generate Invoice
-            $order->update(['total_amount' => $grandTotal]);
-
-            Invoice::create([
-                'order_id' => $order->id,
-                'invoice_number' => 'INV-' . time(),
-                'total_amount' => $grandTotal,
-            ]);
-
+        // $order->update(['invoice_path' => $fileName]);
+        $this->invoiceService->createInvoiceForOrder($order,$fileName);
             return $order;
         });
     }
 
-    private function calculateTotalShipping(Car $car, $method, $deliveryTariffId)
+    /**
+     * Get Paginated Orders for Admin
+     */
+    public function getAllOrders($perPage = 15)
     {
-        // Get the Inland Tariff (Port to City)
-        $tariff = DeliveryTariff::findOrFail($deliveryTariffId);
-        
-        // Find the Ocean Route (Origin Country -> Destination Country)
-        $route = ShippingRate::where('from_country_id', $car->origin_country_id)
-            ->where('to_country_id', $tariff->country_id)
-            ->where('is_current', true)
-            ->first();
-
-        // Ocean Cost (RORO or Container)
-        $oceanCost = ($method === 'container') ? $route->price_container : $route->price_roro;
-
-        // Inland Cost (Weight * Rate)
-        // Convert car weight (grams/kg) to tons if necessary
-        $weightInTons = $car->weight / 1000; 
-        $inlandCost = $weightInTons * (float)$tariff->tarif_per_tone;
-
-        return $oceanCost + $inlandCost;
+        return Order::with(['car', 'user'])->latest()->paginate($perPage);
     }
+
+    /**
+     * Get Single Order Details
+     */
+    public function getOrderById(int $id)
+    {
+        return Order::with(['car.price', 'user', 'invoice'])->findOrFail($id);
+    }
+
+    /**
+     * Update Order Status with Validation
+     */
+    public function updateStatus(int $id, string $status)
+    {
+        $order = Order::findOrFail($id);
+        
+        $validStatuses = ['quote', 'proforma', 'paid', 'cancelled'];
+        if (!in_array(Str::lower($status), $validStatuses)) {
+            throw new \InvalidArgumentException("Invalid status: $status");
+        }
+
+        $order->update(['status' => Str::lower($status)]);
+        return $order;
+    }
+
+    /**
+     * Delete Order
+     */
+    public function deleteOrder(int $id)
+    {
+        $order = Order::findOrFail($id);
+        return $order->delete();
+    }
+
+    public function getUserOrders()
+{
+
+    $orders = Order::with([
+        'car', 
+        'invoice' 
+    ])
+    ->where('user_id', Auth::user()->id)
+    ->latest()
+    ->get();
+    return OrderResource::collection($orders);
+}
+
+
+public function cancelOrder($id)
+{
+    dd($id);
+    $order = Order::where('user_id',Auth::user()->id)->findOrFail($id);
+    if (in_array($order->status, ['quote', 'proforma'])) {
+        $order->update(['status' => 'cancelled']); 
+        if ($order->invoice) {
+            $order->invoice->update(['payment_status' => 'unpaid']); 
+        }
+        return response()->json(['message' => 'Order cancelled successfully.']);
+    }
+    return response()->json(['error' => 'Paid or shipped orders cannot be cancelled.'], 400);
+}
+
+/**
+ * Logic to specifically Confirm a Quote
+ */
+public function confirmOrder(int $id)
+{
+    dd($id);
+    $order = Order::where('user_id', Auth::user()->id)->findOrFail($id);
+
+    if ($order->status !== 'quote') {
+        throw new \Exception("Only quotations can be confirmed.");
+    }
+
+    // 1. Update status
+    $order->update(['status' => 'proforma']);
+
+    // 2. Create the Invoice record if it doesn't exist
+    $order->invoice()->firstOrCreate([
+        'order_id' => $order->id
+    ], [
+        'invoice_number' => 'INV-' . strtoupper(Str::random(8)),
+        'amount_due' => $order->total_amount,
+        'payment_status' => 'unpaid'
+    ]);
+
+    return new OrderResource($order->load('invoice'));
+}
+
+public function downloadInvoice($id)
+{
+if (ob_get_level()) ob_end_clean();
+
+    $order = Order::where('user_id', Auth::user()->id)->with('invoice')->findOrFail($id);
+    
+    // Path from your successful generation: quotes/QT-UZFRSLBNJQTR.pdf
+    $path = $order->invoice?->pdf_path; 
+    $fullSystemPath = storage_path('app/public/' . $path);
+
+    if (!$path || !file_exists($fullSystemPath)) {
+        return response()->json(['message' => 'File not found on storage'], 404);
+    }
+
+    // 2. Return the file with explicit headers
+    return response()->file($fullSystemPath, [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'attachment; filename="Quotation-'.$order->order_number.'.pdf"',
+        'Access-Control-Expose-Headers' => 'Content-Disposition'
+    ]);
+}
+
 }

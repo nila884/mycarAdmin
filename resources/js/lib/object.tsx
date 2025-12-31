@@ -303,6 +303,7 @@ export interface DeliveryTariffObject {
     country_id: string | number;
     to_city_id: string | number | null;
     delivery_driver_agency_id: string | number | null;
+    is_current: boolean;
 
     // Full Nested Relationships
     country?: any;
@@ -311,5 +312,6 @@ export interface DeliveryTariffObject {
     from_city?: any;
     to_city?: any;
     delivery_driver_agency?: any;
+
 }
 

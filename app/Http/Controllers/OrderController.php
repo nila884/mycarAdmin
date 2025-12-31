@@ -1,9 +1,10 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Classes\Services\OrderService;
+use App\Http\Resources\OrderResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
@@ -16,23 +17,68 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
-        dd("request price quote");
-        $validated = $request->validate([
-            'car_ids' => 'required|array',
-            'car_ids.*' => 'exists:cars,id',
-            'delivery_tariff_id' => 'required|exists:delivery_tariffs,id',
-            'shipping_method' => 'required|in:price_roro,price_container',
-        ]);
-
-        try {
-            $order = $this->orderService->createOrder($validated);
-            return response()->json([
-                'success' => true, 
-                'order_number' => $order->order_number,
-                'message' => 'Order and Invoice generated successfully.'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'error' => $e->getMessage()], 400);
+      
+ 
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
+        $order = $this->orderService->createOrderSnapshot($request->all(), Auth::id());
+        return new OrderResource($order);
     }
+    
+    
+    public function index()
+    {
+        $orders = $this->orderService->getAllOrders();
+        return OrderResource::collection($orders);
+    }
+
+    public function show($id)
+    {
+        $order = $this->orderService->getOrderById($id);
+        return new OrderResource($order);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate(['status' => 'required|string']);
+        
+        $order = $this->orderService->updateStatus($id, $request->status);
+        return new OrderResource($order);
+    }
+
+
+    public function destroy($id)
+    {
+        $this->orderService->deleteOrder($id);
+        return response()->json(['message' => 'Order deleted successfully']);
+    }
+
+    public function getUserOrders()
+    {
+        return $this->orderService->getUserOrders();
+    }
+    public function cancelOrder($id){
+        require $this->orderService->cancelOrder($id);
+    }
+
+    public function confirmOrder($id)
+{
+    try {
+        $order = $this->orderService->confirmOrder($id);
+        return response()->json($order);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 400);
+    }
+}
+public function downloadInvoice($id){
+        try {
+        $order = $this->orderService->downloadInvoice($id);
+        return response()->json($order);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 400);
+    }
+}
+
+    
 }

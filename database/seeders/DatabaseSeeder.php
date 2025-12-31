@@ -34,20 +34,17 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // create user
-        $users = User::factory(20)->create();
+        $users = User::factory(6)->create();
         $i = 0;
         foreach ($users as $user) {
-            if ($i < 10) {
-                $user->assignRole('user');
-
-            } elseif ($i < 17) {
+          
                 $user->assignRole('seller');
                 Seller::factory()->create([
                     'seller_name' => $user->name,
                     'user_id' => $user->id,
 
                 ]);
-            } elseif ($i < 19) {
+            if ($i < 4) {
                 $user->assignRole('admin');
             }
             $i++;

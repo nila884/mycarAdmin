@@ -41,7 +41,6 @@ public function cities()
     return $this->hasMany(City::class);
 }
 
-// Ensure cities are loaded in your common queries
 protected $with = ['cities', 'gatewayPorts'];
 
 }

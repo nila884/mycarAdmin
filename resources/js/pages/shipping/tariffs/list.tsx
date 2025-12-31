@@ -5,18 +5,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, MapPin, Truck, Landmark } from 'lucide-react';
-import { DeliveryTariffObject, CountryObject, PortObject, DeliveryDriverAgencyObject } from '@/lib/object';
+import { DeliveryTariffObject, CountryObject, PortObject, DeliveryDriverAgencyObject, CityObject } from '@/lib/object';
 import DeliveryTariffForm from '@/components/shipping/tariff/deliveryTariffForm';
 
 interface Props {
     delivery_tariffs: DeliveryTariffObject[];
     countries: CountryObject[];
     ports: PortObject[];
-    agencies:DeliveryDriverAgencyObject[]
+    agencies:DeliveryDriverAgencyObject[];
 }
 
-export default function DeliveryTariffList({ delivery_tariffs, countries, ports,agencies }: Props) {
-    
+export default function DeliveryTariffList({ delivery_tariffs, countries, ports,agencies}: Props) {
+
     const handleDelete = (id: number | string | null) => {
         if (id == null) return;
         const parsedId = typeof id === 'string' ? Number(id) : id;

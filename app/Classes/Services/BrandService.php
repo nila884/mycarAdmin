@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage; // Ensure Storage facade is imported
 use Illuminate\Validation\Validator as ValidatorReturn;
+use Illuminate\Support\Str;
 
 Class BrandService
 {
@@ -27,13 +28,13 @@ Class BrandService
 
     public function Create(Request $request)
     {
-        $name = trim(htmlspecialchars($request->brand_name));
+        $name = Str::lower(trim(htmlspecialchars($request->brand_name)));
         $logoPath = null; // Initialize logo path to null
 
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
             // Generate a unique file name
-            $fileName = time() . '_' . \Str::slug($name) . '.' . $file->getClientOriginalExtension();
+            $fileName = time() . '_' . Str::slug($name) . '.' . $file->getClientOriginalExtension();
             $logoPath = $file->storeAs('brand_logos', $fileName, 'public');
         }
         
@@ -45,7 +46,7 @@ Class BrandService
 
     public function Update(Request $request, Brand $brand): Brand
     {
-        $name = trim(htmlspecialchars($request->input('brand_name')));
+        $name = Str::lower(trim(htmlspecialchars($request->input('brand_name'))));
         $logoPath = $brand->logo; // Keep existing logo path by default
 
         // Check if a new logo file has been uploaded
@@ -57,7 +58,7 @@ Class BrandService
 
             $file = $request->file('logo');
             // Generate a unique file name for the new logo
-            $fileName = time() . '_' . \Str::slug($name) . '.' . $file->getClientOriginalExtension();
+            $fileName = time() . '_' . Str::slug($name) . '.' . $file->getClientOriginalExtension();
             // Store the new file and get its relative path
             $logoPath = $file->storeAs('brand_logos', $fileName, 'public');
         } elseif ($request->input('clear_logo')) { // Frontend sends 'clear_logo' if user wants to remove image
@@ -84,21 +85,43 @@ Class BrandService
         return $brand->delete();
     }
 
-    public function DataValidation(Request $request, String $method, Brand|bool $brand = null): ValidatorReturn|null
-    {
-        switch (strtolower($method)) {
-            case 'post':
-                return Validator::make($request->all(), [
-                    "brand_name" => ["required", "string", "max:255", "unique:brands,brand_name", "regex:/^[a-zA-Z0-9\s]+$/"], // Allow alphanumeric and spaces only
-                    "logo" => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:1024']
-                ]);
-            case 'patch': // Use 'patch' for update operations
-                return Validator::make($request->all(), [
-                    "brand_name" => ["required", "string", "max:255", Rule::unique("brands", "brand_name")->ignore($brand->id), "regex:/^[a-zA-Z0-9\s]+$/"], // Allow alphanumeric and spaces only
-                    "logo" => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:1024']
-                ]);
-            default:
-                return null;
-        }
+public function DataValidation(Request $request, string $method, $brand = null)
+{
+    if ($request->has('brand_name')) {
+        $request->merge([
+            'brand_name' => Str::lower($request->brand_name)
+        ]);
     }
+
+    $method = strtolower($method);
+    $rules = [
+        "logo" => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:1024']
+    ];
+
+    switch ($method) {
+        case 'post':
+            $rules["brand_name"] = [
+                "required", "string", "max:255", 
+                "unique:brands,brand_name", 
+                "regex:/^[a-z0-9\s]+$/" // Updated regex for lowercase
+            ];
+            break;
+
+        case 'patch':
+        case 'put':
+            $brandId = is_object($brand) ? $brand->id : null;
+
+            $rules["brand_name"] = [
+                "required", "string", "max:255", 
+                Rule::unique("brands", "brand_name")->ignore($brandId), 
+                "regex:/^[a-z0-9\s]+$/"
+            ];
+            break;
+
+        default:
+            return null;
+    }
+
+    return Validator::make($request->all(), $rules);
+}
 }

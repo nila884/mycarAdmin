@@ -49,7 +49,7 @@ class CarResourceManagement extends JsonResource
             'created_at' => $this->created_at?->format('Y-m-d'),
 
             'fuel_type' => $this->whenLoaded('fuelType'),
-            'version' => $this->whenLoaded('version'),
+            'version' => VersionResource::make($this->whenLoaded('version')),
             'seller' => $this->whenLoaded('seller'),
             'features' => $this->whenLoaded('features'),
             'images' => $this->whenLoaded('images'),

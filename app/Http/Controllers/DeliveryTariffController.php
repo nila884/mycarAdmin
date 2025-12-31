@@ -6,10 +6,11 @@ use App\Models\DeliveryTariff;
 use App\Models\Country;
 use App\Models\Port;
 use App\Classes\Services\DeliveryTariffService;
-use App\Http\Resources\CountryResource;
+use App\Http\Resources\CountryWithCitiesResource;
 use App\Http\Resources\DeliveryDriverAgencyResource;
 use App\Http\Resources\DeliveryTariffResource;
 use App\Http\Resources\PortResource;
+use App\Models\City;
 use App\Models\DeliveryDriverAgency;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -31,7 +32,7 @@ class DeliveryTariffController extends Controller
     {
         return Inertia::render('shipping/tariffs/list', [
             'delivery_tariffs' => DeliveryTariffResource::collection( $this->service->Index()),
-            'countries' => CountryResource::collection( Country::orderBy('country_name')->get()),
+            'countries' => CountryWithCitiesResource::collection( Country::orderBy('country_name')->get()),
             'ports' => PortResource::collection( Port::orderBy('name')->get()),
             'agencies'=> DeliveryDriverAgencyResource::collection( DeliveryDriverAgency::all()),
         ]);

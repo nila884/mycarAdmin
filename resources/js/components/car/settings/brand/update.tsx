@@ -45,8 +45,8 @@ const Update: React.FC<EditBrandProps> = ({ brand }) => {
   // Set initial image preview if a logo exists
   useEffect(() => {
     if (brand.logo) {
-      // Assuming your public storage is accessible via /storage/
-      setPreview(`/storage/${brand.logo}`); // Updated path based on your `brand.tsx` image source
+
+      setPreview(`${brand.logo}`);
       setCurrentLogoPath(brand.logo);
     }
   }, [brand.logo]);

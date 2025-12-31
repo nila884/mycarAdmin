@@ -14,7 +14,8 @@ import { useForm } from '@inertiajs/react';
 import { Pencil, Plus, Landmark, Anchor, MapPin, Building2, Truck, Box, Navigation } from 'lucide-react';
 import React, { useState } from 'react';
 import InputError from '@/components/input-error';
-import { CountryObject, DeliveryTariffObject, PortObject, DeliveryDriverAgencyObject } from '@/lib/object';
+import { CountryObject, DeliveryTariffObject, PortObject, DeliveryDriverAgencyObject, CityObject } from '@/lib/object';
+import { Switch } from '@/components/ui/switch';
 
 interface Props {
     countries: CountryObject[];
@@ -23,7 +24,7 @@ interface Props {
     tariff?: DeliveryTariffObject;
 }
 
-const DeliveryTariffForm: React.FC<Props> = ({ tariff, countries, ports, agencies }) => {
+const DeliveryTariffForm: React.FC<Props> = ({ tariff, countries, ports, agencies}) => {
     const isUpdate = !!tariff;
     const [open, setOpen] = useState(false);
 
@@ -41,6 +42,7 @@ const DeliveryTariffForm: React.FC<Props> = ({ tariff, countries, ports, agencie
         driver_fee: tariff?.driver_fee || '',
         clearing_fee: tariff?.clearing_fee || '',
         agency_service_fee: (tariff as any)?.agency_service_fee || '',
+        is_current: tariff?.is_current ?? false,
         // weight_range: tariff?.weight_range || 'Standard',
     });
 
@@ -210,7 +212,7 @@ const DeliveryTariffForm: React.FC<Props> = ({ tariff, countries, ports, agencie
                         <div className="grid grid-cols-4 gap-4">
                             <div className="space-y-2">
                                 <Label className="text-[11px]">Trucking/Tone</Label>
-                                <Input type="number" value={data.tarif_per_tone} onChange={e => setData('tarif_per_tone', e.target.value)} />
+                                <Input type="number" value={data.tarif_per_tone} onChange={e => setData('tarif_per_tone', e.target.value)} disabled={data.service_type === 'self_pickup'} />
                                 <InputError message={errors.tarif_per_tone} />
                             </div>
                             <div className="space-y-2">
@@ -227,6 +229,20 @@ const DeliveryTariffForm: React.FC<Props> = ({ tariff, countries, ports, agencie
                                 <Input type="number" value={data.agency_service_fee} onChange={e => setData('agency_service_fee', e.target.value)} disabled={data.service_type !== 'agency'} />
                             </div>
                         </div>
+                    </div>
+                                            {/* discount Input */}
+                    <div className="grid gap-2">
+                        <Label htmlFor="is_current">Current price?</Label>
+                          <Switch
+                      checked={data.is_current}
+                     
+                      onCheckedChange={(checked) => {
+                        setData('is_current', checked);
+                      }}
+                      disabled={processing}
+                    />
+                        
+                        <InputError message={errors.is_current} className="mt-2" />
                     </div>
                     <div className="mt-4 p-3 bg-blue-50 rounded-md flex justify-between items-center">
                         <span className="text-sm font-bold text-blue-900">Estimated Total Route Cost:</span>

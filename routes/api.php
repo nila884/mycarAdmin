@@ -3,6 +3,7 @@
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ClientAuthController;
 use App\Http\Controllers\ClientShippingController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\DeliveryTariffController;
@@ -15,6 +16,9 @@ use App\Http\Controllers\SellerController;
 use App\Http\Controllers\ShippingRateController;
 use App\Http\Controllers\VersionController;
 use Illuminate\Support\Facades\Route;
+
+
+
 
 Route::get('brands', [BrandController::class, 'apiIndex'])->name('api.brands');
 Route::get('fuels', [FuelController::class, 'apiIndex'])->name('api.fuels');
@@ -42,9 +46,27 @@ Route::get('shipping-details/rates', [ShippingRateController::class, 'apiGetShip
 Route::get('countries', [CountryController::class, 'apiGetCountriesClient'])->name('api.countries');
 Route::get('ports', [PortController::class, 'apiIndex'])->name('api.ports');
 
-Route::post('price-quote-request', [OrderController::class, 'store'])->name('api.request.quotes');
+// Route::post('price-quote-request', [OrderController::class, 'store'])->name('api.request.quotes');
 
 
 
 
 Route::get('management/cars/search-brand', [CarController::class, 'searchByBrand'])->name('management.car.filter.brand');
+
+
+
+
+Route::post('/client/register', [ClientAuthController::class, 'register']);
+Route::post('/client/login', [ClientAuthController::class, 'login']);
+
+
+Route::middleware('auth:sanctum')->group(function () {
+Route::post('/orders/quotes/request', [OrderController::class, 'store']);
+Route::get('/orders/client/list', [OrderController::class, 'getUserOrders']);
+Route::post('/orders/client/{id}/confirm', [OrderController::class, 'confirmOrder']);
+Route::post('/orders/client/{id}/cancel', [OrderController::class, 'cancelOrder']);
+
+Route::get('/orders/client/{id}/download', [OrderController::class, 'downloadInvoice']);
+
+Route::post('/client/logout', [ClientAuthController::class, 'logout']);
+});
