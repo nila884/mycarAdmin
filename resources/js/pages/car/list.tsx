@@ -26,7 +26,7 @@ export default function List({ cars, filters }: any) {
       replace: true,
     })
   }
-//////implement search by user-seller!!!!!!!!!!!!
+
   return (
     <AppLayout>
       <Head title="Cars Listings" />

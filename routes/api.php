@@ -67,6 +67,9 @@ Route::post('/orders/client/{id}/confirm', [OrderController::class, 'confirmOrde
 Route::post('/orders/client/{id}/cancel', [OrderController::class, 'cancelOrder']);
 
 Route::get('/orders/client/{id}/download', [OrderController::class, 'downloadInvoice']);
+Route::get('/client/infos', [ClientAuthController::class, 'show']);
+Route::patch('/client/infos/update', [ClientAuthController::class, 'updateField']);
+Route::patch('/client/password/update', [ClientAuthController::class, 'updatePassword']);
 
 Route::post('/client/logout', [ClientAuthController::class, 'logout']);
 });

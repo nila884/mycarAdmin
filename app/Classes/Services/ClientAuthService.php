@@ -1,9 +1,11 @@
 <?php
 namespace App\Classes\Services;
 
+use App\Http\Resources\ClientResource;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
@@ -75,4 +77,33 @@ $validator = Validator::make($data, [
 
         return $user;
     }
+
+
+    public function show(Request $request)
+{
+    $user = $request->user()->load('client');
+    return new ClientResource($user);
+}
+
+
+/**
+     * Update a single field across users or clients tables
+     */
+    public function updateSingleField($user, array $data)
+    {
+        return DB::transaction(function () use ($user, $data) {
+            if (isset($data['name']) || isset($data['email'])) {
+                $user->update(array_intersect_key($data, array_flip(['name', 'email'])));
+            }
+            if (isset($data['country']) || isset($data['address']) || isset($data['phone'])) {
+                $user->client()->updateOrCreate(
+                    ['user_id' => $user->id],
+                    array_intersect_key($data, array_flip(['country', 'address', 'phone']))
+                );
+            }
+            return new ClientResource($user->load('client'));
+        });
+    } 
+
+
 }

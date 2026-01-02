@@ -169,7 +169,6 @@ public function cancelOrder($id)
  */
 public function confirmOrder(int $id)
 {
-    dd($id);
     $order = Order::where('user_id', Auth::user()->id)->findOrFail($id);
 
     if ($order->status !== 'quote') {
@@ -191,26 +190,24 @@ public function confirmOrder(int $id)
     return new OrderResource($order->load('invoice'));
 }
 
-public function downloadInvoice($id)
+
+public function getDownloadPath($id)
 {
-if (ob_get_level()) ob_end_clean();
+    // Find the order for the logged-in user
+    $order = Order::where('user_id', Auth::user()->id)
+                  ->with('invoice')
+                  ->findOrFail($id);
 
-    $order = Order::where('user_id', Auth::user()->id)->with('invoice')->findOrFail($id);
-    
-    // Path from your successful generation: quotes/QT-UZFRSLBNJQTR.pdf
-    $path = $order->invoice?->pdf_path; 
-    $fullSystemPath = storage_path('app/public/' . $path);
+    $path = $order->invoice->pdf_path; // e.g., "quotes/QT-123.pdf"
+    $fullPath = storage_path('app/public/' . $path);
 
-    if (!$path || !file_exists($fullSystemPath)) {
-        return response()->json(['message' => 'File not found on storage'], 404);
+    if (!file_exists($fullPath)) {
+        throw new \Exception("The PDF file does not exist on the server.");
     }
 
-    // 2. Return the file with explicit headers
-    return response()->file($fullSystemPath, [
-        'Content-Type' => 'application/pdf',
-        'Content-Disposition' => 'attachment; filename="Quotation-'.$order->order_number.'.pdf"',
-        'Access-Control-Expose-Headers' => 'Content-Disposition'
-    ]);
+    return [
+        'path' => $fullPath,
+        'name' => $order->order_number . '.pdf'
+    ];
 }
-
 }

@@ -72,11 +72,23 @@ class OrderController extends Controller
     }
 }
 public function downloadInvoice($id){
-        try {
-        $order = $this->orderService->downloadInvoice($id);
-        return response()->json($order);
+try {
+        // 1. Get the path and filename from the Service
+        $fileData = $this->orderService->getDownloadPath($id);
+
+        // 2. Force clear buffers to prevent binary corruption
+        if (ob_get_level()) ob_end_clean();
+
+        // 3. Return the actual file stream (NOT JSON)
+        return response()->file($fileData['path'], [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $fileData['name'] . '"',
+            'Access-Control-Expose-Headers' => 'Content-Disposition'
+        ]);
+
     } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 400);
+        // Only use JSON if an error actually happens
+        return response()->json(['error' => $e->getMessage()], 404);
     }
 }
 

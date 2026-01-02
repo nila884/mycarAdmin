@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 use App\Classes\Services\ClientAuthService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ClientResource;
-use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class ClientAuthController extends Controller
 {
@@ -68,9 +69,7 @@ class ClientAuthController extends Controller
         }
     }
 
-    /**
-     * Handle Logout
-     */
+
     public function logout(Request $request)
     {
         
@@ -80,4 +79,39 @@ class ClientAuthController extends Controller
         'message' => 'Logged out successfully'
     ]);
     }
+
+    public function show(Request $request)
+{
+    return response()->json($this->authService->show($request));
+}
+
+public function updateField(Request $request)
+    {
+        $validated = $request->validate([
+            'name'    => 'sometimes|string|max:255',
+            'email'   => 'sometimes|email|unique:users,email,' . $request->user()->id,
+            'country' => 'sometimes|string', 
+            'address' => 'sometimes|string',
+            'phone'   => 'sometimes|string',
+        ]);
+
+        $user = $this->authService->updateSingleField($request->user(), $validated);
+
+        return new ClientResource($user);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', 'current_password'], // Built-in Laravel rule
+            'password' => ['required', 'confirmed', Password::defaults()],
+        ]);
+
+        $request->user()->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return response()->json(['message' => 'Password updated successfully']);
+    }
+
 }
