@@ -1,25 +1,82 @@
 <?php
 
-namespace Database\Factories;
-
+namespace Database\Seeders;
 use App\Models\Feature;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Seeder;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Feature>
- */
-class FeatureFactory extends Factory
+class FeaturesSeeder extends Seeder
 {
-    protected $model = Feature::class;
-
+    
     /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
+     * Run the database seeds.
      */
-    public function definition(): array
+    public function run(): void
     {
-       $features = [
+
+
+$mainFeatures = [
+    [
+        'feature_name' => 'Air Conditioning',
+        'description' => 'Cools the cabin to provide comfort for passengers in hot or warm weather.',
+        'icon' => 'FaSnowflake',
+        'is_main' => true,
+    ],
+    [
+        'feature_name' => 'Bluetooth',
+        'description' => 'Allows wireless connection for hands-free calls and audio streaming.',
+        'icon' => 'FaBluetoothB',
+        'is_main' => true,
+    ],
+    [
+        'feature_name' => 'Power Windows',
+        'description' => 'Enables electronic control of vehicle windows for driver and passengers.',
+        'icon' => 'FaWindowMaximize',
+        'is_main' => true,
+    ],
+    [
+        'feature_name' => 'ABS',
+        'description' => 'Prevents wheel lock during sudden or hard braking, improving safety.',
+        'icon' => 'FaCarCrash',
+        'is_main' => true,
+    ],
+    [
+        'feature_name' => 'Airbags',
+        'description' => 'Provides protection to occupants in case of a collision or accident.',
+        'icon' => 'FaLifeRing',
+        'is_main' => true,
+    ],
+    [
+        'feature_name' => 'Central Locking',
+        'description' => 'Locks or unlocks all doors at once for convenience and security.',
+        'icon' => 'FaLock',
+        'is_main' => true,
+    ],
+    [
+        'feature_name' => 'Rear Camera',
+        'description' => 'Helps the driver see behind the vehicle when reversing or parking.',
+        'icon' => 'FaCamera',
+        'is_main' => true,
+    ],
+    [
+        'feature_name' => 'Touchscreen Display',
+        'description' => 'Provides access to infotainment, navigation, and media controls.',
+        'icon' => 'FaTabletAlt',
+        'is_main' => true,
+    ],
+    [
+        'feature_name' => 'Alloy Wheels',
+        'description' => 'Lightweight aluminum wheels that improve appearance and performance.',
+        'icon' => 'FaCircle',
+        'is_main' => true,
+    ],
+];
+
+        foreach ($mainFeatures as $feature) {
+    Feature::create($feature);
+}
+
+
+    $features = [
     ['feature_name' => 'Sunroof', 'description' => 'Allows fresh air and sunlight into the cabin.', 'icon' => 'link'],
     ['feature_name' => 'Headlamp (HID, LED)', 'description' => 'High-intensity discharge or LED lights for better visibility.', 'icon' => 'link'],
     ['feature_name' => 'Parking sensor (front, rear)', 'description' => 'Detects obstacles while parking.', 'icon' => 'link'],
@@ -66,18 +123,10 @@ class FeatureFactory extends Factory
     ['feature_name' => 'Premium audio system', 'description' => 'High-quality sound system for immersive audio.', 'icon' => 'link'],
     ['feature_name' => 'Apple CarPlay/Android Auto', 'description' => 'Integrates smartphone apps with the infotainment system.', 'icon' => 'link'],
 ];
- $featuresIcon = collect([
-            '/storage/feature_icons/1765592828_seat-heat.png',
-            '/storage/feature_icons/1765593321_power-door-lock.jpg',
-        ]);
+                foreach ($features as $feature) {
+                    Feature::create($feature);
+                }
 
-        return [
 
-            'feature_name' => $features[array_rand($features)]['feature_name'],
-            'description' => $features[array_rand($features)]['description'],
-            'icon' => function (array $attributes) use ($featuresIcon) {
-                return $featuresIcon->random();
-            },
-        ];
     }
 }

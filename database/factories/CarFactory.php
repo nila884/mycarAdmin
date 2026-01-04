@@ -66,7 +66,7 @@ class CarFactory extends Factory
     {
         return $this->afterCreating(function (Car $car) {
 
-            $featureIds = Feature::pluck('id');
+            $featureIds = Feature::where('is_main', true)->pluck('id');
 
             $randomFeatures = $featureIds->shuffle()->take(rand(3, 7));
 

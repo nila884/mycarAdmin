@@ -26,6 +26,7 @@ Route::get('categories', [CategoryController::class, 'apiIndex'])->name('api.cat
 Route::get('models', [ModelController::class, 'apiIndex'])->name('api.models');
 Route::get('versions', [VersionController::class, 'apiIndex'])->name('api.versions');
 Route::get('features', [FeatureController::class, 'apiIndex'])->name('api.features');
+Route::get('features/main', [FeatureController::class, 'apiFeatureMain'])->name('api.features.main');
 
 Route::get('seller-infos/{id}', [SellerController::class, 'apiSellerProfile'])->name('api.seller.infos');
 

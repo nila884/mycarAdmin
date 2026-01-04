@@ -30,7 +30,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             InitSeeder::class,
-            ShippingLogisticSeeder::class
+            ShippingLogisticSeeder::class,
+            FeaturesSeeder::class,
         ]);
 
         // create user
@@ -78,7 +79,7 @@ class DatabaseSeeder extends Seeder
         $categories = Category::factory(5)->create();
         $fuelTypes = FuelType::factory(3)->create();
         $enginePowers = EnginePower::factory(10)->create();
-        $features = Feature::factory(40)->create();
+       
         $colors= Color::factory(5)->create();
         foreach ($brands as $brand) {
 
