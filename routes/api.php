@@ -1,10 +1,10 @@
 <?php
 
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientAuthController;
-use App\Http\Controllers\ClientShippingController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\DeliveryTariffController;
 use App\Http\Controllers\FeatureController;
@@ -70,6 +70,12 @@ Route::get('/orders/client/{id}/download', [OrderController::class, 'downloadInv
 Route::get('/client/infos', [ClientAuthController::class, 'show']);
 Route::patch('/client/infos/update', [ClientAuthController::class, 'updateField']);
 Route::patch('/client/password/update', [ClientAuthController::class, 'updatePassword']);
+
+Route::post('/client/favorites/toggle', [FavoriteController::class, 'toggle']);
+Route::get('/client/favorites/ids', [FavoriteController::class, 'index']);
+Route::post('/client/favorites/objects', [FavoriteController::class, 'listObjects']);
+
+Route::post('/client/favorites/sync', [FavoriteController::class, 'sync']);
 
 Route::post('/client/logout', [ClientAuthController::class, 'logout']);
 });

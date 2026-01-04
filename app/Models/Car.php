@@ -114,5 +114,10 @@ class Car extends Model
         return $this->belongsTo(Country::class,'origin_country_id');
     }
 
+    public function favoritedBy()
+{
+    return $this->belongsToMany(Client::class, 'favorites', 'car_id', 'client_id');
+}
+
 
 }

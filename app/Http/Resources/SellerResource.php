@@ -23,7 +23,7 @@ class SellerResource extends JsonResource
             'country' => $this->country,
             'description' => $this->description,
             'avatar' => $this->avatar,
-            'user' => UserResource::make($this->whenLoaded('user')),
+            'user' => UserSnapshotResource::make($this->whenLoaded('user')),
             'created_at' => $this->created_at->format('Y-m-d'),
         ];
 

@@ -18,7 +18,7 @@ class CarResource extends JsonResource
             'id' => $this->id,
             'location' => $this->location,
             'image_main' => new ImageResource($this->whenLoaded('images')->firstWhere('is_main', true)),
-            'price' => new CarPriceResource($this->whenLoaded('prices')->firstWhere('is_current', true)),
+            'price' => new CarPriceResource($this->whenLoaded('currentPrice')),
             'spect' => [
                 'engine_code' => $this->engine_code,
                 'engine_size' => $this->engine_size,

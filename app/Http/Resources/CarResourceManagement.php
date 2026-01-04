@@ -19,7 +19,7 @@ class CarResourceManagement extends JsonResource
             'id' => $this->id,
             'location' => $this->location,
             'image_main' => $this->whenLoaded('images')->firstWhere('is_main', true),
-            'price' => CarPriceResourceManagement::make($this->whenLoaded('prices')->firstWhere('is_current', true)),
+            'price' => CarPriceResourceManagement::make($this->whenLoaded('currentPrice')->firstWhere('is_current', true)),
             'interior_color' => $this->whenLoaded('interiorColor'),
             'exterior_color' => $this->whenLoaded('exteriorColor'),
             'spect' => [

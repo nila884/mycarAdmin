@@ -213,7 +213,7 @@ class CarController extends Controller
         $query = Car::query();
 
         // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['version.carModel.brand', 'category', 'fuelType',  'seller', 'images', 'features', 'prices']);
+        $query->with(['version.carModel.brand', 'category', 'fuelType',  'seller', 'imageMain', 'features', 'currentPrice']);
 
         // Conditionally apply the brand filter if the brand name is provided.
         $query->when($brandId, function ($brandQuery) use ($brandId) {
@@ -289,7 +289,7 @@ class CarController extends Controller
         $query = Car::query();
 
         // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['version.carModel.brand', 'category', 'fuelType',  'seller', 'images', 'features', 'prices']);
+        $query->with(['version.carModel.brand', 'category', 'fuelType',  'seller', 'imageMain', 'features', 'currentPrice']);
 
         // Conditionally apply the brand filter if the brand name is provided.
         $query->when($brandId, function ($brandQuery) use ($brandId) {
@@ -353,7 +353,7 @@ class CarController extends Controller
     public function carsHome()
     {
         $query = Car::query();
-        $query->with(['version.carModel.brand', 'images',  'prices']);
+        $query->with(['version.carModel.brand', 'imageMain',  'currentPrice']);
         $cars = $query->take(10)->get();
         if ($cars->isEmpty()) {
             return response()->json(
@@ -377,7 +377,7 @@ class CarController extends Controller
     {
     
 
-        $car = Car::with(['version.carModel.brand','originCountry' ,'category', 'fuelType', 'seller', 'features', 'images', 'prices'])
+        $car = Car::with(['version.carModel.brand','originCountry' ,'category', 'fuelType', 'seller', 'features', 'images', 'currentPrice'])
             ->find($id);
 
         if (! $car) {
@@ -402,7 +402,7 @@ class CarController extends Controller
     {
         $query = Car::query();
         // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['version.carModel.brand',   'images',  'prices']);
+        $query->with(['version.carModel.brand',   'imageMain',  'currentPrice']);
 
         $cars = $query->take(4)->get();
         if ($cars->isEmpty()) {
@@ -429,7 +429,7 @@ class CarController extends Controller
 
         $query = Car::query();
         // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['version.carModel.brand', 'images',  'prices']);
+        $query->with(['version.carModel.brand', 'imageMain',  'currentPrice']);
 
         $cars = $query->take(4)->get();
         if ($cars->isEmpty()) {
@@ -457,7 +457,7 @@ class CarController extends Controller
 
     public function getCarsBySellerId($sellerId)
     {
-        $cars = Car::with(['version.carModel.brand', 'seller', 'images', 'prices'])
+        $cars = Car::with(['version.carModel.brand', 'seller', 'imageMain', 'currentPrice'])
             ->where('seller_id', $sellerId)
             ->get();
 

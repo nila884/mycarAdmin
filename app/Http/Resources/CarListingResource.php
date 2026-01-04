@@ -19,8 +19,8 @@ class CarListingResource extends JsonResource
             'id' => $this->id,
             'car_selling_status' => $this->car_selling_status,
             'location' => 'originCountry',
-            'image_main' => new ImageResource($this->whenLoaded('images')->firstWhere('is_main', true)),
-            'price' => new CarPriceResource($this->whenLoaded('prices')->firstWhere('is_current', true)),
+            'image_main' => new ImageResource($this->whenLoaded('imageMain')),
+            'price' => new CarPriceResource($this->whenLoaded('currentPrice')),
             'origin_country'=>new CountryResource($this->whenLoaded('originCountry') ),
             'spect' => [
 

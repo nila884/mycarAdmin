@@ -36,7 +36,7 @@ $validator = Validator::make($data, [
                 'regex:/^([0-9\s\-\+\(\)]*)$/', 
                 'min:10'
             ],
-            'password' => 'required|string|min:8',
+            'password' => 'required|string|min:8|confirmed',
             'country'  => 'required|exists:countries,id',
             'address'  => 'required|string',
         ]);

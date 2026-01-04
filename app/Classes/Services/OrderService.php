@@ -44,7 +44,7 @@ class OrderService
         }
 
         return DB::transaction(function () use ($data, $userId) {
-            $car = Car::with(['version.carModel.brand','prices'=> function ($query) {
+            $car = Car::with(['version.carModel.brand','currentPrice'=> function ($query) {
                             $query->where('is_current', true);}
                             ])->findOrFail($data['car_id']);
             $seaRate = ShippingRate::findOrFail($data['shipping_rate_id']);

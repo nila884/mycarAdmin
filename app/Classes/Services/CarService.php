@@ -33,7 +33,7 @@ class CarService
             'features',
             'images',
             'originCountry',
-            'prices' => fn ($q) => $q->where('is_current', true),
+            'currentPrice' => fn ($q) => $q->where('is_current', true),
         ])
         ->leftJoin('versions', 'cars.version_id', '=', 'versions.id')
         ->leftJoin('car_models', 'versions.car_model_id', '=', 'car_models.id')
@@ -127,7 +127,7 @@ class CarService
 
     public function searchByBrand(){
         $query = Car::query();
-        $query->with(['version.carModel.brand', 'category', 'fuelType',  'seller', 'images', 'features', 'prices']);
+        $query->with(['version.carModel.brand', 'category', 'fuelType',  'seller', 'images', 'features', 'currentPrice']);
         $query->whereHas('version.carModel.brand', function ($q) {
             $q->where('brand_name', 'like', '%' . request('search') . '%');
         });
@@ -235,7 +235,7 @@ class CarService
     public function read(int $id)
     {
 
-        $car = Car::with(['version.carModel.brand', 'category','exteriorColor','interiorColor', 'originCountry','fuelType', 'seller', 'features', 'images','prices' => function ($query) {
+        $car = Car::with(['version.carModel.brand', 'category','exteriorColor','interiorColor', 'originCountry','fuelType', 'seller', 'features', 'images','currentPrice' => function ($query) {
             $query->where('is_current', true);}])->find($id);
         if (! $car) {
             return null;

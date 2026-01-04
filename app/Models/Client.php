@@ -29,4 +29,10 @@ class Client extends Model
       
         return $this->belongsTo(User::class);
     }
+
+public function favoriteCars()
+{
+    return $this->belongsToMany(Car::class, 'favorites', 'client_id', 'car_id')->withTimestamps();
+}
+
 }

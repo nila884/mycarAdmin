@@ -102,16 +102,27 @@ public function updateField(Request $request)
 
     public function updatePassword(Request $request)
     {
-        $request->validate([
-            'current_password' => ['required', 'current_password'], // Built-in Laravel rule
-            'password' => ['required', 'confirmed', Password::defaults()],
-        ]);
+$request->validate([
+        'current_password' => ['required', 'current_password'],
+        'password' => ['required', 'confirmed', Password::defaults()],
+    ]);
 
-        $request->user()->update([
-            'password' => Hash::make($request->password),
-        ]);
+    $user = $request->user();
 
-        return response()->json(['message' => 'Password updated successfully']);
+    // 1. Update the password in the users table
+    $user->update([
+        'password' => Hash::make($request->password),
+    ]);
+
+    // 2. Revoke all existing tokens (Security step)
+    $user->tokens()->delete();
+
+    // 3. Create a new "fresh" token
+    $newToken = $user->createToken('auth_token')->plainTextToken;
+
+    // 4. Return via ClientResource which handles the token field
+    $user->token = $newToken; 
+    return new ClientResource($user->load('client'));
     }
 
 }
