@@ -67,6 +67,25 @@ $client = $request->user()->client;
         return response()->json(['message' => 'Favorites synced successfully']);
     }
 
+    public function getGuestObjects(Request $request)
+{
+    $request->validate([
+        'ids' => 'required|array',
+        'ids.*' => 'exists:cars,id'
+    ]);
+
+    $cars = Car::whereIn('id', $request->ids)
+        ->with([
+            'imageMain', 
+            'version.carModel.brand', 
+            'originCountry',
+            'currentPrice',
+        ])
+        ->get();
+
+    return CarListingResource::collection($cars);
+}
+
     // public function getObjects(Request $request)
     // {
     //     // 1. Validate that 'ids' is an array

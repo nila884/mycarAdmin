@@ -59,6 +59,7 @@ Route::get('management/cars/search-brand', [CarController::class, 'searchByBrand
 Route::post('/client/register', [ClientAuthController::class, 'register']);
 Route::post('/client/login', [ClientAuthController::class, 'login']);
 
+Route::post('/client/favorites/objects/guest-list', [FavoriteController::class, 'getGuestObjects']);
 
 Route::middleware('auth:sanctum')->group(function () {
 Route::post('/orders/quotes/request', [OrderController::class, 'store']);
@@ -73,7 +74,7 @@ Route::patch('/client/password/update', [ClientAuthController::class, 'updatePas
 
 Route::post('/client/favorites/toggle', [FavoriteController::class, 'toggle']);
 Route::get('/client/favorites/ids', [FavoriteController::class, 'index']);
-Route::post('/client/favorites/objects', [FavoriteController::class, 'listObjects']);
+Route::get('/client/favorites/objects', [FavoriteController::class, 'listObjects']);
 
 Route::post('/client/favorites/sync', [FavoriteController::class, 'sync']);
 
