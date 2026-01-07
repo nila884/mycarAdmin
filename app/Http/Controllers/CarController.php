@@ -36,6 +36,7 @@ class CarController extends Controller
      */
     public function index(Request $request )
     {
+        $deletedCars = Car::onlyTrashed()->get();
     $cars = $this->carService->Index();
 
     $cars->through(fn ($car) => new CarResourceManagement($car));
@@ -141,7 +142,7 @@ class CarController extends Controller
         $sellers = Seller::all(['id', 'seller_name']);
         $features = Feature::all(['id', 'feature_name']);
         $colors= Color::all(['id','name','hex_code']);
-
+        $coutries= Country::all(['id','country_name']);
         // Fetch the car data including its relationships for pre-filling the form
         $carData = $this->carService->read($car->id);
 
@@ -159,6 +160,7 @@ class CarController extends Controller
             'sellers' => $sellers,
             'features' => $features,
             'colors' => $colors,
+            'countries'=>$coutries,
         ]);
     }
 
@@ -255,7 +257,7 @@ class CarController extends Controller
         });
 
         // Get the final collection of cars.
-        $cars = $query->paginate(30);
+        $cars = $query->paginate(10);
         $cars->through(fn ($car) => new CarResourceManagement($car));
         if ($cars->isEmpty()) {
             return response()->json(
@@ -331,7 +333,7 @@ class CarController extends Controller
         });
 
         // Get the final collection of cars.
-        $cars = $query->get();
+        $cars = $query->paginate(10);
         if ($cars->isEmpty()) {
             return response()->json(
                 [
@@ -472,5 +474,11 @@ class CarController extends Controller
 
         return CarListingResource::collection($cars);
 
+    }
+
+
+    ///get deleted car for report
+    public function getDeletedCar(){
+        return response()->json( $deletedCars = Car::onlyTrashed()->get());
     }
 }

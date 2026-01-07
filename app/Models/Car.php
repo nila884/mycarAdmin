@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Car extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'id',
@@ -37,6 +39,8 @@ class Car extends Model
         'exterior_color_id',
         'interior_color_id',
         'origin_country_id',
+        'cost_price',
+        'min_profit_margin'
 
 
     ];
@@ -119,5 +123,17 @@ class Car extends Model
     return $this->belongsToMany(Client::class, 'favorites', 'car_id', 'client_id');
 }
 
+
+public function getIsPriceHealthyAttribute(): bool
+{
+    $currentPrice = $this->currentPrice();
+    if (!$currentPrice) return false;
+
+    $discountedPrice = $currentPrice->discount_type === 'percent' 
+        ? $currentPrice->price * (1 - ($currentPrice->discount / 100))
+        : $currentPrice->price - $currentPrice->discount;
+
+    return $discountedPrice >= ($this->cost_price + $this->min_profit_margin);
+}
 
 }

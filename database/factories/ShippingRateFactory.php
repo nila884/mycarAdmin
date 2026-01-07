@@ -2,32 +2,31 @@
 
 namespace Database\Factories;
 
+use App\Models\Country;
+use App\Models\Port;
+use App\Models\ShippingRate;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ShippingRate>
- */
 class ShippingRateFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = ShippingRate::class;
+
     public function definition(): array
     {
         return [
-            'id' => fake()->text(),
-            'transport_mode' => fake()->text(),
-            'from_country_id' => fake()->text(),
-            'from_port_id' => fake()->text(),
-            'to_country_id' => fake()->text(),
-            'to_port_id' => fake()->text(),
-            'price_roro' => fake()->text(),
-            'price_container' => fake()->text(),
-            'is_current' => fake()->text(),
-            'created_at' => $this->faker->dateTime(),
-            'updated_at' => $this->faker->dateTime(),
+            'transport_mode' => $this->faker->randomElement(['sea', 'land']),
+            
+            // Link to Country and Port factories
+            'from_country_id' => Country::factory(),
+            'from_port_id' => Port::factory(),
+            'to_country_id' => Country::factory(),
+            'to_port_id' => Port::factory(),
+            
+            'price_roro' => $this->faker->randomFloat(2, 500, 3000),
+            'price_container' => $this->faker->randomFloat(2, 1200, 5000),
+            
+            // Explicitly set as a boolean to avoid SQLite datatype mismatch
+            'is_current' => true, 
         ];
     }
 }

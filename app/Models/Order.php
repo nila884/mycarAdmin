@@ -1,17 +1,21 @@
 <?php
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
+    use HasFactory;
+    use SoftDeletes;
     protected $fillable = [
         'order_number', 'user_id', 'car_id', 'shipping_rate_id', 'delivery_tariff_id',
         'fob_price', 'sea_freight', 'land_transit', 'clearing_fee', 'total_amount',
         'origin_port', 'destination_port', 'final_destination_city',
-        'status', 'delivery_status', 'expires_at'
+        'status', 'delivery_status', 'expires_at','benefit'
     ];
 
     protected $casts = [

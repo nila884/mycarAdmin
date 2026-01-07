@@ -39,7 +39,7 @@ type CarForm = {
     chassis_number: string;
     registration_year: number|null;
     manufacture_year: number|null;
-    status: boolean| null;
+    status: string ;
     transmission: string;
     car_selling_status: string;
     steering: string;
@@ -68,6 +68,8 @@ type CarForm = {
         width_mm: number|null;
         height_mm: number|null;
     } | null;
+    cost_price:number|null;
+    min_profit_margin:number|null;
 };
 
 // === NEW TYPE FOR IMAGE PREVIEWS ===
@@ -88,14 +90,17 @@ const getInitialFormData = (car?: CarDetailData): CarForm => {
         category_id: car?.category.id?.toString() || "",
         fuel_type_id: car?.fuel_type.id?.toString() || "",
         seller_id: car?.seller.id?.toString() || "",
-        origin_country_id: car?.country.id?.toString() || "",
+        origin_country_id: car?.origin_country.id?.toString() || "",
         interior_color_id: car?.interior_color?.id.toString()||"",
         exterior_color_id: car?.exterior_color?.id.toString()||"",
         mileage: car?.spect.mileage || null,
         chassis_number: car?.spect.chassis_number || "",
         registration_year: car?.spect.registration_year || null,
         manufacture_year: car?.spect.manufacture_year || null,
-        status: car?.spect.status || false,
+        status: car?.spect.status||"",
+        cost_price:car?.cost_price||null,
+        min_profit_margin:car?.min_profit_margin||null,
+
         // streering: car?.spect.steering||"",
         transmission: car?.spect.transmission || "",
         car_selling_status: car?.car_selling_status ||"",
@@ -490,8 +495,8 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
                     <div className="grid gap-2">
                         <Label htmlFor="status">Status</Label>
                         <Select
-                            onValueChange={(value) => setData('status', value === 'new' ? true : false)}
-                            value={data.status === true ? 'new' : (data.status === false ? 'used' : '')}
+                            onValueChange={(value) => setData('status', value as 'right' | 'left')}
+                            value={data.status||""}
                         >
                             <SelectTrigger id="status" disabled={processing}>
                                 <SelectValue placeholder="Select status" />
@@ -820,7 +825,12 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
                         <InputError message={errors.weight} className="mt-2" />
                     </div>
 
-                    {/* Price Input */}
+                </div>
+
+
+                <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-4">
+
+                        {/* Price Input */}
                     <div className="grid gap-2">
                         <Label htmlFor="price">Price ($)</Label>
                         <Input
@@ -833,40 +843,67 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
                         />
                         <InputError message={errors.price} className="mt-2" />
                     </div>
+    {/* Cost Price Input (Since you added this column earlier) */}
+    <div className="grid gap-2">
+        <Label htmlFor="cost_price">Cost Price ($)</Label>
+        <Input
+            id="cost_price"
+            type="number"
+            value={data.cost_price ?? ""}
+            onChange={e => setData('cost_price', e.target.value === "" ? null : Number(e.target.value))}
+            disabled={processing}
+        />
+        <InputError message={errors.cost_price} className="mt-2" />
+    </div>
 
-                    {/* discount Input */}
-                    <div className="grid gap-2">
-                        <Label htmlFor="discount">discount</Label>
-                        <Input
-                            id="discount"
-                            placeholder="discount"
-                            type="number"
-                            value={data.discount !== null ? data.discount : ""}
-                            onChange={e => setData('discount', e.target.value === "" ? null : Number(e.target.value))}
-                            disabled={processing}
-                        />
-                        <InputError message={errors.discount} className="mt-2" />
-                    </div>
+    {/* Discount Type Select - Matches ENUM exactly */}
+    <div className="grid gap-2">
+        <Label htmlFor="discount_type">Discount Type</Label>
+        <Select
+            onValueChange={(value) => setData('discount_type', value as 'amount' | 'percent')}
+            value={data.discount_type}
+        >
+            <SelectTrigger id="discount_type" disabled={processing}>
+                <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="amount">Fixed Amount ($)</SelectItem>
+                <SelectItem value="percent">Percentage (%)</SelectItem>
+            </SelectContent>
+        </Select>
+        <InputError message={errors.discount_type} className="mt-2" />
+    </div>
 
-                        {/* discount Input */}
-                    <div className="grid gap-2">
-                        <Label htmlFor="is_current">Current price?</Label>
-                          <Switch
-                      checked={data.is_current_price}
-                     
-                      onCheckedChange={(checked) => {
-                        setData('is_current_price', checked);
-                      }}
-                      disabled={processing}
-                    />
-                        
-                        <InputError message={errors.is_current_price} className="mt-2" />
-                    </div>
+    {/* Discount Input - Dynamically unit-aware */}
+    <div className="grid gap-2">
+        <Label htmlFor="discount">
+            Discount {data.discount_type === 'percent' ? '(%)' : '($)'}
+        </Label>
+        <Input
+            id="discount"
+            placeholder={data.discount_type ? "Enter value" : "Select type first"}
+            type="number"
+            value={data.discount ?? ""}
+            onChange={e => setData('discount', e.target.value === "" ? null : Number(e.target.value))}
+            // SECURITY: Disable input until ENUM type is selected
+            disabled={processing || !data.discount_type}
+        />
+        <InputError message={errors.discount} className="mt-2" />
+    </div>
 
-
-
-
-                </div>
+    {/* Min Profit Margin Input */}
+    <div className="grid gap-2">
+        <Label htmlFor="min_profit_margin">Min Profit ($)</Label>
+        <Input
+            id="min_profit_margin"
+            type="number"
+            value={data.min_profit_margin ?? ""}
+            onChange={e => setData('min_profit_margin', e.target.value === "" ? null : Number(e.target.value))}
+            disabled={processing}
+        />
+        <InputError message={errors.min_profit_margin} className="mt-2" />
+    </div>
+</div>
 
                 <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-4">
                     {/* Registration Year Input */}

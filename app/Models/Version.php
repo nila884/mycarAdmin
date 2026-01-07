@@ -15,7 +15,7 @@ class Version extends Model
         'version_year',
     ];
 
-    public function CarModel()
+    public function carModel()
     {
         return $this->belongsTo(CarModel::class);
     }

@@ -143,10 +143,8 @@ class CarService
          
             throw new \Illuminate\Validation\ValidationException($validator);
         }
-        DB::beginTransaction(); // Start a transaction
-
+        DB::beginTransaction();
         try {
-            // Map frontend form field names to backend database column names
             $car = Car::create([
                  'car_model_id'=> $request->car_model_id,
                 'car_brand_id'=> $request->car_brand_id,
@@ -155,6 +153,8 @@ class CarService
                 'version_id' => $request->version_id,
                 'seller_id' => $request->seller_id,
                 'mileage' => $request->mileage,
+                'cost_price' => $request->cost_price,
+                 'min_profit_margin' => $request->min_profit_margin ?? 0,
                 'origin_country_id'=> $request->origin_country_id,
                 'chassis_number' => trim(htmlspecialchars($request->chassis_number)),
                 'registration_year' => $request->registration_year,
@@ -162,7 +162,7 @@ class CarService
                 'interior_color_id' => $request->interior_color_id,
                 'exterior_color_id' => $request->exterior_color_id,
                 'weight' => $request->weight,
-                'status' => $request->boolean('status'),
+                'status' => $request->status,
                 'transmission' => trim(htmlspecialchars($request->transmission)),
                 'steering' => trim(htmlspecialchars($request->steering)),
                 'seating_capacity' => $request->seating_capacity,
@@ -177,17 +177,13 @@ class CarService
                 'publication_status' => trim(htmlspecialchars($request->publication_status)),
                 'car_selling_status' => trim(htmlspecialchars($request->car_selling_status)),
             ]);
-
-            // --- Handle Car Price ---
             CarPrice::create([
                 'car_id' => $car->id,
                 'price' => $request->price,
-                'discount' => $request->promo ?? null, // 'promo' from frontend maps to 'discount'
-                'discount_type' => $request->promo ? 'amount' : null, // Assuming promo is an amount
+                'discount' => $request->discount ?? null,
+                'discount_type' => $request->discount_type?? null,
                 'is_current' => true,
             ]);
-
-            // --- Handle Main Image (if 'image' field is for a single main image) ---
             if ($request->hasFile('image')) {
                 $imageFile = $request->file('image');
                 $imageName = time().'_'.uniqid().'.'.$imageFile->getClientOriginalExtension();
@@ -197,8 +193,6 @@ class CarService
                     'is_main' => true, // Mark as main image
                 ]);
             }
-
-            // --- Handle Multiple Images ---
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $imageFile) {
                     $imageName = time().'_'.uniqid().'.'.$imageFile->getClientOriginalExtension();
@@ -245,7 +239,7 @@ class CarService
 
     public function update(Request $request, Car $car): Car
     {
-       
+       dd($request->all());
         $validator = $this->DataValidation($request, 'patch', $car);
         if ($validator->fails()) {
             throw new ValidationException($validator);
@@ -267,8 +261,10 @@ class CarService
                 'manufacture_year' => $request->manufacture_year,
                 'exterior_color_id' => $request->exterior_color_id,
                 'interior_color_id' => $request->interior_color_id,
+                'cost_price' => $request->cost_price,
+                 'min_profit_margin' => $request->min_profit_margin ?? 0,
                 'weight' => $request->weight,
-                'status' => $request->boolean('status'),
+                'status' => $request->status,
                 'origin_country_id'=> $request->origin_country_id,
                 'transmission' => trim(htmlspecialchars($request->transmission)),
                 'steering' => trim(htmlspecialchars($request->steering)),
@@ -292,8 +288,8 @@ class CarService
             CarPrice::create([
                 'car_id' => $car->id,
                 'price' => $request->price,
-                'discount' => $request->promo ?? null,
-                'discount_type' => $request->promo ? 'amount' : null,
+                'discount' => $request->discount ?? null,
+                'discount_type' => $request->discount_type,
                 'is_current' => true,
             ]);
 
@@ -423,9 +419,9 @@ class CarService
             ],
             'manufacture_year' => ['nullable', 'numeric', 'min:1900', 'digits:4', 'max:'.$currentYear],
             'price' => ['required', 'numeric', 'min:0'], 
-            'promo' => ['nullable', 'numeric', 'min:0'],
+            'discount_type' => ['nullable', 'required_with:discount_type', 'in:amount,percent'],
             'weight' => ['nullable', 'numeric', 'min:0', 'max:10000'],
-            'status' => ['nullable', 'boolean'], 
+            'status' => ['required', 'in:new,used'], 
             'transmission' => ['required', 'string', 'max:255', 'in:automatic,manual'],
             'steering' => ['required', 'in:right,left'],
             'seating_capacity' => ['required', 'numeric', 'min:1', 'max:100'],
@@ -443,7 +439,8 @@ class CarService
             'images.*' => ['image', 'mimes:png,jpg,jpeg', 'max:2048'],
             'images_to_delete' => ['nullable', 'array'], 
             'images_to_delete.*' => ['integer', 'exists:images,id'], 
-
+            'cost_price' => 'required|numeric|min:0',
+             'min_profit_margin' => 'nullable|numeric|min:0',
             'features' => ['nullable', 'array'],
               'dimensions'           => 'nullable|array',
                 'dimensions.width_mm'  => 'nullable|integer|min:1',

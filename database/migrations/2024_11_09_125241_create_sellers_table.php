@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('country');
             $table->string('address');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -101,7 +101,7 @@ export interface CarDetailData {
   version:Version;
   category: Category;
   seller:Seller;
-  country:CountryObject;
+  origin_country:CountryObject;
   fuel_type: FuelType;
   spect:{
             chassis_number: string;
@@ -113,7 +113,7 @@ export interface CarDetailData {
             steering: string;
             seating_capacity: number;
             doors: number;
-            status: boolean;
+            status: string;
             engine_code: string;
             engine_size: number;
             model_code: string;
@@ -128,6 +128,8 @@ export interface CarDetailData {
    publication_status: string;
    interior_color:Color;
    exterior_color:Color;
+   cost_price:number;
+   min_profit_margin:number;
    images: Image[];
    features: Feature[];
    updated_at: string,

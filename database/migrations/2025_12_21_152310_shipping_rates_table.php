@@ -24,6 +24,7 @@ return new class extends Migration
     $table->decimal('price_roro', 12, 2)->nullable();
     $table->decimal('price_container', 12, 2)->nullable();
     $table->boolean('is_current')->default(true);
+     $table->softDeletes();
     $table->timestamps();
 });
     }
@@ -33,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+         Schema::dropIfExists('shipping_rates');
     }
 };

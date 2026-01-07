@@ -18,6 +18,7 @@ return new class extends Migration
     $table->decimal('amount_due', 12, 2);
     $table->enum('payment_status', ['unpaid', 'partial', 'paid'])->default('unpaid');
     $table->string('pdf_path')->nullable(); // Path to the generated PDF
+    $table->softDeletes();
     $table->timestamps();
 });
     }

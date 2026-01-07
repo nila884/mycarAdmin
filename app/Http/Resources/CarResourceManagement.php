@@ -47,9 +47,10 @@ class CarResourceManagement extends JsonResource
             'origin_country'=>CountryResource::make($this->whenLoaded('originCountry')),
             'updated_at' => $this->updated_at?->format('Y-m-d'),
             'created_at' => $this->created_at?->format('Y-m-d'),
-
+            'cost_price' =>$this->cost_price,
+            'min_profit_margin' => $this->min_profit_margin,
             'fuel_type' => $this->whenLoaded('fuelType'),
-            'version' => VersionResource::make($this->whenLoaded('version')),
+            'version' => $this->whenLoaded('version'),
             'seller' => $this->whenLoaded('seller'),
             'features' => $this->whenLoaded('features'),
             'images' => $this->whenLoaded('images'),

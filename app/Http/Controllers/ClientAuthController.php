@@ -43,9 +43,6 @@ class ClientAuthController extends Controller
         }
     }
 
-    /**
-     * Handle Client Login
-     */
     public function login(Request $request)
     {
        
@@ -73,7 +70,10 @@ class ClientAuthController extends Controller
     public function logout(Request $request)
     {
         
-    $request->user()->currentAccessToken()->delete();
+    $token = $request->user()->currentAccessToken();
+    if ($token instanceof \Laravel\Sanctum\PersonalAccessToken) {
+        $token->delete();
+    }
 
     return response()->json([
         'message' => 'Logged out successfully'
@@ -102,25 +102,16 @@ public function updateField(Request $request)
 
     public function updatePassword(Request $request)
     {
-$request->validate([
+    $request->validate([
         'current_password' => ['required', 'current_password'],
         'password' => ['required', 'confirmed', Password::defaults()],
     ]);
-
     $user = $request->user();
-
-    // 1. Update the password in the users table
     $user->update([
         'password' => Hash::make($request->password),
     ]);
-
-    // 2. Revoke all existing tokens (Security step)
     $user->tokens()->delete();
-
-    // 3. Create a new "fresh" token
     $newToken = $user->createToken('auth_token')->plainTextToken;
-
-    // 4. Return via ClientResource which handles the token field
     $user->token = $newToken; 
     return new ClientResource($user->load('client'));
     }

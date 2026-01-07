@@ -49,13 +49,36 @@ class OrderService
                             ])->findOrFail($data['car_id']);
             $seaRate = ShippingRate::findOrFail($data['shipping_rate_id']);
             $tariff = DeliveryTariff::findOrFail($data['delivery_tariff_id']);
-            $fobPrice = $car->prices->first()->price - ($car->prices->first()->discount ?? 0);
+            // Find where you define $fobPrice and replace with this:
+                $currentPrice = $car->prices->first();
+                $rawPrice = $currentPrice->price;
+                $discountValue = $currentPrice->discount ?? 0;
+                if ($currentPrice->discount_type === 'percent') {
+                    // Math: Price - (Price * (10 / 100))
+                    $fobPrice = $rawPrice - ($rawPrice * ($discountValue / 100));
+                } else {
+                    // Default: Fixed Amount (Price - 1500)
+                    $fobPrice = $rawPrice - $discountValue;
+                }
+
+                $costPrice = $car->cost_price ?? 0;
+
+                // This is your Benefit (Gross Profit on the FOB price)
+                $benefit = $fobPrice - $costPrice;
+
+                // Rigorous Check: Ensure you aren't selling below cost + min margin
+                if ($fobPrice < ($costPrice + $car->min_profit_margin)) {
+                    throw new \Exception("Transaction Denied: Selling price is below the required minimum profit margin.");
+                }
+                
+            // $fobPrice = $car->currentPrice->price - ($car->currentPrice->discount ?? 0);
             $seaFreight = ($data['shipping_method'] === 'roro') ? $seaRate->price_roro : $seaRate->price_container;  
             $weightInTons = $car->weight / 1000;
             $landTransit = ($tariff->tarif_per_tone * $weightInTons) + $tariff->driver_fee + $tariff->agency_service_fee;
             $order = Order::create([
                 'order_number' => 'QT-' . strtoupper(Str::random(12)), // Reference code stays uppercase
                 'user_id' => $userId,
+                'benefit' => $benefit,
                 'car_id' => $car->id,
                 'fob_price' => $fobPrice,
                 'sea_freight' => $seaFreight,
@@ -152,7 +175,7 @@ class OrderService
 
 public function cancelOrder($id)
 {
-    dd($id);
+
     $order = Order::where('user_id',Auth::user()->id)->findOrFail($id);
     if (in_array($order->status, ['quote', 'proforma'])) {
         $order->update(['status' => 'cancelled']); 
@@ -169,7 +192,7 @@ public function cancelOrder($id)
  */
 public function confirmOrder(int $id)
 {
-    $order = Order::where('user_id', Auth::user()->id)->findOrFail($id);
+    $order = Order::with('user')->where('user_id', Auth::user()->id)->findOrFail($id);
 
     if ($order->status !== 'quote') {
         throw new \Exception("Only quotations can be confirmed.");
@@ -194,7 +217,7 @@ public function confirmOrder(int $id)
 public function getDownloadPath($id)
 {
     // Find the order for the logged-in user
-    $order = Order::where('user_id', Auth::user()->id)
+    $order = Order::with('user')->where('user_id', Auth::user()->id)
                   ->with('invoice')
                   ->findOrFail($id);
 

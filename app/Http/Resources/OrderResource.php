@@ -9,13 +9,14 @@ class OrderResource extends JsonResource
     public function toArray(Request $request): array
     {
 
+        
         return [
             'id' => $this->id,
             'order_number' => $this->order_number,
             'status' => $this->status, 
             'vehicle' => [
                 'id' => $this->car->id ?? null,
-                'name' => ($this->car?->versions?->CarModel?->brands?->name ?? 'N/A') . ' ' . ($this->car?->versions?->CarModel?->name ?? ''),
+                'name' => ($this->car?->version?->carModel?->brand?->name ?? 'N/A') . ' ' . ($this->car?->version?->carModel?->name ?? ''),
                 'chassis_number' => $this->car?->chassis_number ?? 'N/A', 
                 'transmission' => $this->car?->transmission ?? 'N/A',
                 'color' => $this->car?->exteriorColor?->name ?? 'N/A',
@@ -31,6 +32,7 @@ class OrderResource extends JsonResource
                 'total_amount' => (float) $this->total_amount,
                 'currency' => 'USD',
             ],
+
             'logistics' => [
                 'origin_port' => $this->origin_port,
                 'destination_port' => $this->destination_port, 

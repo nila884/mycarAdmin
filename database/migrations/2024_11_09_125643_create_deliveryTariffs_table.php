@@ -39,6 +39,7 @@ Schema::create('delivery_tariffs', function (Blueprint $table) {
         
         $table->string('weight_range')->nullable();
         $table->boolean('is_current')->default(false);
+         $table->softDeletes();
         $table->timestamps();
     });
     }
@@ -48,6 +49,6 @@ Schema::create('delivery_tariffs', function (Blueprint $table) {
      */
     public function down(): void
     {
-        //
+          Schema::dropIfExists('delivery_tariffs');
     }
 };

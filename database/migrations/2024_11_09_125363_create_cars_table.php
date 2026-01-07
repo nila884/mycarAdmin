@@ -24,7 +24,7 @@ return new class extends Migration
             $table->year('manufacture_year')->nullable();
             $table->string('image')->nullable();
             $table->unsignedInteger('weight');
-            $table->boolean('status')->nullable();
+            $table->enum('status', ['new', 'used',]);
             $table->enum('transmission', ['automatic', 'manual']);
             $table->enum('steering', ['right', 'left']);
             $table->enum('publication_status', ['published', 'pending', 'archived']);
@@ -60,8 +60,10 @@ return new class extends Migration
                     $table->index('publication_status');
                     $table->index('car_selling_status');
                     $table->index('status');
-                    $table->index('created_at');
+            $table->decimal('cost_price', 12, 2)->nullable();
+            $table->decimal('min_profit_margin', 10, 2)->default(0);
 
+            $table->softDeletes();
             $table->timestamps();
 
         });
