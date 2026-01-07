@@ -1,142 +1,166 @@
-import { Head, router } from '@inertiajs/react';
+'use client';
+
+import VersionForm from '@/components/car/settings/version/versionForm';
 import HeadingSmall from '@/components/heading-small';
-import { type BreadcrumbItem } from '@/types';
-import Create from '@/components/car/settings/version/create'; // Ensure this path is correct
-import UpdateVersion from '@/components/car/settings/version/update'; // Will create this component
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react'; // Assuming X icon for delete
+import { Card} from '@/components/ui/card';
+import { 
+    Table, 
+    TableBody, 
+    TableCell, 
+    TableHead, 
+    TableHeader, 
+    TableRow 
+} from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import CarSettingLayout from '@/layouts/car/settings/layout';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { timeFormat } from '@/lib/utils'; // Assuming you have this utility
+import { timeFormat } from '@/lib/utils';
+import { type BreadcrumbItem } from '@/types';
+import { Head, router } from '@inertiajs/react';
+import { Trash2, Calendar, CarFront } from 'lucide-react';
+import React from 'react';
+import { BrandItem } from './brand';
+import { CarModelItem } from './model';
 
-// Define types for VersionItem and ModelItem
-interface VersionItem {
+export interface VersionItem {
     id: number;
     car_model_id: number;
-    car_model_name: string; 
+    car_model: CarModelItem;
     version_name: string;
     version_year: string;
     created_at: string;
     updated_at: string;
 }
 
-interface ModelItem {
-    id: number;
-    model_name: string;
-}
-
 interface VersionProps {
     versions: {
         data: VersionItem[];
-        current_page: number;
-        last_page: number;
-        from: number;
-        to: number;
-        total: number;
-        links: Array<{
-            url: string | null;
-            label: string;
-            active: boolean;
-        }>;
+        links: Array<{ url: string | null; label: string; active: boolean }>;
     };
-    carModels: ModelItem[]; // Pass car models to the page for Create/Update forms
+    carModels: CarModelItem[];
+    brands: BrandItem[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Car version settings',
-        href: '/car/settings/version',
-    },
+    { title: 'Car settings', href: '/car/settings/brand' },
+    { title: 'Versions', href: '/car/settings/version' },
 ];
 
-export default function Version({ versions, carModels }: VersionProps) {
-    function handleDelete(id: number) {
-        if (!window.confirm('Are you sure you want to delete this version?')) return;
-
-        router.delete(route('carversion.destroy', id), {
-            preserveScroll: true,
-            onSuccess: () => {
-                // optional: toast or reload logic
-            },
-            onError: (errors) => {
-                console.error('Delete error:', errors);
-            },
-        });
-    }
+export default function Version({ versions, carModels, brands }: VersionProps) {
+    
+    const handleDelete = (id: number) => {
+        if (!confirm('Are you sure? This action cannot be undone.')) return;
+        router.delete(route('carversion.destroy', id), { preserveScroll: true });
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Version settings" />
+            <Head title="Version Settings" />
 
             <CarSettingLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Car Version settings" description="Add new, Update and delete car Versions" />
+                    {/* Header Section */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6">
+                        <HeadingSmall 
+                            title="Car Versions" 
+                            description="Manage your vehicle specific trim levels and years." 
+                        />
+                        <VersionForm carModels={carModels} brands={brands} />
+                    </div>
 
-                    <Create models={carModels} /> 
+                    {/* Table Section */}
+                    <Card className="overflow-hidden border-none shadow-sm ring-1 ring-border">
+                        <Table>
+                            <TableHeader className="bg-muted/50">
+                                <TableRow>
+                                    <TableHead className="font-semibold">Version & Year</TableHead>
+                                    <TableHead className="font-semibold">Model Hierarchy</TableHead>
+                                    <TableHead className="font-semibold">Timestamps</TableHead>
+                                    <TableHead className="text-right font-semibold">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {versions.data.length > 0 ? (
+                                    versions.data.map((version) => (
+                                        <TableRow key={version.id} className="group transition-colors">
+                                            {/* Version Name and Year */}
+                                            <TableCell>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-foreground">
+                                                        {version.version_name.toUpperCase()}
+                                                    </span>
+                                                    <div className="flex items-center text-xs text-muted-foreground mt-1">
+                                                        <Calendar className="mr-1 size-3" />
+                                                        {version.version_year}
+                                                    </div>
+                                                </div>
+                                            </TableCell>
 
-                    <Table className="min-w-full">
-                        <TableCaption>A list of your car versions.</TableCaption>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-[100px]">Version Name</TableHead>
-                                <TableHead>Model Name</TableHead>
-                                <TableHead>Version Year</TableHead>
-                                <TableHead>Created At</TableHead>
-                                <TableHead>Last Update</TableHead>
-                                <TableHead className="text-right">Action</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {versions.data.length > 0 ? (
-                                versions.data.map((version) => (
-                                    <TableRow key={version.id}>
-                                        <TableCell className="font-medium">{version.version_name.toUpperCase()}</TableCell>
-                                        <TableCell>{version.car_model_name.toUpperCase()}</TableCell> 
-                                        <TableCell>{version.version_year}</TableCell>
-                                        <TableCell>{timeFormat(version.created_at)}</TableCell>
-                                        <TableCell>{timeFormat(version.updated_at)}</TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex items-center justify-end space-x-2">
-                                                <UpdateVersion version={version} models={carModels} />
-                                                <Button
-                                                    className='ml-2'
-                                                    variant="destructive"
-                                                    onClick={() => handleDelete(version.id)}
-                                                >
-                                                    Delete
-                                                </Button>
+                                            {/* Model and Brand Badge */}
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    <Badge variant="outline" className="font-normal border-primary/20 bg-primary/5 text-primary">
+                                                        {version.car_model.brand?.brand_name}
+                                                    </Badge>
+                                                    <span className="text-muted-foreground">/</span>
+                                                    <span className="font-medium">{version.car_model.model_name}</span>
+                                                </div>
+                                            </TableCell>
+
+                                            {/* Timestamps */}
+                                            <TableCell>
+                                                <div className="text-xs space-y-1">
+                                                    <p className="text-muted-foreground">Added: {timeFormat(version.created_at)}</p>
+                                                    <p className="text-[10px] text-muted-foreground/70 italic">Updated: {timeFormat(version.updated_at)}</p>
+                                                </div>
+                                            </TableCell>
+
+                                            {/* Actions */}
+                                            <TableCell className="text-right">
+                                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <VersionForm version={version} carModels={carModels} brands={brands} />
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                                        onClick={() => handleDelete(version.id)}
+                                                    >
+                                                        <Trash2 className="size-4" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
+                                            <div className="flex flex-col items-center justify-center gap-2">
+                                                <CarFront className="size-8 opacity-20" />
+                                                <p>No car versions found.</p>
                                             </div>
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="text-center">
-                                        No car versions found.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                    {/* Add Pagination if needed */}
-                    {versions.links && versions.links.length > 3 && ( // Check if pagination links exist
-                        <div className="flex justify-center mt-4">
-                            <nav className="flex rounded-md shadow" aria-label="Pagination">
+                                )}
+                            </TableBody>
+                        </Table>
+                    </Card>
+
+                    {/* Pagination - Cleaned up styling */}
+                    {versions.links && versions.links.length > 3 && (
+                        <div className="flex justify-center pt-4">
+                            <nav className="inline-flex -space-x-px rounded-md shadow-sm">
                                 {versions.links.map((link, index) => (
                                     <button
                                         key={index}
                                         onClick={() => link.url && router.get(link.url)}
-                                        disabled={!link.url}
-                                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium
-                                            ${link.active
-                                                ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                                                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                                            }
-                                            ${index === 0 ? 'rounded-l-md' : ''}
-                                            ${index === versions.links.length - 1 ? 'rounded-r-md' : ''}
-                                        `}
-                                        dangerouslySetInnerHTML={{ __html: link.label }} // Render HTML entities like &laquo;
+                                        disabled={!link.url || link.active}
+                                        className={`px-4 py-2 text-sm font-medium transition-colors border first:rounded-l-md last:rounded-r-md 
+                                            ${link.active 
+                                                ? 'bg-primary text-primary-foreground border-primary z-10' 
+                                                : 'bg-background text-muted-foreground hover:bg-muted border-input'
+                                            } ${!link.url && 'opacity-50 cursor-not-allowed'}`}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
                                     />
                                 ))}
                             </nav>

@@ -24,5 +24,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        
+$exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, $request) {
+        return back()->withErrors(['logo' => 'The uploaded file is too large. Maximum allowed size is 1MB.']);
+    });
+
     })->create();
+    

@@ -2,19 +2,17 @@ import { Head, router } from '@inertiajs/react';
 
 import HeadingSmall from '@/components/heading-small';
 import { type BreadcrumbItem } from '@/types';
-import Create from '@/components/car/settings/category/create';
-import Update from '@/components/car/settings/category/update';
 
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import CarSettingLayout from '@/layouts/car/settings/layout';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { timeFormat } from '@/lib/utils'; // Import the timeFormat function
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import CategoryForm from '@/components/car/settings/category/categoryForm';
 
 // Define the type for a single category item
-interface CategoryItem {
+export interface CategoryItem {
     id: number;
     category_name: string;
     created_at: string;
@@ -34,19 +32,20 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 // Update the component to accept props
-export default function category({ categories }: CategoryProps) { // Destructure categories from props
+export default function category({ categories }: CategoryProps) {
+    // Destructure categories from props
 
-  function handleDelete(id: number) {
-  if (!window.confirm('Are you sure you want to delete this category?')) return;
+    function handleDelete(id: number) {
+        if (!window.confirm('Are you sure you want to delete this category?')) return;
 
-  router.delete(`/car/settings/category/${id}`, {
-    preserveScroll: true,
-    onSuccess: () => {
-      // optional: toast or reload logic
-    },
-  });
-}
-  return (
+        router.delete(`/car/settings/category/${id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                // optional: toast or reload logic
+            },
+        });
+    }
+    return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Car Category settings" />
 
@@ -54,7 +53,7 @@ export default function category({ categories }: CategoryProps) { // Destructure
                 <div className="space-y-6">
                     <HeadingSmall title="Car category settings" description="Add new ,Update and delete car categories name" />
 
-                    <Create />
+                    <CategoryForm />
 
                     <Table className="min-w-2xl">
                         <TableCaption>A list of car category.</TableCaption>
@@ -74,13 +73,12 @@ export default function category({ categories }: CategoryProps) { // Destructure
                                         <TableCell className="font-medium">{category.category_name.toUpperCase()}</TableCell>
                                         <TableCell>{timeFormat(category.created_at)}</TableCell>
                                         <TableCell>{timeFormat(category.updated_at)}</TableCell>
-                                                                            <TableCell className="text-right">
-                                                                          
-      
-    <Update category={category} />
-    <Button className='ml-2' size="icon" variant="destructive" onClick={() => handleDelete(category.id)}><X/></Button>
-      
-                                         </TableCell>
+                                        <TableCell className="text-right">
+                                            <CategoryForm category={category} />
+                                            <Button className="ml-2" size="icon" variant="destructive" onClick={() => handleDelete(category.id)}>
+                                                <X />
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
                                 ))
                             ) : (

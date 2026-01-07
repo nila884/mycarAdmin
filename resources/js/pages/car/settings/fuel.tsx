@@ -1,20 +1,16 @@
 import { Head, router } from '@inertiajs/react';
-
 import HeadingSmall from '@/components/heading-small';
 import { type BreadcrumbItem } from '@/types';
-import Create from '@/components/car/settings/fuel/create';
-import Update from '@/components/car/settings/fuel/update';
 
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import CarSettingLayout from '@/layouts/car/settings/layout';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { timeFormat } from '@/lib/utils'; // Import the timeFormat function
 import { X } from 'lucide-react';
+import FuelForm from '@/components/car/settings/fuel/fuelTypeForm';
 
-
-// Define the type for a single fuel item
-interface FuelItem {
+export interface FuelItem {
     id: number;
     fuel_type: string;
     created_at: string;
@@ -34,18 +30,18 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 // Update the component to accept props
-export default function fuel({ fuels }: FuelProps) { // Destructure fuels from props
+export default function fuel({ fuels }: FuelProps) {
+    // Destructure fuels from props
 
-  function handleDelete(id: number) {
-  if (!window.confirm('Are you sure you want to delete this fuel?')) return;
+    function handleDelete(id: number) {
+        if (!window.confirm('Are you sure you want to delete this fuel?')) return;
 
-  router.delete(`/car/settings/fuel/${id}`, {
-    preserveScroll: true,
-    onSuccess: () => {
-    },
-  });
-}
-  return (
+        router.delete(`/car/settings/fuel/${id}`, {
+            preserveScroll: true,
+            onSuccess: () => {},
+        });
+    }
+    return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Car fuel settings" />
 
@@ -53,7 +49,7 @@ export default function fuel({ fuels }: FuelProps) { // Destructure fuels from p
                 <div className="space-y-6">
                     <HeadingSmall title="Car fuel settings" description="Add new ,Update and delete car fuels name" />
 
-                    <Create />
+                    <FuelForm/>
 
                     <Table className="min-w-2xl">
                         <TableCaption>A list of car fuel.</TableCaption>
@@ -73,13 +69,12 @@ export default function fuel({ fuels }: FuelProps) { // Destructure fuels from p
                                         <TableCell className="font-medium">{fuel.fuel_type.toUpperCase()}</TableCell>
                                         <TableCell>{timeFormat(fuel.created_at)}</TableCell>
                                         <TableCell>{timeFormat(fuel.updated_at)}</TableCell>
-                                                                            <TableCell className="text-right">
-                                                                          
-      
-    <Update fuel={fuel} />
-    <Button className='ml-2' size="icon" variant="destructive" onClick={() => handleDelete(fuel.id)}><X/></Button>
-      
-                                         </TableCell>
+                                        <TableCell className="text-right">
+                                            <FuelForm fuel={fuel} />
+                                            <Button className="ml-2" size="icon" variant="destructive" onClick={() => handleDelete(fuel.id)}>
+                                                <X />
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
                                 ))
                             ) : (

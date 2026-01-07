@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Classes\Services\SellerService;
+use App\Http\Resources\CountryResource;
 use App\Http\Resources\SellerResource;
+use App\Models\Country;
 use App\Models\Seller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException; // Import your service class
@@ -25,7 +27,8 @@ class SellerController extends Controller
     public function index()
     {
         return Inertia::render('car/settings/seller', [
-            'sellers' => $this->sellerService->Index(), // Using the service to get data
+            'sellers' => $this->sellerService->Index(),
+            'countries' => CountryResource::collection(Country::all()),
         ]);
     }
 
@@ -34,16 +37,13 @@ class SellerController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validate the request using the SellerService
-        $validator = $this->sellerService->DataValidation($request, 'post');
 
-        if ($validator->fails()) {
-            // If validation fails, throw a ValidationException.
+        $validator = $this->sellerService->DataValidation($request, 'post');
+        try {
+              if ($validator->fails()) {
+            dd($validator->messages());
             throw new ValidationException($validator);
         }
-
-        // 2. If validation passes, create the seller using the SellerService
-        try {
             $this->sellerService->Create($request);
 
             // 3. Redirect back or to an index page with a success message
@@ -51,7 +51,7 @@ class SellerController extends Controller
                 ->with('success', 'Seller created successfully!');
         } catch (\Exception $e) {
           
-
+                dd($e);
             return back()->withErrors(['general' => 'Failed to create seller. Please try again.']);
         }
     }

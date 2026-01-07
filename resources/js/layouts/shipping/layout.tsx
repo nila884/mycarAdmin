@@ -26,13 +26,12 @@ const sidebarNavItems: NavItem[] = [
         title: 'Delivery tariffs',
         href: '/shipping/tariffs/list',
         icon: null,
-    },    
+    },
     {
         title: 'Delivery agencies',
         href: '/shipping/agencies/list',
         icon: null,
     },
-    
 ];
 
 export default function Layout({ children }: PropsWithChildren) {

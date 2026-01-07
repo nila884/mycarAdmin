@@ -1,16 +1,14 @@
 import { Head, router } from '@inertiajs/react'; // Import router for delete
-
 import HeadingSmall from '@/components/heading-small';
-import { type BreadcrumbItem } from '@/types';
-import CreateFeature from '@/components/car/settings/feature/create'; // Ensure this path is correct
-import UpdateFeature from '@/components/car/settings/feature/update'; // Will create this component
 import { Button } from '@/components/ui/button'; // Import Button for delete action
+import { type BreadcrumbItem } from '@/types';
 import { X } from 'lucide-react'; // Assuming X icon for delete
 
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import CarSettingLayout from '@/layouts/car/settings/layout';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { timeFormat } from '@/lib/utils'; // Assuming you have this utility
+import FeatureForm from '@/components/car/settings/feature/featureForm';
 
 // Define types for FeatureItem
 interface FeatureItem {
@@ -69,7 +67,7 @@ export default function Feature({ features }: FeatureProps) {
                 <div className="space-y-6">
                     <HeadingSmall title="Car Feature settings" description="Add new, Update and delete car features name" />
 
-                    <CreateFeature /> 
+                    <FeatureForm />
 
                     <Table className="min-w-full">
                         <TableCaption>A list of car Features.</TableCaption>
@@ -77,7 +75,7 @@ export default function Feature({ features }: FeatureProps) {
                             <TableRow>
                                 <TableHead className="w-[100px]">icon</TableHead>
                                 <TableHead className="w-[150px]">Feature Name</TableHead>
-                                <TableHead>Description</TableHead> 
+                                <TableHead>Description</TableHead>
                                 <TableHead>Created At</TableHead>
                                 <TableHead>Last Update</TableHead>
                                 <TableHead className="text-right">Action</TableHead>
@@ -89,13 +87,9 @@ export default function Feature({ features }: FeatureProps) {
                                     <TableRow key={feature.id}>
                                         <TableCell>
                                             {feature.icon ? (
-                                                <img
-                                                    src={feature.icon}
-                                                    alt={feature.feature_name}
-                                                    className="w-10 h-10 object-cover rounded"
-                                                />
+                                                <img src={feature.icon} alt={feature.feature_name} className="h-10 w-10 rounded object-cover" />
                                             ) : (
-                                                <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                                                <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-200 text-xs text-gray-500">
                                                     No icon
                                                 </div>
                                             )}
@@ -106,13 +100,8 @@ export default function Feature({ features }: FeatureProps) {
                                         <TableCell>{timeFormat(feature.updated_at)}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end space-x-2">
-                                                <UpdateFeature feature={feature} /> 
-                                                <Button
-                                                    className='ml-2'
-                                                    size="icon"
-                                                    variant="destructive"
-                                                    onClick={() => handleDelete(feature.id)}
-                                                >
+                                                <FeatureForm feature={feature} />
+                                                <Button className="ml-2" size="icon" variant="destructive" onClick={() => handleDelete(feature.id)}>
                                                     <X className="h-4 w-4" />
                                                 </Button>
                                             </div>
@@ -129,21 +118,18 @@ export default function Feature({ features }: FeatureProps) {
                         </TableBody>
                     </Table>
                     {features.links && features.links.length > 3 && (
-                        <div className="flex justify-center mt-4">
+                        <div className="mt-4 flex justify-center">
                             <nav className="flex rounded-md shadow" aria-label="Pagination">
                                 {features.links.map((link, index) => (
                                     <button
                                         key={index}
                                         onClick={() => link.url && router.get(link.url)}
                                         disabled={!link.url}
-                                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium
-                                            ${link.active
-                                                ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                                        className={`relative inline-flex items-center border px-4 py-2 text-sm font-medium ${
+                                            link.active
+                                                ? 'z-10 border-indigo-500 bg-indigo-50 text-indigo-600'
                                                 : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                                            }
-                                            ${index === 0 ? 'rounded-l-md' : ''}
-                                            ${index === features.links.length - 1 ? 'rounded-r-md' : ''}
-                                        `}
+                                        } ${index === 0 ? 'rounded-l-md' : ''} ${index === features.links.length - 1 ? 'rounded-r-md' : ''} `}
                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                     />
                                 ))}

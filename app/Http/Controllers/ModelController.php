@@ -39,12 +39,11 @@ class ModelController extends Controller
      */
     public function store(Request $request)
     {
+              
         $validator = $this->carModelService->DataValidation($request, 'post');
-
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }
-
         try {
             $this->carModelService->create($request);
             return redirect()->route('carmodel.index')->with('success', 'Car model created successfully!');
@@ -58,8 +57,8 @@ class ModelController extends Controller
      */
     public function update(Request $request, CarModel $carModel)
     {
+        
         $validator = $this->carModelService->DataValidation($request, 'patch', $carModel);
-
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }

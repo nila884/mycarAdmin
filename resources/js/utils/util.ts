@@ -20,34 +20,33 @@ interface ModuleItem {
  * @returns An object with the initial module ID and the actions array.
  */
 function parseInitialPermissions(
-    permission: PermissionItem, 
-    modules: ModuleItem[], 
-    actions: string[]
-): { initialModuleId: string, initialActions: string[] } {
-    
+    permission: PermissionItem,
+    modules: ModuleItem[],
+    actions: string[],
+): { initialModuleId: string; initialActions: string[] } {
     // Permission name format is: "[action] [module_name]" (e.g., "create user")
-    const parts = permission.name.split(" "); 
+    const parts = permission.name.split(' ');
     if (parts.length === 0) {
-        return { initialModuleId: "", initialActions: [] };
+        return { initialModuleId: '', initialActions: [] };
     }
-    
+
     // 1. Identify the Module Name (the last part of the permission name, e.g., 'user')
-    const moduleNameFromPermission = parts[parts.length - 1]; 
-    
+    const moduleNameFromPermission = parts[parts.length - 1];
+
     // 2. Find the corresponding Module ID
-    const module = modules.find(m => m.name.toLowerCase() === moduleNameFromPermission.toLowerCase());
-    const initialModuleId = module ? module.id.toString() : "";
-    
+    const module = modules.find((m) => m.name.toLowerCase() === moduleNameFromPermission.toLowerCase());
+    const initialModuleId = module ? module.id.toString() : '';
+
     // 3. Identify the Actions (all parts except the last one, e.g., 'create')
     // Filter the available actions array to see which ones are present in the permission name parts.
-    const initialActions = actions.filter(action => {
+    const initialActions = actions.filter((action) => {
         // Check if the current action (e.g., 'create') is found in the permission parts
         return parts.includes(action.toLowerCase());
     });
-    
-    return { 
-        initialModuleId, 
-        initialActions
+
+    return {
+        initialModuleId,
+        initialActions,
     };
 }
 

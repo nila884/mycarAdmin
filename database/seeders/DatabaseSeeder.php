@@ -42,7 +42,7 @@ class DatabaseSeeder extends Seeder
                 $user->assignRole('seller');
                 Seller::factory()->create([
                     'seller_name' => $user->name,
-                    'user_id' => $user->id,
+                    // 'user_id' => $user->id,
 
                 ]);
             if ($i < 4) {

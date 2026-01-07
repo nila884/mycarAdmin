@@ -3,8 +3,10 @@ namespace App\Http\Controllers;
 
 use App\Classes\Services\OrderService;
 use App\Http\Resources\OrderResource;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class OrderController extends Controller
 {
@@ -27,11 +29,11 @@ class OrderController extends Controller
     }
     
     
-    public function index()
-    {
-        $orders = $this->orderService->getAllOrders();
-        return OrderResource::collection($orders);
-    }
+    // public function index()
+    // {
+    //     $orders = $this->orderService->getAllOrders();
+    //     return OrderResource::collection($orders);
+    // }
 
     public function show($id)
     {
@@ -92,5 +94,19 @@ try {
     }
 }
 
+public function index(Request $request)
+    {
+        return Inertia::render('order/list', [
+            'orders'  => $this->orderService->getPaginatedOrders($request),
+            'filters' => $request->only(['search', 'status', 'sort', 'direction']),
+        ]);
+    }
+
+    public function updateStatusManagement(Request $request, Order $order)
+    {
+        $validated = $request->validate(['status' => 'required|string']);
+        $this->orderService->updateStatusManagement($order, $validated['status']);
+        return back()->with('success', 'Status updated.');
+    }
     
 }

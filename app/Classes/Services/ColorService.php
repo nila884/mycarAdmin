@@ -59,7 +59,7 @@ class colorService
         switch (strtolower($method)) {
             case 'post':
                 return Validator::make($request->all(), [
-                        "brand_name" => ["required","string","max:255", "unique:colors,name"],
+                        "name" => ["required","string","max:255", "unique:colors,name"],
                     'hex_code' => ["string", "unique:colors,hex_code", "regex:/^#([A-Fa-f0-9]{6})$/"],
                 ]);
             case 'patch':

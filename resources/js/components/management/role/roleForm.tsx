@@ -1,16 +1,16 @@
 // src/components/management/role/roleForm.tsx
 
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox'; // Assuming you have a Checkbox component
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import InputError from '@/components/input-error';
+import { PermissionItem } from '@/pages/management/permission/permission';
+import { RoleItem } from '@/pages/management/role/role';
 import { useForm } from '@inertiajs/react';
 import { Pencil } from 'lucide-react';
 import React, { useState } from 'react';
-import { RoleItem } from '@/pages/management/role/role';
-import { PermissionItem } from '@/pages/management/permission/permission';
-import { Checkbox } from '@/components/ui/checkbox'; // Assuming you have a Checkbox component
 
 // Define the base type for data that the server expects
 type RoleFormData = {
@@ -34,9 +34,9 @@ const RoleForm: React.FC<RoleFormProps> = ({ role, permissions }) => {
 
     // CRITICAL: Initialize data with existing permissions if updating
     const { data, setData, post, patch, processing, errors } = useForm<RoleFormData>({
-        name: role?.name || "",
+        name: role?.name || '',
         // Initialize permission array with IDs from the role object (converted to string)
-        permission: isUpdate ? role!.permissions.map(p => p.id.toString()) : [],
+        permission: isUpdate ? role!.permissions.map((p) => p.id.toString()) : [],
         _method: isUpdate ? 'patch' : undefined,
     });
 
@@ -58,7 +58,7 @@ const RoleForm: React.FC<RoleFormProps> = ({ role, permissions }) => {
 
     // Helper function to handle checkbox state
     const handlePermissionChange = (permissionId: number, isChecked: boolean) => {
-        setData(prevData => {
+        setData((prevData) => {
             let newPermissions = [...prevData.permission];
             const idString = permissionId.toString();
 
@@ -69,7 +69,7 @@ const RoleForm: React.FC<RoleFormProps> = ({ role, permissions }) => {
                 }
             } else {
                 // Remove ID if unchecked
-                newPermissions = newPermissions.filter(id => id !== idString);
+                newPermissions = newPermissions.filter((id) => id !== idString);
             }
             return {
                 ...prevData,
@@ -77,7 +77,6 @@ const RoleForm: React.FC<RoleFormProps> = ({ role, permissions }) => {
             };
         });
     };
-
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -93,32 +92,27 @@ const RoleForm: React.FC<RoleFormProps> = ({ role, permissions }) => {
                 <form onSubmit={onSubmit} className="space-y-6">
                     <div className="grid gap-2">
                         <Label htmlFor="name">Role Name</Label>
-                        <Input 
-                            id="name"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            disabled={processing} 
-                        />
+                        <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} disabled={processing} />
                         <InputError message={errors.name} />
                     </div>
 
                     {/* CRITICAL: Permission Checkbox Group */}
-                    <div className="grid gap-2 p-4 border rounded-lg bg-gray-50 max-h-96 overflow-y-auto">
-                        <Label className="text-lg font-semibold mb-2">Assign Permissions</Label>
+                    <div className="grid max-h-96 gap-2 overflow-y-auto rounded-lg border bg-gray-50 p-4">
+                        <Label className="mb-2 text-lg font-semibold">Assign Permissions</Label>
                         <InputError message={errors.permission} />
-                        
+
                         {/* Using a responsive grid for the list of permissions */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
                             {permissions.map((permission) => (
                                 <div key={permission.id} className="flex items-center space-x-2">
-                                    <Checkbox 
-                                        id={`perm-${permission.id}`} 
+                                    <Checkbox
+                                        id={`perm-${permission.id}`}
                                         // Check if the permission ID is in the data.permission array
                                         checked={data.permission.includes(permission.id.toString())}
                                         onCheckedChange={(checked) => handlePermissionChange(permission.id, checked as boolean)}
                                         disabled={processing}
                                     />
-                                    <Label htmlFor={`perm-${permission.id}`} className="cursor-pointer text-sm font-medium leading-none">
+                                    <Label htmlFor={`perm-${permission.id}`} className="cursor-pointer text-sm leading-none font-medium">
                                         {permission.name}
                                     </Label>
                                 </div>

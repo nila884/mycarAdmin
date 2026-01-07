@@ -1,14 +1,14 @@
 // src/pages/car/settings/port.tsx
 
-import { Head, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import ShippingLayout from '@/layouts/shipping/layout';
-import { Trash2, Anchor, Globe, MapPin, Calendar } from 'lucide-react';
 import PortForm from '@/components/shipping/port/portForm';
-import { CountryObject, PortObject } from '@/lib/object';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AppLayout from '@/layouts/app-layout';
+import ShippingLayout from '@/layouts/shipping/layout';
+import { CountryObject, PortObject } from '@/lib/object';
+import { Head, router } from '@inertiajs/react';
+import { Anchor, Calendar, Globe, Trash2 } from 'lucide-react';
 
 interface PortProps {
     ports: PortObject[];
@@ -17,24 +17,23 @@ interface PortProps {
 
 export default function PortIndex({ ports, countries }: PortProps) {
     function handleDelete(id: number) {
-        if (!window.confirm('Are you sure you want to delete this port? This will also delete associated shipping cost records.')) 
-            return;
+        if (!window.confirm('Are you sure you want to delete this port? This will also delete associated shipping cost records.')) return;
         router.delete(`/shipping/ports/${id}`, { preserveScroll: true });
     }
 
     return (
         <AppLayout>
             <Head title="Port Settings" />
-            <ShippingLayout> 
-                <div className="flex items-center justify-between mb-8">
+            <ShippingLayout>
+                <div className="mb-8 flex items-center justify-between">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight text-slate-900">Port Gateways</h2>
-                        <p className="text-sm text-muted-foreground">Manage international entry points and logistics hubs.</p>
+                        <p className="text-muted-foreground text-sm">Manage international entry points and logistics hubs.</p>
                     </div>
                     <PortForm countries={countries} />
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                     <Table>
                         <TableHeader className="bg-slate-50/50">
                             <TableRow>
@@ -42,48 +41,50 @@ export default function PortIndex({ ports, countries }: PortProps) {
                                 <TableHead>Location</TableHead>
                                 <TableHead>System Code</TableHead>
                                 <TableHead>Last Activity</TableHead>
-                                <TableHead className="text-right px-6">Management</TableHead>
+                                <TableHead className="px-6 text-right">Management</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {ports.length > 0 ? (
                                 ports.map((port) => (
-                                    <TableRow key={port.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <TableRow key={port.id} className="transition-colors hover:bg-slate-50/50">
                                         <TableCell className="py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="p-2 bg-blue-100 rounded-lg">
-                                                    <Anchor className="w-4 h-4 text-blue-600" />
+                                                <div className="rounded-lg bg-blue-100 p-2">
+                                                    <Anchor className="h-4 w-4 text-blue-600" />
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="font-semibold text-slate-900">{port.name}</span>
-                                                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Gateway Terminal</span>
+                                                    <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                                                        Gateway Terminal
+                                                    </span>
                                                 </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2 text-slate-600">
-                                                <Globe className="w-3.5 h-3.5 text-slate-400" />
+                                                <Globe className="h-3.5 w-3.5 text-slate-400" />
                                                 <span className="text-sm">{port.country?.country_name}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant="secondary" className="font-mono text-[11px] bg-slate-100 text-slate-600 border-none">
+                                            <Badge variant="secondary" className="border-none bg-slate-100 font-mono text-[11px] text-slate-600">
                                                 {port.code || 'NO-CODE'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2 text-slate-500">
-                                                <Calendar className="w-3.5 h-3.5" />
+                                                <Calendar className="h-3.5 w-3.5" />
                                                 <span className="text-xs">{port.updated_at}</span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-right px-6">
+                                        <TableCell className="px-6 text-right">
                                             <div className="flex justify-end gap-2">
                                                 <PortForm port={port} countries={countries} />
-                                                <Button 
-                                                    size="icon" 
-                                                    variant="ghost" 
-                                                    className="text-slate-400 hover:text-red-600 hover:bg-red-50"
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="text-slate-400 hover:bg-red-50 hover:text-red-600"
                                                     onClick={() => handleDelete(port.id)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />

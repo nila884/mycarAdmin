@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 
 class OrderService
 {
@@ -233,4 +234,29 @@ public function getDownloadPath($id)
         'name' => $order->order_number . '.pdf'
     ];
 }
+
+public function getPaginatedOrders(Request $request)
+    {
+        $orders = Order::query()
+            // Eager load everything used in your OrderResource
+            ->with(['car.version.carModel.brand', 'car.exteriorColor', 'invoice']) 
+            ->when($request->search, function ($query, $search) {
+                $query->where('order_number', 'like', "%{$search}%")
+                      ->orWhereHas('car.version.carModel', fn($q) => $q->where('model_name', 'like', "%{$search}%"));
+            })
+            ->when($request->status && $request->status !== 'all', function ($query, $status) {
+                $query->where('status', $status);
+            })
+            ->orderBy($request->input('sort', 'created_at'), $request->input('direction', 'desc'))
+            ->paginate($request->input('per_page', 10))
+            ->withQueryString();
+
+        return OrderResource::collection($orders);
+    }
+
+    public function updateStatusManagement(Order $order, string $status): void
+    {
+        $order->update(['status' => $status]);
+    }
+
 }

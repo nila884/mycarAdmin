@@ -83,7 +83,6 @@ class SellerService
                 return Validator::make($request->all(), [
                     'seller_name' => ['required', 'string', 'max:255'],
                     'phone' => ['nullable', 'string', 'max:20'],
-                    'email' => ['required', 'email', 'max:255', 'unique:sellers,email'],
                     'address' => ['nullable', 'string', 'max:255'],
                     'country' => ['nullable', 'string', 'max:255'],
                 ]);
@@ -91,7 +90,6 @@ class SellerService
                 return Validator::make($request->all(), [
                     'seller_name' => ['required', 'string', 'max:255'],
                     'phone' => ['nullable', 'string', 'max:20'],
-                    'email' => ['required', 'email', 'max:255', Rule::unique('sellers', 'email')->ignore($seller->id)],
                     'address' => ['nullable', 'string', 'max:255'],
                     'country' => ['nullable', 'string', 'max:255'],
                 ]);

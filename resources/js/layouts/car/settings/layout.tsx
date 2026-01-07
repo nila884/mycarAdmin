@@ -41,13 +41,12 @@ const sidebarNavItems: NavItem[] = [
         title: 'Version',
         href: '/car/settings/version',
         icon: null,
-    },    
+    },
     {
         title: 'Color',
         href: '/car/settings/color',
         icon: null,
     },
-    
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {

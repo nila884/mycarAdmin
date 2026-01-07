@@ -22,7 +22,6 @@ const sidebarNavItems: NavItem[] = [
         href: '/management/role/list',
         icon: null,
     },
-    
 ];
 
 export default function Layout({ children }: PropsWithChildren) {

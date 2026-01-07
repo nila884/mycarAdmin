@@ -29,6 +29,15 @@ export default [
         },
     },
     {
+    ignores: [
+      'resources/js/ziggy.js',
+      'public/**',
+      'vendor/**',
+      'node_modules/**',
+      'bootstrap/ssr/**', // If you are using SSR
+    ],
+  },
+    {
         plugins: {
             'react-hooks': reactHooks,
         },

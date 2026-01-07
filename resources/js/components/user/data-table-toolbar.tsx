@@ -1,135 +1,93 @@
-"use client"
+import { DataTableViewOptions } from '@/components/data-table-view-options';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useDebounceOnSearch } from '@/hooks/use-debounce';
+import { router } from '@inertiajs/react';
+import { Table } from '@tanstack/react-table';
+import { X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
-import { Table } from "@tanstack/react-table"
-import { router } from "@inertiajs/react"
-import { useEffect, useRef, useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { X } from "lucide-react"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { useDebounceOnSearch } from "@/hooks/use-debounce"
+// 1. Define a strict but flexible interface for the filter bag
+interface UserDataTableToolbarProps<TData> {
+    table: Table<TData>;
+    filters: {
+        search?: string;
+        role?: string;
+        [key: string]: unknown; // Documentation pattern to replace 'any'
+    };
+}
 
+export function DataTableToolbar<TData>({ 
+    table, 
+    filters 
+}: UserDataTableToolbarProps<TData>) {
+    // Explicitly typing useState prevents 'any' leakage
+    const [search, setSearch] = useState<string>(filters?.search ?? '');
+    const [role, setRole] = useState<string>(filters?.role ?? 'all');
+    
+    const debouncedSearch = useDebounceOnSearch(search, 500);
+    const isFirst = useRef(true);
 
-import { UserData } from "@/lib/object"
-import { DataTableViewOptions } from "@/components/data-table-view-options"
+    useEffect(() => {
+        if (isFirst.current) {
+            isFirst.current = false;
+            return;
+        }
 
-export function DataTableToolbar({
-  table,
-  filters,
-}: {
-  table: Table<UserData>
-  filters: any
-}) {
-  const [search, setSearch] = useState(filters?.search ?? "")
-  const [role, setRole] = useState(filters?.role ?? "all")
-  const debouncedSearch = useDebounceOnSearch(search, 500)
-  const isFirst = useRef(true)
+        const url = new URL(window.location.href);
+        const params = Object.fromEntries(url.searchParams.entries());
 
-  useEffect(() => {
-    if (isFirst.current) {
-      isFirst.current = false
-      return
-    }
+        // 🔍 Search Logic
+        if (debouncedSearch) {
+            params.search = debouncedSearch;
+            params.page = '1';
+        } else {
+            delete params.search;
+        }
 
-    const url = new URL(window.location.href)
-    const params = Object.fromEntries(url.searchParams.entries())
+        // Role Filter Logic
+        if (role !== 'all') {
+            params.role = role;
+            params.page = '1';
+        } else {
+            delete params.role;
+        }
 
-    // 🔍 Search
-    if (debouncedSearch) {
-      params.search = debouncedSearch
-      params.page = "1"
-    } else {
-      delete params.search
-    }
+        router.get(route('user.index'), params, {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
+    }, [debouncedSearch, role]);
 
-   
-    if (role !== "all") {
-      params.role = role
-      params.page = "1"
-    } else {
-      delete params.role
-    }
+    return (
+        <div className="flex flex-wrap items-center gap-2">
+            {/* 🔍 Search Input */}
+            <Input 
+                placeholder="Search name or email" 
+                value={search} 
+                onChange={(e) => setSearch(e.target.value)} 
+                className="w-[250px]" 
+            />
 
+            {/* Reset Button */}
+            {(search !== '' || role !== 'all') && (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                        setSearch('');
+                        setRole('all');
+                    }}
+                    className="h-8 px-2 lg:px-3"
+                >
+                    Reset <X className="ml-2 h-4 w-4" />
+                </Button>
+            )}
 
-
-    router.get(route("user.index"), params, {
-      preserveState: true,
-      preserveScroll: true,
-      replace: true,
-    })
-  }, [debouncedSearch, role])
-
-  
-// const handleBulkDelete = () => {
-//   const ids = table
-//     .getSelectedRowModel()
-//     .rows
-//     .map(row => row.original.id)
-
-//   if (!ids.length) return
-
-//   if (!confirm(`Delete ${ids.length} users?`)) return
-
-//   router.post(route("user.bulk-delete"), { ids })
-// }
-
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      {/* 🔍 Search */}
-      <Input
-        placeholder="Search name or email"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-[250px]"
-      />
-
-      {/* <Select
-        value={role}
-        onValueChange={setRole}
-      >
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Publication status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All statuses</SelectItem>
-          <SelectItem value="published">Published</SelectItem>
-          <SelectItem value="pending">Pending</SelectItem>
-          <SelectItem value="archived">Archived</SelectItem>
-        </SelectContent>
-      </Select> */}
-
-
-
-{/* <Button
-  variant="destructive"
-  disabled={!table.getIsSomeRowsSelected()}
-  onClick={handleBulkDelete}
->
-  Delete selected
-</Button> */}
-
-      {/* Reset */}
-      {(search || role !== "all") && (
-        <Button
-          variant="ghost"
-          onClick={() => {
-            setSearch("")
-            setRole("all")
-          }}
-        >
-          Reset <X className="ml-2 h-4 w-4" />
-        </Button>
-      )}
-
-
-
-      <div> <DataTableViewOptions table={table}/></div>
-    </div>
-  )
+            <div className="ml-auto">
+                <DataTableViewOptions table={table} />
+            </div>
+        </div>
+    );
 }

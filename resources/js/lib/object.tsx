@@ -1,5 +1,3 @@
-import { string } from "zod";
-
 export interface Dimensions {
     length_mm: number | null;
     width_mm: number | null;
@@ -8,7 +6,7 @@ export interface Dimensions {
 }
 // export type Car = {
 //     id:string;
-  
+
 //     car_brand_id: Brand;
 //     version_id: Version;
 //     category_id: Category;
@@ -82,121 +80,122 @@ export interface Dimensions {
 //     updated_at: string;
 // }
 
-export interface Price{
-  id: string;
-  car_id: string;
-  price: number;
-  discount: number;
-  discount_type: string;
-  is_current: boolean;
-  final_price: string;
-
-
+export interface Price {
+    id: string;
+    car_id: string;
+    price: number;
+    discount: number;
+    discount_type: string;
+    is_current: boolean;
+    final_price: string;
 }
 
 export interface CarDetailData {
-  id: string;
-  image_main: Image;
-  price: Price;
-  version:Version;
-  category: Category;
-  seller:Seller;
-  origin_country:CountryObject;
-  fuel_type: FuelType;
-  spect:{
-            chassis_number: string;
-            registration_year: number;
-            manufacture_year: number;
-            color: string;
-            mileage: number;
-            transmission: string;
-            steering: string;
-            seating_capacity: number;
-            doors: number;
-            status: string;
-            engine_code: string;
-            engine_size: number;
-            model_code: string;
-            wheel_driver: string;
-            m_3: number;
-            dimensions: Dimensions;
-            weight: number;
-
-        }
-   location: string;
-   car_selling_status :string;
-   publication_status: string;
-   interior_color:Color;
-   exterior_color:Color;
-   cost_price:number;
-   min_profit_margin:number;
-   images: Image[];
-   features: Feature[];
-   updated_at: string,
-   created_at: string,
+    id: string;
+    image_main: Image;
+    price: Price;
+    version: Version;
+    category: Category;
+    seller: Seller;
+    origin_country: CountryObject;
+    fuel_type: FuelType;
+    spect: {
+        chassis_number: string;
+        registration_year: number;
+        manufacture_year: number;
+        color: string;
+        mileage: number;
+        transmission: string;
+        steering: string;
+        seating_capacity: number;
+        doors: number;
+        status: string;
+        engine_code: string;
+        engine_size: number;
+        model_code: string;
+        wheel_driver: string;
+        m_3: number;
+        dimensions: Dimensions;
+        weight: number;
+    };
+    location: string;
+    car_selling_status: string;
+    publication_status: string;
+    interior_color: Color;
+    exterior_color: Color;
+    cost_price: number;
+    min_profit_margin: number;
+    images: Image[];
+    features: Feature[];
+    updated_at: string;
+    created_at: string;
 }
-export type Color={
+export type Color = {
     id: string;
     name: string;
-    hex_code: string
+    hex_code: string;
+};
+export type Brand = {
+    id: string;
+    brand_name: string;
+};
+export type CarModel = {
+    id: string;
+    brand_id: string;
+    brand: Brand;
+    model_name: string;
+};
+export type Category = {
+    id: string;
+    category_name: string;
+};
+export type FuelType = {
+    id: string;
+    fuel_type: string;
+};
+export type Version = {
+    id: string;
+    version_name: string;
+    car_model_id: string;
+    car_model: CarModel;
+    version_year: string; //must be string
+};
+export interface Seller {
+    id: number;
+    seller_name: string;
+    phone: string;
+    avatar: string | null;
+    description: string | null;
+    country: string;
+    address: string;
+        created_at: string;
+    updated_at: string;
 }
-export type Brand={
-  id:string;
-  brand_name:string;
-}
-export type CarModel={
-  id:string;
-  brand_id:string;
-  brand: Brand;
-  model_name:string;
-}
-export type Category={
-  id:string;
-  category_name:string;
-}
-export type FuelType={
-  id:string;
-  fuel_type:string;
-}
-export type Version={
-  id:string;
-  version_name:string;
-  car_model_id:string;
-  car_model: CarModel;
-  version_year:string//must be string
-}
-export type Seller={
-  id:string;
-  seller_name:string;
-  phone_string?: string;
-  email?: string;
-  address?: string;
-}
-export type Feature={
-  id:string;
-  feature_name:string;
-  icon?: string; // Optional icon field
-  description?: string; // Optional description field
-}
+export type Feature = {
+    id: string;
+    feature_name: string;
+    icon?: string; // Optional icon field
+    description?: string; // Optional description field
+};
 
-export type Image={
-  id:string;
-  car_id:string;
-  image_path:string;
-  is_main:boolean;
-}
-export type Role={
-id:string
-name: string;
-}
-export type UserData={
-  id:string;
-  name:string;
-  email:string;
-  roles:Role[];
-  created_at:string;
-  updated_at:string;
-}
+export type Image = {
+    id: string;
+    car_id: string;
+    image_path: string;
+    is_main: boolean;
+};
+export type Role = {
+    id: string;
+    name: string;
+};
+export type UserData = {
+    id: string;
+    name: string;
+    email: string;
+    roles: Role[];
+    created_at: string;
+    updated_at: string;
+};
 
 export interface CountryObject {
     id: number;
@@ -206,23 +205,21 @@ export interface CountryObject {
     currency: string | null;
     import_regulation_information: string | null;
     flags: string | null;
-    gateway_ports? : PortObject[];
+    gateway_ports?: PortObject[];
     cities?: CityObject[];
     created_at?: string;
     updated_at?: string;
 }
-
 
 export interface PortObject {
     id: number;
     name: string;
     code: string | null;
     country_id: number;
-    country?: CountryObject; 
+    country?: CountryObject;
     updated_at?: string;
     created_at?: string;
 }
-
 
 export interface ShippingRateObject {
     id: number;
@@ -235,9 +232,9 @@ export interface ShippingRateObject {
     to_country?: CountryObject;
     to_port_id: number | null;
     to_port?: PortObject | null;
-    price_roro: string; 
+    price_roro: string;
     price_container: string;
-    
+
     is_current: boolean;
     updated_at: string;
 }
@@ -245,19 +242,18 @@ export interface ShippingRateObject {
 // export interface DeliveryTariffObject {
 //     id: number;
 //     adress_name: string;
-//     country_id: number; 
+//     country_id: number;
 //     country?: CountryObject;
-//     from_port_id: number | null; 
+//     from_port_id: number | null;
 //     from_country_id: number | null;
 //     tarif_per_tone: string;
-//     driver_fee: string;    
-//     clearing_fee: string;  
-    
-//     weight_range: string | null;
-    
-//     origin_display?: string; 
-// }
+//     driver_fee: string;
+//     clearing_fee: string;
 
+//     weight_range: string | null;
+
+//     origin_display?: string;
+// }
 
 export interface CityObject {
     id: number;
@@ -265,9 +261,6 @@ export interface CityObject {
     country_id: number;
     is_hub: boolean;
 }
-
-
-
 
 export interface DeliveryDriverAgencyObject {
     id: number | null;
@@ -281,13 +274,12 @@ export interface DeliveryDriverAgencyObject {
     fleet_size: number | string;
     is_active: boolean;
     // Relationships can be added here if agencies are linked to countries
-    country?: CountryObject; 
+    country?: CountryObject;
 }
-
 
 export interface DeliveryTariffObject {
     id: number | null;
-    
+
     // Raw Data
     service_type: 'self_pickup' | 'individual_driver' | 'agency';
     delivery_method: 'drive_away' | 'car_carrier' | 'container';
@@ -308,12 +300,28 @@ export interface DeliveryTariffObject {
     is_current: boolean;
 
     // Full Nested Relationships
-    country?: any;
-    origin_country?: any;
-    origin_port?: any;
-    from_city?: any;
-    to_city?: any;
-    delivery_driver_agency?: any;
-
+    country?: CountryObject;
+    origin_country?: CountryObject;
+    origin_port?: PortObject;
+    from_city?: CityObject;
+    to_city?: CityObject;
+    delivery_driver_agency?: DeliveryDriverAgencyObject;
 }
 
+export interface Order {
+    id: number;
+    order_number: string;
+    status: string;
+    vehicle: {
+        name: string;
+        chassis_number: string;
+        image: string | null;
+    };
+    pricing: {
+        total_amount: number;
+        currency: string;
+    };
+    dates: {
+        created_at: string;
+    };
+}

@@ -1,71 +1,107 @@
-// fuelForm.tsx
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import InputError from '@/components/input-error'
-import { useForm } from '@inertiajs/react'
-import { Pencil } from 'lucide-react'
-import { useEffect, useState } from 'react'
+'use client';
 
-type Fuel = { id: number; fuel_type: string }
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { FuelItem } from '@/pages/car/settings/fuel';
+import { useForm } from '@inertiajs/react';
+import { Pencil, Plus } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
-type FuelFormData = {
-  fuel_type: string
-  _method?: 'patch'
+
+interface FuelFormProps {
+    fuel?: FuelItem; // Optional: if present, we are in "Update" mode
 }
 
-export default function FuelForm({ fuel }: { fuel?: Fuel }) {
-  const isUpdate = !!fuel
-  const [open, setOpen] = useState(false)
+const FuelForm = ({ fuel }: FuelFormProps) => {
+    const isUpdate = !!fuel;
+    const [open, setOpen] = useState(false);
 
-  const { data, setData, post, processing, errors } = useForm<FuelFormData>({
-    fuel_type: fuel?.fuel_type ?? '',
-    _method: isUpdate ? 'patch' : undefined,
-  })
-
-  useEffect(() => {
-    if (open) {
-      setData({
+    // Initialize Inertia useForm
+    const { data, setData, post, patch, processing, errors, reset } = useForm({
         fuel_type: fuel?.fuel_type ?? '',
-        _method: isUpdate ? 'patch' : undefined,
-      })
-    }
-  }, [open])
+    });
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault()
-    post(
-      isUpdate ? route('carfuel.update', fuel!.id) : route('carfuel.store'),
-      { onSuccess: () => setOpen(false) }
-    )
-  }
+    // Reset or Sync data when the dialog opens or fuel prop changes
+    useEffect(() => {
+        if (open) {
+            setData('fuel_type', fuel?.fuel_type ?? '');
+        }
+    }, [open, fuel,setData]);
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant={isUpdate ? 'outline' : 'default'} size={isUpdate ? 'icon' : 'default'}>
-          {isUpdate ? <Pencil className="h-4 w-4" /> : 'Add Fuel'}
-        </Button>
-      </DialogTrigger>
+    const onSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
 
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{isUpdate ? 'Update Fuel' : 'Create Fuel'}</DialogTitle>
-        </DialogHeader>
+        if (isUpdate) {
+            patch(route('carfuel.update', fuel.id), {
+                onSuccess: () => setOpen(false),
+            });
+        } else {
+            post(route('carfuel.store'), {
+                onSuccess: () => {
+                    setOpen(false);
+                    reset();
+                },
+            });
+        }
+    };
 
-        <form onSubmit={submit} className="space-y-4">
-          <div>
-            <Label>Fuel Type</Label>
-            <Input value={data.fuel_type} onChange={e => setData('fuel_type', e.target.value)} />
-            <InputError message={errors.fuel_type} />
-          </div>
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                {isUpdate ? (
+                    <Button variant="outline" size="sm">
+                        <Pencil className="mr-2 h-4 w-4" /> Update
+                    </Button>
+                ) : (
+                    <Button variant="default">
+                        <Plus className="mr-2 h-4 w-4" /> Add Fuel Type
+                    </Button>
+                )}
+            </DialogTrigger>
+            
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>{isUpdate ? 'Update Fuel Type' : 'New Fuel Type'}</DialogTitle>
+                    <DialogDescription>
+                        {isUpdate 
+                            ? 'Modify the existing fuel type name.' 
+                            : 'Enter the name of the new fuel type (e.g., Electric, Hybrid).'}
+                    </DialogDescription>
+                </DialogHeader>
 
-          <Button disabled={processing} className="w-full">
-            {processing ? 'Saving…' : isUpdate ? 'Update' : 'Create'}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
-  )
-}
+                <form onSubmit={onSubmit} className="space-y-6 pt-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="fuel_type">Fuel Type Name</Label>
+                        <Input
+                            id="fuel_type"
+                            placeholder="e.g. Diesel"
+                            value={data.fuel_type}
+                            onChange={(e) => setData('fuel_type', e.target.value)}
+                            disabled={processing}
+                            autoFocus
+                        />
+                        <InputError message={errors.fuel_type} />
+                    </div>
+
+                    <div className="flex justify-end gap-3">
+                        <Button 
+                            type="button" 
+                            variant="ghost" 
+                            onClick={() => setOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button type="submit" disabled={processing || !data.fuel_type}>
+                            {processing ? 'Saving...' : isUpdate ? 'Save Changes' : 'Create Fuel'}
+                        </Button>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+export default FuelForm;

@@ -44,6 +44,7 @@ class colorController extends Controller
      */
     public function store(Request $request)
     {
+       
         $validator = $this->colorService->DataValidation($request, 'post');
         if ($validator->fails()) {
             throw new ValidationException($validator);

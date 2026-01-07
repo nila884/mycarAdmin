@@ -10,6 +10,7 @@ use App\Classes\Services\BrandService;
 use Illuminate\Validation\ValidationException;
 use App\Http\Resources\BrandResource;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class BrandController extends Controller
 {
@@ -32,18 +33,25 @@ class BrandController extends Controller
     public function store(Request $request)
     {
         
-        $validator = $this->brandService->DataValidation($request, 'post');
 
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-        try {
-            $this->brandService->Create($request);
-            return redirect()->route('carbrand.index')
-                             ->with('success', 'Brand created successfully!');
-        } catch (\Exception $e) {
-            return back()->withErrors(['general' => 'Failed to create brand. Please try again.']);
-        }
+       $validator = $this->brandService->DataValidation($request, 'post');
+
+    if ($validator->fails()) {
+        // This automatically redirects back with 'errors' prop for Inertia
+        return back()->withErrors($validator)->withInput();
+    }
+
+    try {
+        $this->brandService->Create($request);
+        return redirect()->route('carbrand.index')
+                         ->with('success', 'Brand created successfully!');
+    } catch (\Exception $e) {
+        // Log the error for AWS debugging, don't use dd() in production
+        Log::error($e->getMessage());
+        return redirect()->back()
+            ->withErrors(['brand_name' => 'Server error: Could not save brand.'])
+            ->withInput();
+    }
     }
 
     public function update(Request $request, Brand $brand)

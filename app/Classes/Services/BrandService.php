@@ -28,20 +28,20 @@ Class BrandService
 
     public function Create(Request $request)
     {
-        $name = Str::lower(trim(htmlspecialchars($request->brand_name)));
-        $logoPath = null; // Initialize logo path to null
+    $name = Str::lower(trim(htmlspecialchars($request->brand_name)));
+    $logoPath = null;
 
-        if ($request->hasFile('logo')) {
-            $file = $request->file('logo');
-            // Generate a unique file name
-            $fileName = time() . '_' . Str::slug($name) . '.' . $file->getClientOriginalExtension();
-            $logoPath = $file->storeAs('brand_logos', $fileName, 'public');
-        }
-        
-        return Brand::create([
-            "brand_name" => strtolower($name),
-            "logo" => Storage::url($logoPath)
-        ]);
+    if ($request->hasFile('logo')) {
+        $file = $request->file('logo');
+        $fileName = time() . '_' . Str::slug($name) . '.' . $file->getClientOriginalExtension();
+        // Store on 'public' disk
+        $logoPath = $file->storeAs('brand_logos', $fileName, 'public');
+    }
+    
+    return Brand::create([
+        "brand_name" => $name,
+        "logo" => $logoPath // Save the PATH, not the URL
+    ]);
     }
 
     public function Update(Request $request, Brand $brand): Brand
