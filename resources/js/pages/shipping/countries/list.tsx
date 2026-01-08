@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head} from '@inertiajs/react';
 import HeadingSmall from '@/components/heading-small';
 import AppLayout from '@/layouts/app-layout';
 import ShippingLayout from '@/layouts/shipping/layout';
@@ -17,11 +17,11 @@ interface Props {
 }
 
 export default function CountryIndex({ countries,ports }: Props) {
-  const handleDelete = (id: number) => {
-    if (confirm('Are you sure? This will delete associated ports and rates.')) {
-      router.delete(route('country.destroy', id));
-    }
-  };
+  // const handleDelete = (id: number) => {
+  //   if (confirm('Are you sure? This will delete associated ports and rates.')) {
+  //     router.delete(route('country.destroy', id));
+  //   }
+  // };
 
   return (
     <AppLayout>
