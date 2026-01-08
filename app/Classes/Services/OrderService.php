@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
 
 class OrderService
 {
-    protected $invoiceService,$carService;
+    protected $invoiceService;
 
     public function __construct(InvoiceService $invoiceService)
     {
@@ -26,18 +26,15 @@ class OrderService
 
     /**
      * Business Logic: Create a Quotation Snapshot
+     * SECURITY FIX: Prices are calculated purely from DB, ignoring frontend price inputs.
      */
     public function createOrderSnapshot(array $data, int $userId)
     {
-      
         $validator = Validator::make($data, [
-            'car_id'=>'required|exists:cars,id',
-            'car_price' => 'required',
-            'total_price' => 'required',
+            'car_id' => 'required|exists:cars,id',
             'shipping_rate_id' => 'required|exists:shipping_rates,id',
             'delivery_tariff_id' => 'required|exists:delivery_tariffs,id',
             'shipping_method' => 'required|in:roro,container',
-            'car_weight'=>'required'
         ]);
 
         if ($validator->fails()) {
@@ -45,39 +42,44 @@ class OrderService
         }
 
         return DB::transaction(function () use ($data, $userId) {
-            $car = Car::with(['version.carModel.brand','currentPrice'=> function ($query) {
-                            $query->where('is_current', true);}
-                            ])->findOrFail($data['car_id']);
+            // 1. Fetch Car and Prices directly from DB (Security: Do not trust $data['car_price'])
+            $car = Car::with(['prices' => fn($q) => $q->where('is_current', true)])->findOrFail($data['car_id']);
+            
+            $currentPrice = $car->prices->first();
+            if (!$currentPrice) {
+                throw new \Exception("Active price not found for this vehicle.");
+            }
+
+            $rawPrice = $currentPrice->price;
+            $discountValue = $currentPrice->discount ?? 0;
+            
+            // Calculate FOB Price
+            $fobPrice = ($currentPrice->discount_type === 'percent') 
+                ? $rawPrice - ($rawPrice * ($discountValue / 100))
+                : $rawPrice - $discountValue;
+
+            // 2. Profit Margin Guard
+            $costPrice = $car->cost_price ?? 0;
+            $benefit = $fobPrice - $costPrice;
+
+            if ($fobPrice < ($costPrice + ($car->min_profit_margin ?? 0))) {
+                throw new \Exception("Transaction Denied: Pricing error or margin too low.");
+            }
+
+            // 3. Logistics Calculation (Security: Do not trust frontend calculations)
             $seaRate = ShippingRate::findOrFail($data['shipping_rate_id']);
             $tariff = DeliveryTariff::findOrFail($data['delivery_tariff_id']);
-            // Find where you define $fobPrice and replace with this:
-                $currentPrice = $car->prices->first();
-                $rawPrice = $currentPrice->price;
-                $discountValue = $currentPrice->discount ?? 0;
-                if ($currentPrice->discount_type === 'percent') {
-                    // Math: Price - (Price * (10 / 100))
-                    $fobPrice = $rawPrice - ($rawPrice * ($discountValue / 100));
-                } else {
-                    // Default: Fixed Amount (Price - 1500)
-                    $fobPrice = $rawPrice - $discountValue;
-                }
-
-                $costPrice = $car->cost_price ?? 0;
-
-                // This is your Benefit (Gross Profit on the FOB price)
-                $benefit = $fobPrice - $costPrice;
-
-                // Rigorous Check: Ensure you aren't selling below cost + min margin
-                if ($fobPrice < ($costPrice + $car->min_profit_margin)) {
-                    throw new \Exception("Transaction Denied: Selling price is below the required minimum profit margin.");
-                }
-                
-            // $fobPrice = $car->currentPrice->price - ($car->currentPrice->discount ?? 0);
-            $seaFreight = ($data['shipping_method'] === 'roro') ? $seaRate->price_roro : $seaRate->price_container;  
+            
+            $seaFreight = (Str::lower($data['shipping_method']) === 'roro') ? $seaRate->price_roro : $seaRate->price_container;  
             $weightInTons = $car->weight / 1000;
             $landTransit = ($tariff->tarif_per_tone * $weightInTons) + $tariff->driver_fee + $tariff->agency_service_fee;
+            
+            $totalAmount = $fobPrice + $seaFreight + $landTransit + $tariff->clearing_fee;
+            $nextId = Order::max('id') + 1;
+            $orderNumber = 'QT-' . date('Y') . '-' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
+            // 4. Create Order
             $order = Order::create([
-                'order_number' => 'QT-' . strtoupper(Str::random(12)), // Reference code stays uppercase
+                'order_number' => $orderNumber,
                 'user_id' => $userId,
                 'benefit' => $benefit,
                 'car_id' => $car->id,
@@ -85,148 +87,84 @@ class OrderService
                 'sea_freight' => $seaFreight,
                 'land_transit' => $landTransit,
                 'clearing_fee' => $tariff->clearing_fee,
-                'total_amount' => $fobPrice + $seaFreight + $landTransit + $tariff->clearing_fee,
-                'origin_port' => Str::lower('YOKOHAMA, JAPAN'),
+                'total_amount' => $totalAmount,
+                'origin_port' => Str::lower($seaRate->originPort->name),
                 'destination_port' => Str::lower($seaRate->toPort->name ?? 'tba'),
                 'final_destination_city' => Str::lower($tariff->toCity->name ?? 'tba'),
                 'shipping_method' => Str::lower($data['shipping_method']),
                 'status' => 'quote',
-                'expires_at' => now()->addDays(30),
+                'expires_at' => now()->addDays(config('settings.quotes.validity_days', 30)),
             ]);
-           
-            $pdfData = [
-            'order' => $order,
-            'car' => $car,
-            'user' => Auth::user(),
-            // Mapping fields to match the reference PDF structure 
-            'issue_date' => now()->format('d-M-Y'),
-            'valid_until' => $order->expires_at->format('d-M-Y'),
-            'bank_details' => [
-                'name' => 'SUMITOMO MITSUI BANKING CORPORATION',
-                'swift' => 'SMBCJPJT',
-                'account' => '988-5000137',
-                'name_on_account' => 'BE FORWARD CO.LTD,.'
-            ]
-        ];
-        $pdf = Pdf::loadView('pdf.quotation', $pdfData);
-        
-        $fileName = 'quotes/' . $order->order_number . '.pdf';
-        Storage::disk('public')->put($fileName, $pdf->output());
 
-        // $order->update(['invoice_path' => $fileName]);
-        $this->invoiceService->createInvoiceForOrder($order,$fileName);
+            // PDF Generation
+            $pdfData = [
+                'order' => $order,
+                'car' => $car,
+                'user' => Auth::user(),
+                'issue_date' => now()->format('d-M-Y'),
+                'valid_until' => $order->expires_at->format('d-M-Y'),
+                'bank_details' => config('settings.bank_details'),
+                'valid_until' => $order->expires_at->format('d-M-Y'),
+                'note' => config('settings.quotes.footer_note'),
+                'company' => config('settings.company_info'),
+            ];
+            
+            $pdf = Pdf::loadView('pdf.quotation', $pdfData);
+            $fileName = 'quotes/' . $order->order_number . '.pdf';
+            Storage::disk('public')->put($fileName, $pdf->output());
+
+            $this->invoiceService->createInvoiceForOrder($order, $fileName);
+            
             return $order;
         });
     }
 
     /**
-     * Get Paginated Orders for Admin
+     * Get Paginated Orders 
+     * Uses Order::mine() to ensure Clients only see theirs, Admins see all.
      */
-    public function getAllOrders($perPage = 15)
+    public function getPaginatedOrders(Request $request)
     {
-        return Order::with(['car', 'user'])->latest()->paginate($perPage);
+        return OrderResource::collection(
+            Order::mine() // <--- SECURITY: Using your new scope
+                ->with(['car.version.carModel.brand', 'invoice', 'user'])
+                ->when($request->search, function ($query, $search) {
+                    $query->where('order_number', 'like', "%{$search}%");
+                })
+                ->latest()
+                ->get()
+        );
     }
 
     /**
-     * Get Single Order Details
+     * Get Single Order
      */
     public function getOrderById(int $id)
     {
-        return Order::with(['car.price', 'user', 'invoice'])->findOrFail($id);
+        // mine() scope will throw 404 if user tries to access someone else's ID
+        return Order::mine()->with(['car.price', 'user', 'invoice'])->findOrFail($id);
     }
 
     /**
-     * Update Order Status with Validation
-     */
-    public function updateStatus(int $id, string $status)
-    {
-        $order = Order::findOrFail($id);
-        
-        $validStatuses = ['quote', 'proforma', 'paid', 'cancelled'];
-        if (!in_array(Str::lower($status), $validStatuses)) {
-            throw new \InvalidArgumentException("Invalid status: $status");
-        }
-
-        $order->update(['status' => Str::lower($status)]);
-        return $order;
-    }
-
-    /**
-     * Delete Order
-     */
-    public function deleteOrder(int $id)
-    {
-        $order = Order::findOrFail($id);
-        return $order->delete();
-    }
-
-    public function getUserOrders()
-{
-
-    $orders = Order::with([
-        'car', 
-        'invoice' 
-    ])
-    ->where('user_id', Auth::user()->id)
-    ->latest()
-    ->get();
-    return OrderResource::collection($orders);
-}
-
-
-public function cancelOrder($id)
-{
-
-    $order = Order::where('user_id',Auth::user()->id)->findOrFail($id);
-    if (in_array($order->status, ['quote', 'proforma'])) {
-        $order->update(['status' => 'cancelled']); 
-        if ($order->invoice) {
-            $order->invoice->update(['payment_status' => 'unpaid']); 
-        }
-        return response()->json(['message' => 'Order cancelled successfully.']);
-    }
-    return response()->json(['error' => 'Paid or shipped orders cannot be cancelled.'], 400);
-}
-
-/**
- * Logic to specifically Confirm a Quote
+ * Securely get the physical path for the PDF download.
+ * Uses scopeMine to ensure users only download their own documents.
  */
-public function confirmOrder(int $id)
-{
-    $order = Order::with('user')->where('user_id', Auth::user()->id)->findOrFail($id);
-
-    if ($order->status !== 'quote') {
-        throw new \Exception("Only quotations can be confirmed.");
-    }
-
-    // 1. Update status
-    $order->update(['status' => 'proforma']);
-
-    // 2. Create the Invoice record if it doesn't exist
-    $order->invoice()->firstOrCreate([
-        'order_id' => $order->id
-    ], [
-        'invoice_number' => 'INV-' . strtoupper(Str::random(8)),
-        'amount_due' => $order->total_amount,
-        'payment_status' => 'unpaid'
-    ]);
-
-    return new OrderResource($order->load('invoice'));
-}
-
-
 public function getDownloadPath($id)
 {
-    // Find the order for the logged-in user
-    $order = Order::with('user')->where('user_id', Auth::user()->id)
-                  ->with('invoice')
-                  ->findOrFail($id);
 
-    $path = $order->invoice->pdf_path; // e.g., "quotes/QT-123.pdf"
+    $order = Order::mine()
+        ->with('invoice')
+        ->findOrFail($id);
+
+    if (!$order->invoice || !$order->invoice->pdf_path) {
+        throw new \Exception("No invoice record found for this order.");
+    }
+
+    $path = $order->invoice->pdf_path; 
     $fullPath = storage_path('app/public/' . $path);
-
+    
     if (!file_exists($fullPath)) {
-        throw new \Exception("The PDF file does not exist on the server.");
+        throw new \Exception("The PDF file was not found on the server. Please regenerate the quote.");
     }
 
     return [
@@ -235,28 +173,59 @@ public function getDownloadPath($id)
     ];
 }
 
-public function getPaginatedOrders(Request $request)
+    /**
+     * Client: Cancel Order
+     */
+    public function cancelOrder($id)
     {
-        $orders = Order::query()
-            // Eager load everything used in your OrderResource
-            ->with(['car.version.carModel.brand', 'car.exteriorColor', 'invoice']) 
-            ->when($request->search, function ($query, $search) {
-                $query->where('order_number', 'like', "%{$search}%")
-                      ->orWhereHas('car.version.carModel', fn($q) => $q->where('model_name', 'like', "%{$search}%"));
-            })
-            ->when($request->status && $request->status !== 'all', function ($query, $status) {
-                $query->where('status', $status);
-            })
-            ->orderBy($request->input('sort', 'created_at'), $request->input('direction', 'desc'))
-            ->paginate($request->input('per_page', 10))
-            ->withQueryString();
+        $order = Order::mine()->findOrFail($id);
 
-        return OrderResource::collection($orders);
+        if (!in_array($order->status, ['quote', 'proforma'])) {
+            return response()->json(['error' => 'Confirmed or Paid orders require admin intervention to cancel.'], 400);
+        }
+
+        $order->update(['status' => 'cancelled']); 
+        if ($order->invoice) {
+            $order->invoice->update(['payment_status' => 'cancelled']); 
+        }
+
+        return response()->json(['message' => 'Order cancelled successfully.']);
     }
 
+    /**
+     * Client: Confirm a Quote (Proforma)
+     */
+    public function confirmOrder(int $id)
+    {
+        $order = Order::mine()->findOrFail($id);
+
+        if ($order->status !== 'quote') {
+            throw new \Exception("Only quotations can be confirmed.");
+        }
+
+        $order->update(['status' => 'proforma']);
+
+        $order->invoice()->firstOrCreate([
+            'order_id' => $order->id
+        ], [
+            'invoice_number' => 'INV-' . strtoupper(Str::random(8)),
+            'amount_due' => $order->total_amount,
+            'payment_status' => 'unpaid'
+        ]);
+
+        return new OrderResource($order->load('invoice'));
+    }
+
+    /**
+     * Admin: Change status manually
+     */
     public function updateStatusManagement(Order $order, string $status): void
     {
-        $order->update(['status' => $status]);
-    }
+        // Check if current user is admin via Spatie
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403, 'Only admins can change order statuses manually.');
+        }
 
+        $order->update(['status' => Str::lower($status)]);
+    }
 }

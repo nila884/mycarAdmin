@@ -17,7 +17,6 @@ class ClientResource extends JsonResource
                 'address' => $this->client->address ?? null,
                 'phone'   => $this->client->phone ?? null,
             ],
-            // Include token if it was recently generated
             'token' => $this->when($this->token, $this->token),
         ];
     }

@@ -397,7 +397,7 @@ class CarService
             'fuel_type_id' => ['required', 'exists:fuel_types,id'],
             'version_id' => ['required', 'exists:versions,id'],
             'car_brand_id' => ['required', 'exists:brands,id'],
-            'seller_id' => ['required', 'exists:sellers,id'], 
+            'seller_id' => ['nullable', 'exists:sellers,id'], 
             'interior_color'=> ['nullable','exists:colors,id'],
             'exterior_color'=> ['nullable','exists:colors,id'],
             'mileage' => ['required', 'numeric', 'min:0'],

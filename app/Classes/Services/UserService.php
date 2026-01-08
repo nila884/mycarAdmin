@@ -70,8 +70,8 @@ class UserService
                 'role' => 'user',
                 'country_id' => $request->country_id,
             ]);
-
-            $role = Role::where('name', $user->role)->first();
+            $user->assignRole('user');
+            $role = Role::where('name', !$user->hasRole('client'))->first();
             if ($role != null) {
                 $user->assignRole($role);
             } else {

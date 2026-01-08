@@ -44,8 +44,8 @@ class CarFactory extends Factory
         'steering' => $this->faker->randomElement(['right', 'left']),
         'publication_status' => 'published',
         'car_selling_status' => 'selling',
-        'cost_price' => $this->faker->randomFloat(2, 5000, 100000),        
-        'min_profit_margin' => $this->faker->randomFloat(2, 1000, 10000),
+        'cost_price' => $this->faker->randomFloat(2, 5000, 6000),        
+        'min_profit_margin' => $this->faker->randomFloat(2, 100, 200),
         'seating_capacity' => 5,
         'doors' => 4,
         'location' => $this->faker->city(),
@@ -66,6 +66,7 @@ class CarFactory extends Factory
             $randomFeatures = $featureIds->shuffle()->take(rand(3, 7));
 
             $car->features()->attach($randomFeatures);
+            
         });
     }
 }

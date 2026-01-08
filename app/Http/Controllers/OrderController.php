@@ -1,12 +1,11 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Classes\Services\OrderService;
-use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
 
 class OrderController extends Controller
 {
@@ -17,96 +16,89 @@ class OrderController extends Controller
         $this->orderService = $orderService;
     }
 
+    /**
+     * CLIENT: Request a new quote
+     */
     public function store(Request $request)
     {
-      
- 
-        if (!Auth::check()) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+        try {
+            // Service handles validation and DB-based price calculation
+            $order = $this->orderService->createOrderSnapshot($request->all(), Auth::id());
+            return response()->json($order, 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
         }
-        $order = $this->orderService->createOrderSnapshot($request->all(), Auth::id());
-        return new OrderResource($order);
     }
-    
-    
-    // public function index()
-    // {
-    //     $orders = $this->orderService->getAllOrders();
-    //     return OrderResource::collection($orders);
-    // }
 
+    /**
+     * CLIENT: Get list of own orders
+     */
+    public function getUserOrders(Request $request)
+    {
+        // Automatically uses Order::mine() through the service
+        return $this->orderService->getPaginatedOrders($request);
+    }
+
+    /**
+     * CLIENT: Confirm a quote (move to proforma)
+     */
+    public function confirmOrder($id)
+    {
+        try {
+            return $this->orderService->confirmOrder((int)$id);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 403);
+        }
+    }
+
+    /**
+     * CLIENT: Cancel a quote/proforma
+     */
+    public function cancelOrder($id)
+    {
+        return $this->orderService->cancelOrder((int)$id);
+    }
+
+    /**
+     * CLIENT: Download PDF Invoice/Quote
+     */
+    public function downloadInvoice($id)
+    {
+        try {
+            $fileInfo = $this->orderService->getDownloadPath($id);
+            return response()->download($fileInfo['path'], $fileInfo['name']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 404);
+        }
+    }
+
+    /**
+     * ADMIN: View all orders (Inertia Management)
+     */
+    public function index(Request $request)
+    {
+        // Admins pass through Order::mine() and see everything
+        return $this->orderService->getPaginatedOrders($request);
+    }
+
+    /**
+     * ADMIN: Show single order details
+     */
     public function show($id)
     {
-        $order = $this->orderService->getOrderById($id);
-        return new OrderResource($order);
+        return $this->orderService->getOrderById((int)$id);
     }
 
-    public function update(Request $request, $id)
+    /**
+     * ADMIN: Update status manually
+     */
+    public function updateStatusManagement(Order $order, Request $request)
     {
-        $request->validate(['status' => 'required|string']);
-        
-        $order = $this->orderService->updateStatus($id, $request->status);
-        return new OrderResource($order);
+        try {
+            $this->orderService->updateStatusManagement($order, $request->status);
+            return response()->json(['message' => 'Status updated successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 403);
+        }
     }
-
-
-    public function destroy($id)
-    {
-        $this->orderService->deleteOrder($id);
-        return response()->json(['message' => 'Order deleted successfully']);
-    }
-
-    public function getUserOrders()
-    {
-        return $this->orderService->getUserOrders();
-    }
-    public function cancelOrder($id){
-        require $this->orderService->cancelOrder($id);
-    }
-
-    public function confirmOrder($id)
-{
-    try {
-        $order = $this->orderService->confirmOrder($id);
-        return response()->json($order);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 400);
-    }
-}
-public function downloadInvoice($id){
-try {
-        // 1. Get the path and filename from the Service
-        $fileData = $this->orderService->getDownloadPath($id);
-
-        // 2. Force clear buffers to prevent binary corruption
-        if (ob_get_level()) ob_end_clean();
-
-        // 3. Return the actual file stream (NOT JSON)
-        return response()->file($fileData['path'], [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="' . $fileData['name'] . '"',
-            'Access-Control-Expose-Headers' => 'Content-Disposition'
-        ]);
-
-    } catch (\Exception $e) {
-        // Only use JSON if an error actually happens
-        return response()->json(['error' => $e->getMessage()], 404);
-    }
-}
-
-public function index(Request $request)
-    {
-        return Inertia::render('order/list', [
-            'orders'  => $this->orderService->getPaginatedOrders($request),
-            'filters' => $request->only(['search', 'status', 'sort', 'direction']),
-        ]);
-    }
-
-    public function updateStatusManagement(Request $request, Order $order)
-    {
-        $validated = $request->validate(['status' => 'required|string']);
-        $this->orderService->updateStatusManagement($order, $validated['status']);
-        return back()->with('success', 'Status updated.');
-    }
-    
 }

@@ -57,7 +57,7 @@ $validator = Validator::make($data, [
                 'address' => $data['address'],
                 'phone'   => $data['phone'],
             ]);
-                $user->assignRole('user');
+    $user->assignRole('user');
             return $user;
         });
     }
@@ -67,13 +67,15 @@ $validator = Validator::make($data, [
      */
     public function loginClient(array $data)
     {
-        $user = User::where('email', Str::lower($data['email']))->first();
+        $user = User::where('email', $data['email'])->first();
 
-        if (!$user || !Hash::check($data['password'], $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['Invalid credentials.'],
-            ]);
-        }
+    // 2. Verify user existence and password hash manually
+    // This prevents Laravel from starting a session or setting a cookie
+    if (!$user || !Hash::check($data['password'], $user->password)) {
+        throw ValidationException::withMessages([
+            'email' => ['Invalid credentials.'],
+        ]);
+    }
 
         return $user;
     }

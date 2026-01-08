@@ -47,22 +47,13 @@ Route::get('shipping-details/rates', [ShippingRateController::class, 'apiGetShip
 Route::get('countries', [CountryController::class, 'apiGetCountriesClient'])->name('api.countries');
 Route::get('ports', [PortController::class, 'apiIndex'])->name('api.ports');
 
-// Route::post('price-quote-request', [OrderController::class, 'store'])->name('api.request.quotes');
-
-
-
-
-Route::get('management/cars/search-brand', [CarController::class, 'searchByBrand'])->name('management.car.filter.brand');
-
-
-
 
 Route::post('/client/register', [ClientAuthController::class, 'register']);
 Route::post('/client/login', [ClientAuthController::class, 'login']);
 
 Route::post('/client/favorites/objects/guest-list', [FavoriteController::class, 'getGuestObjects']);
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
 Route::post('/orders/quotes/request', [OrderController::class, 'store']);
 Route::get('/orders/client/list', [OrderController::class, 'getUserOrders']);
 Route::post('/orders/client/{id}/confirm', [OrderController::class, 'confirmOrder']);

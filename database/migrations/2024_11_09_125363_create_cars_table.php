@@ -17,7 +17,7 @@ return new class extends Migration
             // $table->unsignedBigInteger('power_id')->index();
             $table->unsignedBigInteger('fuel_type_id')->index();
             $table->unsignedBigInteger('version_id')->index();
-            $table->unsignedBigInteger('seller_id')->index();
+            $table->unsignedBigInteger('seller_id')->index()->nullable();
             $table->unsignedInteger('mileage');
             $table->string('chassis_number');
             $table->year('registration_year')->nullable();

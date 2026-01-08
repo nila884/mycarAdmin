@@ -17,7 +17,7 @@ class PortFactory extends Factory
             // Generates a random 3-5 letter code like "TKO" or "LAX"
             'code' => strtoupper($this->faker->unique()->lexify('???')), 
             // This will automatically create a Country if one isn't provided
-            'country_id' => Country::factory(),
+            // 'country_id' => Country::factory(),
         ];
     }
 }

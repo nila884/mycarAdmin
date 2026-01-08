@@ -25,7 +25,7 @@ class CarPriceFactory extends Factory
     public function definition()
     {
         // 1. Define the base car price
-        $basePrice = $this->faker->randomFloat(2, 5000, 100000); // Price between $5,000 and $100,000
+        $basePrice = $this->faker->randomFloat(2, 6000, 10000); // Price between $5,000 and $100,000
 
         // 2. Randomly decide if a discount will be applied (e.g., 70% chance)
         if ($this->faker->boolean(70)) {
@@ -51,23 +51,11 @@ class CarPriceFactory extends Factory
             $discount = 0.00;
         }
 
-        // 4. Calculate Final Price (optional, but good for data integrity)
-        $finalPrice = $basePrice;
-        if ($discount > 0 && $discountType !== null) {
-            if ($discountType === 'amount') {
-                $finalPrice = max(0, $basePrice - $discount);
-            } else { // percentage
-                $finalPrice = $basePrice * (1 - ($discount / 100));
-            }
-        }
 
         return [
             'price' => $basePrice,
             'discount' => $discount,
             'discount_type' => $discountType,
-            // 'final_price' => $finalPrice, // Assuming you have a final_price column
-            // 'is_current' => true,
-            // 'car_id' is typically set when creating the price via the CarSeeder
         ];
     }
 }

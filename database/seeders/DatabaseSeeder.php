@@ -33,24 +33,6 @@ class DatabaseSeeder extends Seeder
             ShippingLogisticSeeder::class,
             FeaturesSeeder::class,
         ]);
-
-        // create user
-        $users = User::factory(6)->create();
-        $i = 0;
-        foreach ($users as $user) {
-          
-                $user->assignRole('seller');
-                Seller::factory()->create([
-                    'seller_name' => $user->name,
-                    // 'user_id' => $user->id,
-
-                ]);
-            if ($i < 4) {
-                $user->assignRole('admin');
-            }
-            $i++;
-        }
-
         $imagesCars = collect([
      '/storage/cars/1765592641_693cce41e85ad.jpg',
 '/storage/cars/1765592641_693cce41e953a.jpg',
@@ -76,9 +58,9 @@ class DatabaseSeeder extends Seeder
                 return $logo->random();
             },
         ]);
-        $categories = Category::factory(5)->create();
-        $fuelTypes = FuelType::factory(3)->create();
-        $enginePowers = EnginePower::factory(10)->create();
+        Category::factory(5)->create();
+       FuelType::factory(3)->create();
+        EnginePower::factory(10)->create();
        
         $colors= Color::factory(5)->create();
         foreach ($brands as $brand) {
@@ -101,8 +83,7 @@ class DatabaseSeeder extends Seeder
         $sellerIds = Seller::pluck('id');
         $versionIds = Version::pluck('id');
         $colorsIds= Color::pluck('id');
-        $countriesIds= Country::pluck('id');
-        $portsIds = Port::pluck('id');
+        $countriesIds = Country::whereIn('country_name', ['Japan', 'South Korea'])->pluck('id');
         
 
         $cars = Car::factory(100)->create([
@@ -112,9 +93,6 @@ class DatabaseSeeder extends Seeder
             },
             'fuel_type_id' => function (array $attributes) use ($fuelTypesIds) {
                 return $fuelTypesIds->random();
-            },
-            'seller_id' => function (array $attributes) use ($sellerIds) {
-                return $sellerIds->random();
             },
             'version_id' => function (array $attributes) use ($versionIds) {
                 return $versionIds->random();
@@ -128,11 +106,11 @@ class DatabaseSeeder extends Seeder
             'origin_country_id' => function(array $attributes)use($countriesIds){
                 return $countriesIds->random();
             },
-            // 'origin_port_id ' => function(array $attributes)use($portsIds){
+            
+            // 'origin_port_id' => function(array $attributes)use($portsIds){
             //     return $portsIds->random();
-            // }
+            // },
         ]);
-
         foreach ($cars as $car) {
             // Create a CarPrice record for each car.
             CarPrice::factory()->create([
@@ -153,7 +131,7 @@ class DatabaseSeeder extends Seeder
             ]);
 
             // Create multiple Image records for each car.
-            Image::factory(20)->create([
+            Image::factory(9)->create([
                 'car_id' => $car->id,
                 'image_path' => function (array $attributes) use ($imagesCars) {
                     return $imagesCars->random();

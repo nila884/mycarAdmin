@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class Order extends Model
 {
@@ -17,6 +19,18 @@ class Order extends Model
         'origin_port', 'destination_port', 'final_destination_city',
         'status', 'delivery_status', 'expires_at','benefit'
     ];
+
+
+    public function scopeMine(Builder $query): Builder
+    {
+        if (!Auth::check()) {
+            return $query->where('id', 0); 
+        }
+        if (Auth::user()->hasRole('admin')) {
+            return $query;
+        }
+        return $query->where('user_id', Auth::id());
+    }
 
     protected $casts = [
         'expires_at' => 'datetime',

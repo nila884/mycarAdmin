@@ -16,15 +16,15 @@ class UserSeeder extends Seeder
         $adminEmail = env('SUPER_ADMIN_EMAIL');
         $adminPassword = env('SUPER_ADMIN_PASSWORD');
         $superAdminName = env('SUPER_ADMIN_NAME');
-
+    
         $sa = User::create([
             'id' => 1,
-            'name' => $superAdminName,
-            'email' => $adminEmail,
-            'password' => bcrypt($adminPassword),
+            'name' => "administrator",
+            'email' => "admin@test.com",
+            'password' => bcrypt("password123"),
         ]);
 
-        $sa->assignRole('super-admin');
+        $sa->assignRole('admin');
 
     }
 }
