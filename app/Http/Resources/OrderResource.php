@@ -46,7 +46,7 @@ class OrderResource extends JsonResource
 
             'dates' => [
                 'created_at' => $this->created_at->format('d-M-Y'),
-                'expires_at' => $this->expires_at ? $this->expires_at->format('d-M-Y') : null,
+                'expires_at' => $this->expires_at ? $this->expires_at->diffForHumans() : null,
             ],
         ];
     }

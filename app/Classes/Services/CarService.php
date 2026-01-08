@@ -19,6 +19,39 @@ use Illuminate\Validation\Validator as ValidatorReturn;
 
 class CarService
 {
+
+    /**
+ * Verifies profit margin. 
+ * Handles cases with and without discounts.
+ */
+private function verifyProfitMargin($costPrice, $minMargin, $price, $discount, $discountType)
+{
+    $discountValue = $discount ?? 0;
+    
+    // 1. Calculate FOB Price
+    // If discount is 0 or null, fobPrice is just the base price.
+    if ($discountValue > 0 && !empty($discountType)) {
+        $fobPrice = ($discountType === 'percent') 
+            ? $price - ($price * ($discountValue / 100))
+            : $price - $discountValue;
+    } else {
+        $fobPrice = $price;
+    }
+
+    // 2. Margin Guard
+    $requiredMinimum = ($costPrice ?? 0) + ($minMargin ?? 0);
+
+    if ($fobPrice < $requiredMinimum) {
+        throw new \Exception(
+            "Price Protection: The final price (US$ " . number_format($fobPrice, 2) . 
+            ") is too low. Minimum required: US$ " . number_format($requiredMinimum, 2)
+        );
+    }
+    
+    return $fobPrice;
+}
+
+
   public function Index()
 {
     $query = Car::query()
@@ -143,6 +176,15 @@ class CarService
          
             throw new \Illuminate\Validation\ValidationException($validator);
         }
+
+        $this->verifyProfitMargin(
+            $request->cost_price,
+            $request->min_profit_margin,
+            $request->price,
+            $request->discount, // Passed even if null
+            $request->discount_type // Passed even if null
+        );
+
         DB::beginTransaction();
         try {
             $car = Car::create([
@@ -184,6 +226,9 @@ class CarService
                 'discount_type' => $request->discount_type?? null,
                 'is_current' => true,
             ]);
+
+            
+
             if ($request->hasFile('image')) {
                 $imageFile = $request->file('image');
                 $imageName = time().'_'.uniqid().'.'.$imageFile->getClientOriginalExtension();
@@ -239,12 +284,17 @@ class CarService
 
     public function update(Request $request, Car $car): Car
     {
-       dd($request->all());
         $validator = $this->DataValidation($request, 'patch', $car);
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }
-           
+           $this->verifyProfitMargin(
+    $request->has('cost_price') ? $request->cost_price : $car->cost_price,
+    $request->has('min_profit_margin') ? $request->min_profit_margin : $car->min_profit_margin,
+    $request->price,
+    $request->discount,
+    $request->discount_type
+);
         DB::beginTransaction();
         try {
 

@@ -15,7 +15,7 @@ class CountryService
     public function Index()
     {
         // Using pagination as per your existing CountryService logic
-        return Country::with('gatewayPorts')->orderBy('country_name', 'asc')->get();
+        return Country::with('gatewayPorts')->orderBy('country_name', 'asc')->paginate(15);
     }
 
     public function DataValidation(Request $request, string $method, Country|null $country = null): ValidatorReturn|null

@@ -33,6 +33,7 @@ Schema::create('orders', function (Blueprint $table) {
     $table->enum('status', ['quote', 'proforma', 'paid', 'cancelled'])->default('quote');
     $table->timestamp('expires_at'); 
     $table->decimal('benefit', 12, 2)->nullable();
+    $table->boolean('is_port_pickup')->default(false);
     $table->softDeletes();
     $table->timestamps();
 });

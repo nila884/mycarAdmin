@@ -77,8 +77,8 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        // Admins pass through Order::mine() and see everything
-        return $this->orderService->getPaginatedOrders($request);
+      
+        return response()->json(['orders' => $this->orderService->getPaginatedOrders($request)]);
     }
 
     /**
