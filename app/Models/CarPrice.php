@@ -9,7 +9,7 @@ class CarPrice extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['car_id', 'price', 'discount', 'discount_type', 'is_current'];
+    protected $fillable = ['car_id', 'price', 'discount', 'discount_type', 'is_current','final_price'];
 
     public function car()
     {

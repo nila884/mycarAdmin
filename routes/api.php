@@ -3,6 +3,8 @@
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CarController;
+use App\Http\Controllers\CarFilterController;
+use App\Http\Controllers\CarMetaController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientAuthController;
 use App\Http\Controllers\CountryController;
@@ -31,6 +33,10 @@ Route::get('features/main', [FeatureController::class, 'apiFeatureMain'])->name(
 Route::get('seller-infos/{id}', [SellerController::class, 'apiSellerProfile'])->name('api.seller.infos');
 
 Route::get('seller-cars/{id}', [CarController::class, 'getCarsBySellerId'])->name('api.seller.cars');
+Route::get('/cars/filters', [CarFilterController::class, 'index']);
+Route::get('/brands/{brand}/models', [CarMetaController::class, 'modelsByBrand']);
+Route::get('/models/{model}/versions', [CarMetaController::class, 'versionsByModel']);
+
 
 Route::get('cars-search', [CarController::class, 'carsSearch'])->name('api.cars.search');
 Route::get('cars/recomended', [CarController::class, 'carRecomended'])->name('api.cars.recomanded');

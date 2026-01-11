@@ -20,7 +20,6 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
-use function Pest\Laravel\json;
 
 class CarController extends Controller
 {
@@ -201,76 +200,56 @@ class CarController extends Controller
      *
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function carsSearch(Request $request)
-    {
-      
-        $brandId = $request->query('brand');
-        $modelId = $request->query('model');
-        $versionId = $request->query('version');
-        $categoryIds = $request->query('category');
-        $fuelTypeIds = $request->query('fuel');
-        $transmission = $request->query('transmission');
-        $steering = $request->query('steering');
+public function carsSearch(Request $request)
+{
+    $cars = Car::query()
+        ->with([
+            'version.carModel.brand',
+            'category',
+            'fuelType',
+            'seller',
+            'imageMain',
+            'features',
+            'currentPrice',
+        ])
+        ->visible()
 
-        $query = Car::query();
+        ->when($request->brand, fn ($q, $v) => $q->brand($v))
+        ->when($request->model, fn ($q, $v) => $q->model($v))
+        ->when($request->version, fn ($q, $v) => $q->version($v))
+        ->when($request->category, fn ($q, $v) => $q->categories($v))
+        ->when($request->fuel, fn ($q, $v) => $q->fuels($v))
+        ->when($request->transmission, fn ($q, $v) => $q->transmission($v))
+        ->when($request->steering, fn ($q, $v) => $q->steering($v))
+        ->when(
+            $request->price_min || $request->price_max,
+            fn ($q) => $q->priceBetween(
+                $request->price_min,
+                $request->price_max
+            )
+        )
+         ->when(
+        $request->mileage_min || $request->mileage_max,
+        fn ($q) => $q->mileageBetween(
+            $request->mileage_min,
+            $request->mileage_max
+        )
+    )
+         ->when(
+        $request->year_min || $request->year_max,
+        fn ($q) => $q->manufacturedYearBetween(
+            $request->year_min,
+            $request->year_max
+        )
+    )
+        ->sort($request->sort)
+        ->select('cars.*')
+        ->paginate(10);
 
-        // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['version.carModel.brand', 'category', 'fuelType',  'seller', 'imageMain', 'features', 'currentPrice']);
+    return CarListingResource::collection($cars);
+}
 
-        // Conditionally apply the brand filter if the brand name is provided.
-        $query->when($brandId, function ($brandQuery) use ($brandId) {
-            $brandQuery->whereHas('version.carModel.brand', function ($innerQuery) use ($brandId) {
-                $innerQuery->where('id', $brandId);
-            });
-        });
 
-        // Conditionally apply the car model filter if the model name is provided.
-        $query->when($modelId, function ($modelQuery) use ($modelId) {
-            $modelQuery->whereHas('version.carModel', function ($innerQuery) use ($modelId) {
-                $innerQuery->where('id', $modelId);
-            });
-        });
-
-        // Conditionally apply the version filter if the version name is provided.
-        $query->when($versionId, function ($versionQuery) use ($versionId) {
-            $versionQuery->whereHas('version', function ($innerQuery) use ($versionId) {
-                $innerQuery->where('version_name', $versionId);
-            });
-        });
-
-        $query->when($categoryIds, function ($categoryQuerry) use ($categoryIds) {
-            $ids = explode(',', $categoryIds);
-            $categoryQuerry->whereIn('category_id', $ids);
-        });
-
-        $query->when($fuelTypeIds, function ($q) use ($fuelTypeIds) {
-            $ids = explode(',', $fuelTypeIds);
-            $q->whereIn('fuel_type_id', $ids);
-        });
-
-        $query->when($transmission, function ($q) use ($transmission) {
-            $q->where('transmission', 'LIKE', '%'.$transmission.'%');
-        });
-
-        $query->when($steering, function ($q) use ($steering) {
-            $q->where('streering', 'LIKE', '%'.$steering.'%');
-        });
-
-        // Get the final collection of cars.
-        $cars = $query->paginate(10);
-        $cars->through(fn ($car) => new CarResourceManagement($car));
-        if ($cars->isEmpty()) {
-            return response()->json(
-                [
-                    'message' => 'No cars found for the given filters.',
-                    'data' => [],
-
-                ], 200);
-        }
-
-        // Return a collection of CarResource instances.
-        return CarListingResource::collection($cars);
-    }
 
     /**
      * Display a listing of all cars based on provided filters (brand, model, version).

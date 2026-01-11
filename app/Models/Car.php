@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
 
 class Car extends Model
 {
@@ -135,5 +136,132 @@ public function getIsPriceHealthyAttribute(): bool
 
     return $discountedPrice >= ($this->cost_price + $this->min_profit_margin);
 }
+
+
+ /* ==========================
+     | BASE VISIBILITY
+     ========================== */
+
+    public function scopeVisible(Builder $q): Builder
+    {
+        return $q
+            ->where('publication_status', 'published')
+            ->where('car_selling_status', 'selling');
+    }
+
+    /* ==========================
+     | FILTER SCOPES
+     ========================== */
+
+    public function scopeBrand(Builder $q, $brandId): Builder
+    {
+        return $q->whereHas(
+            'version.carModel.brand',
+            fn ($q) => $q->where('id', $brandId)
+        );
+    }
+
+    public function scopeModel(Builder $q, $modelId): Builder
+    {
+        return $q->whereHas(
+            'version.carModel',
+            fn ($q) => $q->where('id', $modelId)
+        );
+    }
+
+    public function scopeVersion(Builder $q, $versionId): Builder
+    {
+        return $q->where('version_id', $versionId);
+    }
+
+    public function scopeCategories(Builder $q, $ids): Builder
+    {
+        return $q->whereIn('category_id', explode(',', $ids));
+    }
+
+    public function scopeFuels(Builder $q, $ids): Builder
+    {
+        return $q->whereIn('fuel_type_id', explode(',', $ids));
+    }
+
+    public function scopeTransmission(Builder $q, $value): Builder
+    {
+        return $q->where('transmission', $value);
+    }
+
+    public function scopeSteering(Builder $q, $value): Builder
+    {
+        return $q->where('steering', $value);
+    }
+
+    public function scopePriceBetween(
+        Builder $q,
+        $min,
+        $max
+    ): Builder {
+        return $q->whereHas('currentPrice', function ($q) use ($min, $max) {
+            if ($min) $q->where('final_price', '>=', $min);
+            if ($max) $q->where('final_price', '<=', $max);
+        });
+    }
+
+public function scopeMileageBetween(
+    Builder $q,
+    $min,
+    $max
+): Builder {
+    if ($min) {
+        $q->where('mileage', '>=', $min);
+    }
+
+    if ($max) {
+        $q->where('mileage', '<=', $max);
+    }
+
+    return $q;
+}
+
+public function scopeManufacturedYearBetween(
+    Builder $q,
+    $min,
+    $max
+): Builder {
+    if ($min) {
+        $q->where('manufactured_year', '>=', $min);
+    }
+
+    if ($max) {
+        $q->where('manufactured_year', '<=', $max);
+    }
+
+    return $q;
+}
+
+
+    /* ==========================
+     | SORTING
+     ========================== */
+
+    public function scopeSort(Builder $q, ?string $sort): Builder
+    {
+        return match ($sort) {
+            'price_asc' => $q->join('car_prices', fn ($j) =>
+                $j->on('cars.id', '=', 'car_prices.car_id')
+                  ->where('car_prices.is_current', true)
+            )->orderBy('car_prices.final_price', 'asc'),
+
+            'price_desc' => $q->join('car_prices', fn ($j) =>
+                $j->on('cars.id', '=', 'car_prices.car_id')
+                  ->where('car_prices.is_current', true)
+            )->orderBy('car_prices.final_price', 'desc'),
+
+            'mileage_asc' => $q->orderBy('mileage', 'asc'),
+            'mileage_desc' => $q->orderBy('mileage', 'desc'),
+            'year_asc' => $q->orderBy('manufacture_year', 'asc'),
+            'year_desc' => $q->orderBy('manufacture_year', 'desc'),
+
+            default => $q->latest('cars.created_at'),
+        };
+    }
 
 }
