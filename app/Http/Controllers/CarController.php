@@ -301,7 +301,7 @@ class CarController extends Controller
 
         $query->when($fuelTypeIds, function ($fuelTypeQuerry) use ($fuelTypeIds) {
             $ids = explode(',', $fuelTypeIds);
-            $q->whereIn('fuel_type_id', $ids);
+            $fuelTypeQuerry->whereIn('fuel_type_id', $ids);
         });
 
         $query->when($transmission, function ($q) use ($transmission) {
