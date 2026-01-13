@@ -3,6 +3,7 @@ namespace App\Classes\Services;
 
 use App\Models\Country;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 use Illuminate\Validation\Rule;
@@ -14,7 +15,7 @@ class CountryService
     public function Index()
     {
         // Using pagination as per your existing CountryService logic
-        return Country::orderBy('country_name', 'asc')->paginate(15);
+        return Country::with('gatewayPorts')->orderBy('country_name', 'asc')->paginate(15);
     }
 
     public function DataValidation(Request $request, string $method, Country|null $country = null): ValidatorReturn|null
@@ -89,5 +90,21 @@ class CountryService
              Storage::disk('public')->delete(str_replace('/storage/', '', $country->flags));
         }
         return $country->delete();
+    }
+
+/**
+     * Set or update the gateway ports for a specific country.
+     *
+     * @param int $countryId
+     * @param array $portIds  List of port IDs to be linked as gateways
+     * @return bool
+     */
+    public function SetCountryGatewayPort(int $countryId, array $portIds): bool
+    {
+        return DB::transaction(function () use ($countryId, $portIds) {
+            $country = Country::findOrFail($countryId);
+            $country->gatewayPorts()->sync($portIds);
+            return true;
+        });
     }
 }

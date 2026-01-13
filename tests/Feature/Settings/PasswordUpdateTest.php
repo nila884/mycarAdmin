@@ -6,7 +6,11 @@ use Illuminate\Support\Facades\Hash;
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('password can be updated', function () {
-    $user = User::factory()->create();
+    // Explicitly set the password so we are 100% sure what 'current_password' is
+    $user = User::factory()->create([
+        'password' => Hash::make('password'),
+        'user_type' => 'simple_user', // Including your required field
+    ]);
 
     $response = $this
         ->actingAs($user)

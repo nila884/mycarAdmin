@@ -23,26 +23,30 @@ const sidebarNavItems: NavItem[] = [
         icon: null,
     },
     {
-        title: 'fuel',
+        title: 'Fuel',
         href: '/car/settings/fuel',
         icon: null,
     },
     {
-        title: 'feature',
+        title: 'Feature',
         href: '/car/settings/feature',
         icon: null,
     },
     {
-        title: 'seller',
+        title: 'Seller',
         href: '/car/settings/seller',
         icon: null,
     },
     {
-        title: 'version',
+        title: 'Version',
         href: '/car/settings/version',
         icon: null,
     },
-    
+    {
+        title: 'Color',
+        href: '/car/settings/color',
+        icon: null,
+    },
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {

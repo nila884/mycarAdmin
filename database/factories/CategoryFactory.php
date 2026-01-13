@@ -2,15 +2,15 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Category;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Category>
  */
 class CategoryFactory extends Factory
 {
-      /**
+    /**
      * The name of the factory's corresponding model.
      *
      * @var string
@@ -25,7 +25,7 @@ class CategoryFactory extends Factory
     public function definition()
     {
         return [
-            'category_name' => $this->faker->unique()->sentence(2, true),
+            'category_name' => $this->faker->unique()->sentence(1, true),
         ];
     }
 }

@@ -1,32 +1,27 @@
-// model.tsx
 import { Head, router } from '@inertiajs/react'; // Import router for delete
-
 import HeadingSmall from '@/components/heading-small';
-import { type BreadcrumbItem } from '@/types';
-import Create from '@/components/car/settings/model/create'; // Import Create component
-import UpdateModel from '@/components/car/settings/model/update'; // Will create this component
 import { Button } from '@/components/ui/button'; // Import Button for delete action
+import { type BreadcrumbItem } from '@/types';
 
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import CarSettingLayout from '@/layouts/car/settings/layout';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { timeFormat } from '@/lib/utils'; // Assuming you have this utility
 import { X } from 'lucide-react';
+import { BrandItem } from './brand';
+import ModelForm from '@/components/car/settings/model/modelForm';
 
 // Define types for CarModel and Brand
-interface CarModelItem {
+export interface CarModelItem {
     id: number;
     model_name: string;
     brand_id: number;
-    brand_name: string; // Include brand_name for display
+    brand_name: string;
+    brand:BrandItem; // Include brand_name for display
     created_at: string;
     updated_at: string;
 }
 
-interface BrandItem {
-    id: number;
-    brand_name: string;
-}
 
 interface ModelProps {
     models: {
@@ -78,7 +73,7 @@ export default function Model({ models, brands }: ModelProps) {
                 <div className="space-y-6">
                     <HeadingSmall title="Car Model settings" description="Add new, Update and delete car Models name" />
 
-                    <Create brands={brands} /> 
+                    <ModelForm brands={brands} />
 
                     <Table className="min-w-full">
                         <TableCaption>A list of your car model.</TableCaption>
@@ -96,19 +91,14 @@ export default function Model({ models, brands }: ModelProps) {
                                 models.data.map((model) => (
                                     <TableRow key={model.id}>
                                         <TableCell className="font-medium">{model.model_name.toUpperCase()}</TableCell>
-                                        <TableCell>{model.brand_name.toUpperCase()}</TableCell> 
+                                        <TableCell>{model.brand_name.toUpperCase()}</TableCell>
                                         <TableCell>{timeFormat(model.created_at)}</TableCell>
                                         <TableCell>{timeFormat(model.updated_at)}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end space-x-2">
-                                                <UpdateModel model={model} brands={brands} /> 
-                                                <Button
-                                                    className='ml-2'
-                                                    size="icon"
-                                                    variant="destructive"
-                                                    onClick={() => handleDelete(model.id)}
-                                                >
-                                                   <X/>
+                                                <ModelForm model={model} brands={brands} />
+                                                <Button className="ml-2" size="icon" variant="destructive" onClick={() => handleDelete(model.id)}>
+                                                    <X />
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -124,28 +114,26 @@ export default function Model({ models, brands }: ModelProps) {
                         </TableBody>
                     </Table>
                     {/* Add Pagination if needed */}
-                    {models.links && models.links.length > 3 && ( // Check if pagination links exist
-                        <div className="flex justify-center mt-4">
-                            <nav className="flex rounded-md shadow" aria-label="Pagination">
-                                {models.links.map((link, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => link.url && router.get(link.url)}
-                                        disabled={!link.url}
-                                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium
-                                            ${link.active
-                                                ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                                                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                                            }
-                                            ${index === 0 ? 'rounded-l-md' : ''}
-                                            ${index === models.links.length - 1 ? 'rounded-r-md' : ''}
-                                        `}
-                                        dangerouslySetInnerHTML={{ __html: link.label }} // Render HTML entities like &laquo;
-                                    />
-                                ))}
-                            </nav>
-                        </div>
-                    )}
+                    {models.links &&
+                        models.links.length > 3 && ( // Check if pagination links exist
+                            <div className="mt-4 flex justify-center">
+                                <nav className="flex rounded-md shadow" aria-label="Pagination">
+                                    {models.links.map((link, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => link.url && router.get(link.url)}
+                                            disabled={!link.url}
+                                            className={`relative inline-flex items-center border px-4 py-2 text-sm font-medium ${
+                                                link.active
+                                                    ? 'z-10 border-indigo-500 bg-indigo-50 text-indigo-600'
+                                                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                                            } ${index === 0 ? 'rounded-l-md' : ''} ${index === models.links.length - 1 ? 'rounded-r-md' : ''} `}
+                                            dangerouslySetInnerHTML={{ __html: link.label }} // Render HTML entities like &laquo;
+                                        />
+                                    ))}
+                                </nav>
+                            </div>
+                        )}
                 </div>
             </CarSettingLayout>
         </AppLayout>

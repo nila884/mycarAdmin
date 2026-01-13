@@ -2,9 +2,8 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\CarModel;
-use App\Models\Brand;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CarModel>
@@ -16,7 +15,7 @@ class CarModelFactory extends Factory
      *
      * @var string
      */
-    protected $model = carModel::class;
+    protected $model = CarModel::class;
 
     /**
      * Define the model's default state.
@@ -26,8 +25,8 @@ class CarModelFactory extends Factory
     public function definition()
     {
         return [
-            'model_name' => $this->faker->unique()->sentence(2, true),
-            'brand_id' => Brand::factory(),
+            'model_name' => $this->faker->unique()->sentence(1, true),
+
         ];
     }
 }

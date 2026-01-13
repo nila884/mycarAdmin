@@ -7,9 +7,13 @@ use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Version;
 use App\Classes\Services\VersionService; // Import your service
+use App\Http\Resources\BrandResourceManagement;
+use App\Http\Resources\ModelResourceManagement;
 use Illuminate\Validation\ValidationException;
 use App\Http\Resources\VersionResource;
+use App\Http\Resources\VersionResourceManagement;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class VersionController extends Controller
 {
@@ -18,6 +22,7 @@ class VersionController extends Controller
     public function __construct(VersionService $versionService)
     {
         $this->versionService = $versionService;
+
     }
 
     /**
@@ -25,30 +30,34 @@ class VersionController extends Controller
      */
     public function index(): Response
     {
+
         return Inertia::render('car/settings/version', [
-            'versions' => $this->versionService->Index(), 
-            'carModels' => $this->versionService->getAllCarModels(),
+            'versions' => VersionResourceManagement::collection($this->versionService->Index()), 
+            'brands' => BrandResourceManagement::collection($this->versionService->getAllBrands()), 
+            'carModels' => ModelResourceManagement::collection($this->versionService->getAllCarModels()),
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $validator = $this->versionService->DataValidation($request, 'post');
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-
-        try {
-            $this->versionService->create($request);
-            return redirect()->route('carversion.index')->with('success', 'Car version created successfully!');
-        } catch (\Exception $e) {
-            return back()->withErrors(['general' => 'Failed to create car version. Please try again.']);
-        }
+public function store(Request $request)
+{
+    $validator = $this->versionService->DataValidation($request, 'post');
+    if ($validator->fails()) {
+        throw new ValidationException($validator);
     }
+
+    try {
+        $this->versionService->Create($request);
+        return redirect()->route('carversion.index')->with('success', 'Car version created successfully!');
+    } catch (\Exception $e) {
+        // Log the actual error for debugging in AWS CloudWatch
+        Log::error("Version Creation Error: " . $e->getMessage());
+        
+        return back()->withErrors(['general' => 'Server error. Please try again later.'])->withInput();
+    }
+}
 
     /**
      * Update the specified resource in storage.

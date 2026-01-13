@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\CarModel; // Ensure correct casing for CarModel
-use App\Classes\Services\carModelService; // Import your service
+use App\Classes\Services\CarModelService; // Import your service
 use App\Classes\Services\BrandService; // Import BrandService to get brands
 use Illuminate\Validation\ValidationException;
 use App\Http\Resources\ModelResource; // Import ModelResource for API responses
@@ -17,10 +17,10 @@ class ModelController extends Controller
     protected $carModelService;
     protected $brandService; // Inject BrandService
 
-    public function __construct(carModelService $carModelService, BrandService $brandService)
+    public function __construct(CarModelService $carModelService, BrandService $brandService)
     {
         $this->carModelService = $carModelService;
-        $this->brandService = $brandService; 
+        $this->brandService = $brandService;
     }
 
     /**
@@ -39,12 +39,11 @@ class ModelController extends Controller
      */
     public function store(Request $request)
     {
+              
         $validator = $this->carModelService->DataValidation($request, 'post');
-
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }
-
         try {
             $this->carModelService->create($request);
             return redirect()->route('carmodel.index')->with('success', 'Car model created successfully!');
@@ -58,8 +57,8 @@ class ModelController extends Controller
      */
     public function update(Request $request, CarModel $carModel)
     {
+        
         $validator = $this->carModelService->DataValidation($request, 'patch', $carModel);
-
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }

@@ -32,5 +32,15 @@ class Country extends Model
         return $this->hasMany(Port::class);
     }
 
+    public function gatewayPorts()
+{
+    return $this->belongsToMany(Port::class, 'country_gateway_port');
+}
+public function cities()
+{
+    return $this->hasMany(City::class);
+}
+
+protected $with = ['cities', 'gatewayPorts'];
 
 }

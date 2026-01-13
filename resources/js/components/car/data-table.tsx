@@ -1,110 +1,143 @@
+'use client';
 
+import { DataTablePagination } from '@/components/data-table-pagination';
+import { DataTableToolbar } from '@/components/data-table-toolbar';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { router } from '@inertiajs/react';
+import { 
+    ColumnDef, 
+    SortingState, 
+    flexRender, 
+    getCoreRowModel, 
+    useReactTable 
+} from '@tanstack/react-table';
+import React from 'react';
 
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-    getPaginationRowModel,
-      SortingState,
-    getSortedRowModel,
-    getFilteredRowModel,
-     ColumnFiltersState,
-       VisibilityState,
-} from "@tanstack/react-table"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import React from "react"
-import { DataTablePagination } from "@/components/data-table-pagination"
-import { DataTableToolbar } from "@/components/data-table-toolbar"
+// 1. Define a shared filter type that both components can agree on
+export type DataTableFilterBag = Record<string, string | number | boolean | undefined>;
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+interface DataTableProps<TData> {
+    columns: ColumnDef<TData>[];
+    data: TData[];
+    serverPagination: {
+        pageIndex: number;
+        pageSize: number;
+        pageCount: number;
+    };
+    onServerPageChange: (page: number, pageSize: number) => void;
+    filters: DataTableFilterBag; // Replaces 'any' and matches the Toolbar
 }
 
-export function DataTable<TData, TValue>({
-  columns,
-  data,
-}: DataTableProps<TData, TValue>) {
-    const [sorting, setSorting] = React.useState<SortingState>([])
-      const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-        const [columnVisibility, setColumnVisibility] =React.useState<VisibilityState>({})
-          const [rowSelection, setRowSelection] = React.useState({})
-  const table = useReactTable({
-
-    data,
+export function DataTable<TData>({
     columns,
-    getCoreRowModel: getCoreRowModel(),
-     getPaginationRowModel: getPaginationRowModel(),
-         onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-        onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-     onColumnVisibilityChange: setColumnVisibility,
-      onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-        columnFilters,
-        columnVisibility,
-        rowSelection,
-    },
-  })
+    data,
+    serverPagination,
+    onServerPageChange,
+    filters,
+}: DataTableProps<TData>) {
+    // Sync sorting state with URL filters
+    const [sorting, setSorting] = React.useState<SortingState>(
+        filters?.sort ? [{ id: String(filters.sort), desc: filters.direction === 'desc' }] : []
+    );
 
-  return (
-    <div className="mx-2">
-    <DataTableToolbar table={table} />
-        <div className="rounded-md border my-1 ">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
+    const table = useReactTable({
+        data,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        manualPagination: true,
+        manualSorting: true,
+        enableMultiSort: true,
+        pageCount: serverPagination.pageCount,
+
+        onSortingChange: (updater) => {
+            const nextSorting = typeof updater === "function" ? updater(sorting) : updater;
+            setSorting(nextSorting);
+
+            const url = new URL(window.location.href);
+            const params = Object.fromEntries(url.searchParams.entries());
+
+            if (nextSorting.length) {
+                // Laravel friendly sorting params
+                params.sort = nextSorting[0].id;
+                params.direction = nextSorting[0].desc ? 'desc' : 'asc';
+                params.page = "1";
+            } else {
+                delete params.sort;
+                delete params.direction;
+            }
+
+            // Using route().current() makes this component reusable across pages
+            router.get(route(route().current() ?? 'car.index'), params, {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            });
+        },
+
+        onPaginationChange: (updater) => {
+            const next = typeof updater === "function"
+                ? updater({
+                      pageIndex: serverPagination.pageIndex,
+                      pageSize: serverPagination.pageSize,
+                  })
+                : updater;
+
+            onServerPageChange(next.pageIndex + 1, next.pageSize);
+        },
+
+        state: {
+            sorting,
+            pagination: {
+                pageIndex: serverPagination.pageIndex,
+                pageSize: serverPagination.pageSize,
+            },
+        },
+    });
+
+    return (
+        <div className="space-y-4">
+            {/* 2. Passing <TData> ensures the toolbar and table share the same data type */}
+            <DataTableToolbar table={table} filters={filters} />
+
+            <div className="rounded-md border bg-white shadow-sm overflow-hidden">
+                <Table>
+                    <TableHeader className="bg-slate-50">
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => (
+                                    <TableHead key={header.id} className="text-slate-700 font-semibold">
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(header.column.columnDef.header, header.getContext())}
+                                    </TableHead>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+
+                    <TableBody>
+                        {table.getRowModel().rows.length > 0 ? (
+                            table.getRowModel().rows.map(row => (
+                                <TableRow key={row.id} className="hover:bg-slate-50/50">
+                                    {row.getVisibleCells().map(cell => (
+                                        <TableCell key={cell.id}>
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={columns.length} className="h-24 text-center text-slate-500">
+                                    No results found.
+                                </TableCell>
+                            </TableRow>
                         )}
-                  </TableHead>
-                )
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
- <DataTablePagination table={table} />
-    </div>
-  )
+                    </TableBody>
+                </Table>
+            </div>
+
+            <DataTablePagination table={table} />
+        </div>
+    );
 }

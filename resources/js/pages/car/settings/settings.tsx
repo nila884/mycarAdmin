@@ -20,7 +20,6 @@ export default function Appearance() {
             <CarSettingLayout>
                 <div className="space-y-6">
                     <HeadingSmall title="Car settings parametter" description="Update your account's appearance settings" />
-                   
                 </div>
             </CarSettingLayout>
         </AppLayout>

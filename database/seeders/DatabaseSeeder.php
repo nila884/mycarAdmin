@@ -2,33 +2,23 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-
-
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use Database\Seeders\BrandSeeder;
-use Database\Seeders\CategorySeeder;
-use Database\Seeders\FuelTypeSeeder;
-use Database\Seeders\EnginePowerSeeder;
-use Database\Seeders\SellerSeeder;
-use Database\Seeders\CarModelSeeder;
-use Database\Seeders\CarSeeder;
-use Database\Seeders\CarPriceSeeder;
-use Database\Seeders\ImageSeeder;
-use Database\Seeders\VersionSeeder; // Ensure to import the VersionSeeder
 use App\Models\Brand;
-use App\Models\Category;
-use App\Models\FuelType;
-use App\Models\EnginePower;
-use App\Models\Seller;
-use App\Models\Feature;
-use App\Models\Version;
-use App\Models\carModel;
-use App\Models\Car;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Car; // Ensure to import the VersionSeeder
+use App\Models\CarModel;
 use App\Models\CarPrice;
+use App\Models\Category;
+use App\Models\Color;
+use App\Models\Country;
+use App\Models\EnginePower;
+use App\Models\Feature;
+use App\Models\FuelType;
 use App\Models\Image;
-
+use App\Models\Port;
+use App\Models\Seller;
+use App\Models\User;
+use App\Models\Version;
+use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -37,73 +27,119 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-        // $this->call([
-        //     BrandSeeder::class,
-        //     CategorySeeder::class,
-        //     FuelTypeSeeder::class,
-        //     SellerSeeder::class,
-        //     CarModelSeeder::class,
-        //     CarSeeder::class,
-        //     CarPriceSeeder::class,
-        //     ImageSeeder::class,
-        //     VersionSeeder::class,
-        // ]);
 
-         // First, create the parent records and get their IDs.
-        // This prevents the CarFactory from creating new dependencies for every car.
-        $brands = Brand::factory(5)->create();
-        $categories = Category::factory(5)->create();
-        $fuelTypes = FuelType::factory(3)->create();
-        $enginePowers = EnginePower::factory(10)->create();
-        $sellers = Seller::factory(10)->create();
-        
+        $this->call([
+            InitSeeder::class,
+            ShippingLogisticSeeder::class,
+            FeaturesSeeder::class,
+        ]);
+        $imagesCars = collect([
+     '/storage/cars/1765592641_693cce41e85ad.jpg',
+'/storage/cars/1765592641_693cce41e953a.jpg',
+'/storage/cars/1765592641_693cce41e8885.jpg',
+'/storage/cars/1765592641_693cce41e9206.jpg',
+'/storage/cars/1765592678_693cce666988d.jpg',
+'/storage/cars/1765931485_6941f9dd04c1c.jpeg',
+'/storage/cars/1765931485_6941f9dd03432.jpeg',
+'/storage/cars/1765931485_6941f9dd04292.jpeg',
+'/storage/cars/1765931485_6941f9dd04590.jpeg',
+'/storage/cars/1765931485_6941f9dd04912.jpeg',
+'/storage/cars/1755117889_689cf94123792.jpg',
 
-        // Create car models and assign them to a random brand.
-        // $carModels = carModel::factory(20)->create([
-        //     'brand_id' => $brands->random()->id,
-        // ]);
+
+        ]);
+        $logo = collect([
+            '/storage/brand_logos/1765592745_ford.png',
+            '/storage/brand_logos/1765592782_mazda.jpg',
+        ]);
+
+        $brands = Brand::factory(5)->create([
+            'logo' => function (array $attributes) use ($logo) {
+                return $logo->random();
+            },
+        ]);
+        Category::factory(5)->create();
+       FuelType::factory(3)->create();
+        EnginePower::factory(10)->create();
+       
+        $colors= Color::factory(5)->create();
         foreach ($brands as $brand) {
-            // Create multiple car models for each brand.
-         $carModels=   carModel::factory(4)->create([
+
+            CarModel::factory(4)->create([
                 'brand_id' => $brand->id,
             ]);
         }
-        var_dump($carModels);
-        foreach($carModels as $carModel) {
-            // Create multiple features for each car model.
+        $carModelIds = CarModel::pluck('id');
+        foreach ($carModelIds as $id) {
 
-          $versions=  Version::factory(1)->create([
-                'car_model_id' => $carModel->id,
+            Version::factory(3)->create([
+                'car_model_id' => $id,
             ]);
-        }   
-        // Create versions and assign them to a random car model.
-        // $versions = Version::factory(30)->create([
-        //     'car_model_id' => $carModels->random()->id,
-        // ]);
- $cars = Car::factory(50)->create([
-            'car_model_id' => $carModels->random()->id,
-            'category_id' => $categories->random()->id,
-            'fuel_type_id' => $fuelTypes->random()->id,
-            'seller_id' => $sellers->random()->id,
-            'version_id' => $versions->random()->id, // Assign a random version ID
-        ]);
+        }
 
-           // Now, create records for the models that depend on cars.
+        $versionIds = Version::pluck('id');
+        $categoryIds = Category::pluck('id');
+        $fuelTypesIds = FuelType::pluck('id');
+        $sellerIds = Seller::pluck('id');
+        $versionIds = Version::pluck('id');
+        $colorsIds= Color::pluck('id');
+        $countriesIds = Country::whereIn('country_name', ['Japan', 'South Korea'])->pluck('id');
+        
+
+        $cars = Car::factory(100)->create([
+
+            'category_id' => function (array $attributes) use ($categoryIds) {
+                return $categoryIds->random();
+            },
+            'fuel_type_id' => function (array $attributes) use ($fuelTypesIds) {
+                return $fuelTypesIds->random();
+            },
+            'version_id' => function (array $attributes) use ($versionIds) {
+                return $versionIds->random();
+            },
+            'exterior_color_id' => function(array $attributes) use ($colorsIds){
+                return $colorsIds->random();
+            },
+            'interior_color_id' => function(array $attributes) use ($colorsIds){
+                return $colorsIds->random();
+            },
+            'origin_country_id' => function(array $attributes)use($countriesIds){
+                return $countriesIds->random();
+            },
+            
+            // 'origin_port_id' => function(array $attributes)use($portsIds){
+            //     return $portsIds->random();
+            // },
+        ]);
         foreach ($cars as $car) {
             // Create a CarPrice record for each car.
             CarPrice::factory()->create([
                 'car_id' => $car->id,
+                'is_current' => (true),
             ]);
-            
-            // Create multiple Image records for each car.
-            Image::factory(3)->create([
+            CarPrice::factory(2)->create([
                 'car_id' => $car->id,
+                'is_current' => (false),
             ]);
+
+            Image::factory(1)->create([
+                'car_id' => $car->id,
+                'image_path' => function (array $attributes) use ($imagesCars) {
+                    return $imagesCars->random();
+                },
+                'is_main' => (true),
+            ]);
+
+            // Create multiple Image records for each car.
+            Image::factory(9)->create([
+                'car_id' => $car->id,
+                'image_path' => function (array $attributes) use ($imagesCars) {
+                    return $imagesCars->random();
+                },
+                'is_main' => (false),
+            ]);
+
         }
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+
     }
 }

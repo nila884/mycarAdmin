@@ -14,12 +14,18 @@ class SellerResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'email' => $this->email,
+            'name' => $this->seller_name,
             'phone' => $this->phone,
             'address' => $this->address,
+            'country' => $this->country,
+            'description' => $this->description,
+            'avatar' => $this->avatar,
+            // 'user' => UserSnapshotResource::make($this->whenLoaded('user')),
+            'created_at' => $this->created_at->format('Y-m-d'),
         ];
+
     }
 }

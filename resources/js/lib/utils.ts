@@ -4,9 +4,9 @@ import { twMerge } from 'tailwind-merge';
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
-export function timeFormat(params:string) {
+export function timeFormat(params: string) {
     return new Intl.DateTimeFormat('en-US', {
-  dateStyle: 'short',
-  timeStyle: 'short',
-}).format(new Date(params));
+        dateStyle: 'short',
+        timeStyle: 'short',
+    }).format(new Date(params));
 }

@@ -94,5 +94,20 @@ class FeatureController extends Controller
         $features = Feature::orderBy('feature_name', 'asc')->get();
      
         return FeatureResource::collection($features)->response();
-    }      
+    } 
+    
+           /**
+     * Return a listing of all brands for API consumption.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function apiFeatureMain(): JsonResponse
+    {
+
+     $features = Feature::where('is_main', true)
+    ->orderBy('feature_name', 'asc')
+    ->get();
+     
+        return FeatureResource::collection($features)->response();
+    } 
 }

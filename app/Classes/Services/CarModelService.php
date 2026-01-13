@@ -2,8 +2,8 @@
 
 namespace App\Classes\Services;
 
-use Carbon\Carbon;
-use App\Models\carModel; // Ensure correct casing for carModel model
+
+use App\Models\CarModel; // Ensure correct casing for carModel model
 use App\Models\Brand; // Import Brand model to fetch brands
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -11,11 +11,10 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator as ValidatorReturn;
 use Illuminate\Support\Str; // For slugging if needed, though not directly used for model_name here
 
-class carModelService
+class CarModelService
 {
     public function Index()
     {
-       
         $carModels = carModel::with('brand')->paginate(15);
         $carModels->getCollection()->transform(function ($model) {
             return [
@@ -33,19 +32,11 @@ class carModelService
 
     public function create(Request $request)
     {
+
         $name = strtolower(trim(htmlspecialchars($request->model_name))); // Ensure lowercase
-        // Assuming brand_name is sent from frontend, find its ID
-        $brand = Brand::where('brand_name', strtolower($request->brand_name))->first();
-
-        if (!$brand) {
-            // Handle case where brand is not found (e.g., throw an exception or return error)
-            // For now, let validation handle it if brand_id is required
-            return null; // Or throw an exception
-        }
-
-        return carModel::create([
+        return CarModel::create([
             "model_name" => $name,
-            "brand_id" => $brand->id // Use the found brand ID
+            "brand_id" => $request->brand_id // Use the found brand ID
         ]);
     }
 
@@ -53,26 +44,20 @@ class carModelService
     {
         return carModel::with('brand')->find($id); // Eager load brand for read
     }
+public function update(Request $request, carModel $carModel): carModel
+{
+    $name = Str::lower(trim(htmlspecialchars($request->model_name)));
+    $brandId = $request->has('brand_id') 
+        ? (int) $request->brand_id 
+        : $carModel->brand_id;
 
-    public function update(Request $request, carModel $carModel): carModel
-    {
-        $name = strtolower(trim(htmlspecialchars($request->model_name))); // Ensure lowercase
-        $brandId = $carModel->brand_id; // Default to current brand ID
+    $carModel->update([
+        "model_name" => $name,
+        "brand_id"   => $brandId
+    ]);
 
-        // If brand_name is provided from the frontend, find its ID
-        if ($request->has('brand_name')) {
-            $brand = Brand::where('brand_name', strtolower($request->brand_name))->first();
-            if ($brand) {
-                $brandId = $brand->id;
-            }
-        }
-        
-        $carModel->update([
-            "model_name" => $name,
-            "brand_id" => $brandId
-        ]);
-        return $carModel;
-    }
+    return $carModel->fresh();
+}
 
     public function delete(carModel $carModel): bool
     {
@@ -97,12 +82,12 @@ class carModelService
             case 'post':
                 return Validator::make($request->all(), [
                     "model_name" => ["required", "string", "max:255", "unique:car_models,model_name", 'regex:/^[a-zA-Z0-9\s\'-]+$/'], // Added regex
-                    "brand_name" => ["required", "string", "exists:brands,brand_name"] // Validate brand_name existence
+                    "brand_id" => ["required", "exists:brands,id"] // Validate brand_name existence
                 ]);
             case 'patch':
                 return Validator::make($request->all(), [
-                    "model_name" => ["required", "string", "max:255", Rule::unique("car_models", "model_name")->ignore($carModel->id), 'regex:/^[a-zA-Z0-9\s\'-]+$/'], // Added regex
-                    "brand_name" => ["required", "string", "exists:brands,brand_name"] // Validate brand_name existence
+                    "model_name" => ["required", "max:255", Rule::unique("car_models", "model_name")->ignore($carModel->id), 'regex:/^[a-zA-Z0-9\s\'-]+$/'], // Added regex
+                    "brand_id" => ["required", "exists:brands,id"] // Validate brand_name existence
                 ]);
             default:
                 return null;

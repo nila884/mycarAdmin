@@ -2,28 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use App\Models\Car;
 use App\Classes\Services\CarService;
-use Illuminate\Validation\ValidationException;
-use App\Models\Brand;
-use App\Models\CarModel;
-use App\Models\FuelType;
-use App\Models\Version;
-use App\Models\Seller;
-use App\Models\Category;
-use App\Models\Feature;
-use App\Http\Resources\CarResource; 
 use App\Http\Resources\CarListingResource;
-use App\Http\Resources\BrandResource;
-use App\Http\Resources\ModelResource;
-use App\Http\Resources\CategoryResource;
-use App\Http\Resources\FuelTypeResource;
-use App\Http\Resources\VersionResource;
-use App\Http\Resources\FeatureResource;
-use Illuminate\Http\JsonResponse;
-
+use App\Http\Resources\CarResource;
+use App\Http\Resources\CarResourceManagement;
+use App\Models\Brand;
+use App\Models\Car;
+use App\Models\CarModel;
+use App\Models\Category;
+use App\Models\Color;
+use App\Models\Country;
+use App\Models\Feature;
+use App\Models\FuelType;
+use App\Models\Seller;
+use App\Models\Version;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 
 
 class CarController extends Controller
@@ -38,12 +33,31 @@ class CarController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request )
     {
-        $cars = $this->carService->Index();
+        $deletedCars = Car::onlyTrashed()->get();
+    $cars = $this->carService->Index();
+
+    $cars->through(fn ($car) => new CarResourceManagement($car));
+
+    return Inertia::render('car/list', [
+        'cars' => $cars,
+        'filters' => $request->only(
+        'search',
+        'sort',
+        'direction',
+        'publication_status',
+        'car_selling_status',
+        'discounted',
+    ),
+    ]);
+    }
+
+    public function searchByBrand(){
+        $cars= $this->carService->searchByBrand();
         return Inertia::render('car/list', [
-            'cars' => $cars,
-        ]);
+            'cars' => $cars->through(fn($car)=> new CarResourceManagement(($car)) ),
+        ]); 
     }
 
     /**
@@ -51,7 +65,7 @@ class CarController extends Controller
      */
     public function create()
     {
-       
+
         // Fetch necessary data for dropdowns and checkboxes
         $brands = Brand::all(['id', 'brand_name']);
         $carModels = CarModel::all(['id', 'model_name', 'brand_id']);
@@ -59,16 +73,17 @@ class CarController extends Controller
         $fuelTypes = FuelType::all(['id', 'fuel_type']);
         $sellers = Seller::all(['id', 'seller_name']);
         $features = Feature::all(['id', 'feature_name']);
-
-            $versions = Version::with('carModel:id,model_name')->get()->map(function ($version) {
+        $colors= Color::all(['id','name','hex_code']);
+        $coutries= Country::all(['id','country_name']);
+        $versions = Version::with('carModel:id,model_name')->get()->map(function ($version) {
             return [
                 'id' => $version->id,
                 'version_name' => $version->version_name,
                 'version_year' => $version->version_year,
                 'car_model_id' => $version->car_model_id,
-                'model_name' => $version->carModel->model_name ?? 'N/A'  ];
+                'model_name' => $version->carModel->model_name ?? 'N/A'];
         });
-        
+
         return Inertia::render('car/create', [
             'brands' => $brands,
             'carModels' => $carModels,
@@ -77,6 +92,8 @@ class CarController extends Controller
             'versions' => $versions,
             'sellers' => $sellers,
             'features' => $features,
+            'colors'=> $colors,
+            'countries'=>$coutries,
         ]);
     }
 
@@ -85,16 +102,16 @@ class CarController extends Controller
      */
     public function store(Request $request)
     {
-       
+          
         try {
-            $this->carService->Create($request);
+          $car=  $this->carService->Create($request);
             return redirect()->route('car.index')
-                             ->with('success', 'Car created successfully!');
+                ->with('success', 'Car created successfully!');
         } catch (ValidationException $e) {
             // Inertia automatically handles validation errors, but you can add custom logic
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            return back()->withErrors(['general' => 'Failed to create car. Please try again. Error: ' . $e->getMessage()])->withInput();
+            return back()->withErrors(['general' => 'Failed to create car. Please try again. Error: '.$e->getMessage()])->withInput();
         }
     }
 
@@ -104,10 +121,9 @@ class CarController extends Controller
     public function show(string $id)
     {
         $car = $this->carService->read($id);
-        if (!$car) {
+        if (! $car) {
             abort(404);
         }
-        // You might render a 'car/show' page here if you have one
         return Inertia::render('car/show', ['car' => $car]);
     }
 
@@ -121,18 +137,20 @@ class CarController extends Controller
         $carModels = CarModel::all(['id', 'model_name', 'brand_id']);
         $categories = Category::all(['id', 'category_name']);
         $fuelTypes = FuelType::all(['id', 'fuel_type']);
-        $versions = Version::all(['id', 'version_name','car_model_id','version_year']);
+        $versions = Version::all(['id', 'version_name', 'car_model_id', 'version_year']);
         $sellers = Seller::all(['id', 'seller_name']);
         $features = Feature::all(['id', 'feature_name']);
-
+        $colors= Color::all(['id','name','hex_code']);
+        $coutries= Country::all(['id','country_name']);
         // Fetch the car data including its relationships for pre-filling the form
         $carData = $this->carService->read($car->id);
-      
-        if (!$carData) {
+
+        if (! $carData) {
             abort(404);
         }
+
         return Inertia::render('car/create', [ // Render the same create form for editing
-            'car' => $carData, // Pass the car data to the frontend
+            'car' => CarResourceManagement::make($carData), // Pass the car data to the frontend
             'brands' => $brands,
             'carModels' => $carModels,
             'categories' => $categories,
@@ -140,6 +158,8 @@ class CarController extends Controller
             'versions' => $versions,
             'sellers' => $sellers,
             'features' => $features,
+            'colors' => $colors,
+            'countries'=>$coutries,
         ]);
     }
 
@@ -151,11 +171,11 @@ class CarController extends Controller
         try {
             $this->carService->update($request, $car);
             return redirect()->route('car.index')
-                             ->with('success', 'Car updated successfully!');
+                ->with('success', 'Car updated successfully!');
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            return back()->withErrors(['general' => 'Failed to update car. Please try again. Error: ' . $e->getMessage()])->withInput();
+            return back()->withErrors(['general' => 'Failed to update car. Please try again. Error: '.$e->getMessage()])->withInput();
         }
     }
 
@@ -166,26 +186,87 @@ class CarController extends Controller
     {
         try {
             $this->carService->delete($car);
+
             return redirect()->route('car.index')
-                             ->with('success', 'Car deleted successfully!');
+                ->with('success', 'Car deleted successfully!');
         } catch (\Exception $e) {
-            return back()->withErrors(['general' => 'Failed to delete car. Please try again. Error: ' . $e->getMessage()]);
+            return back()->withErrors(['general' => 'Failed to delete car. Please try again. Error: '.$e->getMessage()]);
         }
     }
 
-      /**
+    /**
      * Display a listing of all cars based on provided filters (brand, model, version).
      * All filters are optional query parameters.
      *
-     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function carsSearch(Request $request)
+public function carsSearch(Request $request)
+{
+    $cars = Car::query()
+        ->with([
+            'version.carModel.brand',
+            'category',
+            'fuelType',
+            'seller',
+            'imageMain',
+            'features',
+            'currentPrice',
+        ])
+        ->visible()
+
+        ->when($request->brand, fn ($q, $v) => $q->brand($v))
+        ->when($request->model, fn ($q, $v) => $q->model($v))
+        ->when($request->version, fn ($q, $v) => $q->version($v))
+        ->when($request->category, fn ($q, $v) => $q->categories($v))
+        ->when($request->fuel, fn ($q, $v) => $q->fuels($v))
+        ->when($request->transmission, fn ($q, $v) => $q->transmission($v))
+        ->when($request->steering, fn ($q, $v) => $q->steering($v))
+        ->when(
+            $request->price_min || $request->price_max,
+            fn ($q) => $q->priceBetween(
+                $request->price_min,
+                $request->price_max
+            )
+        )
+         ->when(
+        $request->mileage_min || $request->mileage_max,
+        fn ($q) => $q->mileageBetween(
+            $request->mileage_min,
+            $request->mileage_max
+        )
+    )
+         ->when(
+        $request->year_min || $request->year_max,
+        fn ($q) => $q->manufacturedYearBetween(
+            $request->year_min,
+            $request->year_max
+        )
+    )
+        ->when(
+            $request->filled('features'),
+            fn ($q) => $q->withFeatures($request->features)
+    )
+
+        ->sort($request->sort)
+        ->select('cars.*')
+        ->paginate(10);
+
+    return CarListingResource::collection($cars);
+}
+
+
+
+    /**
+     * Display a listing of all cars based on provided filters (brand, model, version).
+     * All filters are optional query parameters.
+     *
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function carsFilter(Request $request)
     {
-        // dd($request);
-        $brandId = $request->query('brand');
-        $modelId = $request->query('model');
-        $versionId = $request->query('version');
+        $brandId = $request->input('brand');
+        $modelId = $request->input('model');
+        $versionId = $request->input('version');
         $categoryIds = $request->query('category');
         $fuelTypeIds = $request->query('fuel');
         $transmission = $request->query('transmission');
@@ -194,99 +275,22 @@ class CarController extends Controller
         $query = Car::query();
 
         // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'images', 'features', 'prices']);
-            
+        $query->with(['version.carModel.brand', 'category', 'fuelType',  'seller', 'imageMain', 'features', 'currentPrice']);
+
         // Conditionally apply the brand filter if the brand name is provided.
         $query->when($brandId, function ($brandQuery) use ($brandId) {
-            $brandQuery->whereHas('carModel.brand', function ($innerQuery) use ($brandId) {
+            $brandQuery->whereHas('version.carModel.brand', function ($innerQuery) use ($brandId) {
                 $innerQuery->where('id', $brandId);
             });
         });
 
-        
-            
         // Conditionally apply the car model filter if the model name is provided.
         $query->when($modelId, function ($modelQuery) use ($modelId) {
-            $modelQuery->whereHas('carModel', function ($innerQuery) use ($modelId) {
+            $modelQuery->whereHas('version.carModel', function ($innerQuery) use ($modelId) {
                 $innerQuery->where('id', $modelId);
             });
         });
-        
-        // Conditionally apply the version filter if the version name is provided.
-        $query->when($versionId, function ($versionQuery) use ($versionId) {
-            $versionQuery->whereHas('version', function ($innerQuery) use ($versionId) {
-                $innerQuery->where('version_name', $versionId);
-            });
-        });
 
-          $query->when($categoryIds, function ($categoryQuerry) use ($categoryIds) {
-            $ids = explode(',', $categoryIds);
-            $categoryQuerry->whereIn('category_id', $ids);
-        });
-
-        $query->when($fuelTypeIds, function ($q) use ($fuelTypeIds) {
-            $ids = explode(',', $fuelTypeIds);
-            $q->whereIn('fuel_type_id', $ids);
-        });
-
-        $query->when($transmission, function ($q) use ($transmission) {
-            $q->where('transmission', 'LIKE', '%' . $transmission . '%');
-        });
-
-        $query->when($steering, function ($q) use ($steering) {
-            $q->where('streering', 'LIKE', '%' . $steering . '%');
-        });
-
-        // Get the final collection of cars.
-        $cars = $query->get();
-        if( $cars->isEmpty()) {
-            return response()->json(
-                [
-                    'message' => 'No cars found for the given filters.',
-                    'data'=>[]
-            
-            ], 200);
-        }
-        // Return a collection of CarResource instances.
-        return CarListingResource::collection($cars);
-    }
-
-/**
-     * Display a listing of all cars based on provided filters (brand, model, version).
-     * All filters are optional query parameters.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
-     */
-    public function carsFilter(Request $request)
-    {
-        $brandId = $request->input('brand');
-        $modelId = $request->input('model');
-        $versionId = $request->input('version');
-          $categoryIds = $request->query('category');
-        $fuelTypeIds = $request->query('fuel');
-        $transmission = $request->query('transmission');
-        $steering = $request->query('steering');
-            
-        $query = Car::query();
-
-        // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'images', 'features', 'prices']);
-            
-        // Conditionally apply the brand filter if the brand name is provided.
-        $query->when($brandId, function ($brandQuery) use ($brandId) {
-            $brandQuery->whereHas('carModel.brand', function ($innerQuery) use ($brandId) {
-                $innerQuery->where('id', $brandId);
-            });
-        });
-            
-        // Conditionally apply the car model filter if the model name is provided.
-        $query->when($modelId, function ($modelQuery) use ($modelId) {
-            $modelQuery->whereHas('carModel', function ($innerQuery) use ($modelId) {
-                $innerQuery->where('id', $modelId);
-            });
-        });
-        
         // Conditionally apply the version filter if the version name is provided.
         $query->when($versionId, function ($versionQuery) use ($versionId) {
             $versionQuery->whereHas('version', function ($innerQuery) use ($versionId) {
@@ -294,7 +298,7 @@ class CarController extends Controller
             });
         });
 
-         $query->when($categoryIds, function ($categoryQuerry) use ($categoryIds) {
+        $query->when($categoryIds, function ($categoryQuerry) use ($categoryIds) {
             $ids = explode(',', $categoryIds);
             $categoryQuerry->whereIn('category_id', $ids);
         });
@@ -305,23 +309,24 @@ class CarController extends Controller
         });
 
         $query->when($transmission, function ($q) use ($transmission) {
-            $q->where('transmission', 'LIKE', '%' . $transmission . '%');
+            $q->where('transmission', 'LIKE', '%'.$transmission.'%');
         });
 
         $query->when($steering, function ($q) use ($steering) {
-            $q->where('streering', 'LIKE', '%' . $steering . '%');
+            $q->where('streering', 'LIKE', '%'.$steering.'%');
         });
 
         // Get the final collection of cars.
-        $cars = $query->get();
-        if( $cars->isEmpty()) {
+        $cars = $query->paginate(10);
+        if ($cars->isEmpty()) {
             return response()->json(
                 [
                     'message' => 'No cars found for the given filters.',
-                    'data'=>[]
-            
-            ], 200);
+                    'data' => [],
+
+                ], 200);
         }
+
         // Return a collection of CarResource instances.
         return CarListingResource::collection($cars);
     }
@@ -334,49 +339,46 @@ class CarController extends Controller
     public function carsHome()
     {
         $query = Car::query();
-                // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['carModel.brand',  'version', 'carModel', 'images',  'prices']);
-        
-       $cars= $query->take(10)->get();
-        if( $cars->isEmpty()) {
+        $query->with(['version.carModel.brand', 'imageMain',  'currentPrice']);
+        $cars = $query->take(10)->get();
+        if ($cars->isEmpty()) {
             return response()->json(
                 [
                     'message' => 'No cars found for the home page.',
-                    'data'=>[]
-            
-            ], 200);
+                    'data' => [],
+
+                ], 200);
         }
-        // Return a collection of CarResource instances.
         return CarListingResource::collection($cars);
 
-
     }
+
     /**
      * Display the details of a specific car.
      *
-     * @param int $id
+     * @param  int  $id
      * @return \Illuminate\Http\Resources\Json\JsonResource
      */
     public function carDetail($id)
     {
+    
 
-              $car = Car::with(['carModel.brand', 'category', 'fuelType', 'version', 'seller', 'features', 'images', 'prices'] )
-              ->find($id);
-      
-        if (!$car) {
+        $car = Car::with(['version.carModel.brand','originCountry' ,'category', 'fuelType', 'seller', 'features', 'images', 'currentPrice'])
+            ->find($id);
+
+        if (! $car) {
             return response()->json(
                 [
                     'message' => 'Car not found.',
-                    'data' => []
+                    'data' => [],
                 ], 404
             );
         }
 
         return new CarResource($car);
-        
-        
-    }   
-    
+
+    }
+
     /**
      * Display a listing of cars for the home page.
      *
@@ -385,57 +387,82 @@ class CarController extends Controller
     public function carRecomended()
     {
         $query = Car::query();
-                // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['carModel.brand',  'version', 'carModel', 'images',  'prices']);
-        
-       $cars= $query->take(4)->get();
-        if( $cars->isEmpty()) {
+        // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
+        $query->with(['version.carModel.brand',   'imageMain',  'currentPrice']);
+
+        $cars = $query->take(4)->get();
+        if ($cars->isEmpty()) {
             return response()->json(
                 [
                     'message' => 'No cars found for the home page.',
-                    'data'=>[]
-            
-            ], 200);
+                    'data' => [],
+
+                ], 200);
         }
+
         // Return a collection of CarResource instances.
         return CarListingResource::collection($cars);
 
-
     }
 
-     /**
+    /**
      * Display a listing of cars for the home page.
      *
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function carsHomeMobile()
     {
-        
+
         $query = Car::query();
-                // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
-        $query->with(['carModel.brand',  'version', 'carModel', 'images',  'prices']);
-        
-       $cars= $query->take(4)->get();
-        if( $cars->isEmpty()) {
+        // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
+        $query->with(['version.carModel.brand', 'imageMain',  'currentPrice']);
+
+        $cars = $query->take(4)->get();
+        if ($cars->isEmpty()) {
             return response()->json(
                 [
                     'message' => 'No cars found for the home page.',
-                    'data'=>[]
-            
-            ], 200);
+                    'data' => [],
+
+                ], 200);
         }
+
         // Return a collection of CarResource instances.
         // return CarListingResource::collection($cars);
         return response()->json(
             [
-                
+
                 'carsRecomended' => CarListingResource::collection($cars),
                 'carsNew' => CarListingResource::collection($cars),
                 'carsRecentlyViewed' => CarListingResource::collection($cars),
-                
+
             ], 200
         );
 
+    }
 
+    public function getCarsBySellerId($sellerId)
+    {
+        $cars = Car::with(['version.carModel.brand', 'seller', 'imageMain', 'currentPrice'])
+            ->where('seller_id', $sellerId)
+            ->get();
+
+        if ($cars->isEmpty()) {
+            return response()->json(
+                [
+                    'message' => 'No cars found for the given seller.',
+                    'data' => [],
+                ], 200
+            );
+        }
+
+        return CarListingResource::collection($cars);
+
+    }
+
+
+    ///get deleted car for report
+    public function getDeletedCar(){
+        return response()->json( $deletedCars = Car::onlyTrashed()->get());
     }
 }

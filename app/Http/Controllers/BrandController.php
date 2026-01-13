@@ -6,90 +6,70 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Brand;
-use App\Classes\Services\BrandService; // Import your service class
-use Illuminate\Validation\ValidationException; // Important for handling validation errors from service
-use App\Http\Resources\BrandResource; // Import the resource for API responses
+use App\Classes\Services\BrandService;
+use Illuminate\Validation\ValidationException;
+use App\Http\Resources\BrandResource;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class BrandController extends Controller
 {
     protected $brandService;
 
-    // Inject the BrandService into the controller
     public function __construct(BrandService $brandService)
     {
         $this->brandService = $brandService;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
-        // Use the service to get paginated brands if needed, or keep Brand::all()
         return Inertia::render('car/settings/brand', [
-            'brands' => $this->brandService->Index(), // Using the service to get data
+            'brands' => $this->brandService->Index(),
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+   
     public function store(Request $request)
     {
-        // 1. Validate the request using the BrandService
-        $validator = $this->brandService->DataValidation($request, 'post');
+        
 
-        if ($validator->fails()) {
-            // If validation fails, throw a ValidationException.
-            // Inertia will automatically catch this and pass errors back to the frontend.
-            throw new ValidationException($validator);
-        }
+       $validator = $this->brandService->DataValidation($request, 'post');
 
-        // 2. If validation passes, create the brand using the BrandService
-        try {
-            $this->brandService->Create($request);
-
-            // 3. Redirect back or to an index page with a success message
-            return redirect()->route('carbrand.index') // Assuming 'carbrand.index' is your route name for listing brands
-                             ->with('success', 'Brand created successfully!');
-        } catch (\Exception $e) {
-            // Handle any other exceptions during creation (e.g., file move error)
-            // You might want to log this error and return a more generic error message
-            return back()->withErrors(['general' => 'Failed to create brand. Please try again.']);
-        }
+    if ($validator->fails()) {
+        // This automatically redirects back with 'errors' prop for Inertia
+        return back()->withErrors($validator)->withInput();
     }
 
+    try {
+        $this->brandService->Create($request);
+        return redirect()->route('carbrand.index')
+                         ->with('success', 'Brand created successfully!');
+    } catch (\Exception $e) {
+        // Log the error for AWS debugging, don't use dd() in production
+        Log::error($e->getMessage());
+        return redirect()->back()
+            ->withErrors(['brand_name' => 'Server error: Could not save brand.'])
+            ->withInput();
+    }
+    }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Brand $brand)
     {
-        // 1. Validate the request using the BrandService for 'patch' method
         $validator = $this->brandService->DataValidation($request, 'patch', $brand);
 
         if ($validator->fails()) {
-            // If validation fails, throw a ValidationException.
             throw new ValidationException($validator);
         }
-
-        // 2. If validation passes, update the brand using the BrandService
         try {
             $this->brandService->Update($request, $brand);
-
-            // 3. Redirect back or to an index page with a success message
             return redirect()->route('carbrand.index')
                              ->with('success', 'Brand updated successfully!');
         } catch (\Exception $e) {
-            // Handle any other exceptions during update (e.g., file move error)
             return back()->withErrors(['general' => 'Failed to update brand. Please try again.']);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Brand $brand)
     {
            try {
@@ -101,11 +81,6 @@ class BrandController extends Controller
         }
     }
 
-       /**
-     * Return a listing of all brands for API consumption.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function apiIndex(): JsonResponse
     {
 

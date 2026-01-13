@@ -82,4 +82,21 @@ class LoginRequest extends FormRequest
     {
         return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
     }
+
+    /**
+     * Helper to manually hit the rate limiter from the controller.
+     */
+    public function hitRateLimiter(): void
+    {
+        RateLimiter::hit($this->throttleKey());
+    }
+
+    /**
+     * Helper to manually clear the rate limiter from the controller.
+     */
+    public function clearRateLimiter(): void
+    {
+        RateLimiter::clear($this->throttleKey());
+    }
+
 }

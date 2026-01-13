@@ -1,31 +1,20 @@
-import { Head, router } from '@inertiajs/react';
+
 import HeadingSmall from '@/components/heading-small';
 import { type BreadcrumbItem } from '@/types';
-import Create from '@/components/car/settings/seller/create';
-import Update from '@/components/car/settings/seller/update'; // Ensure this path is correct
+import { Head, router } from '@inertiajs/react';
 
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import CarSettingLayout from '@/layouts/car/settings/layout';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { timeFormat } from '@/lib/utils'; // Assuming you have a timeFormat utility
-import { X } from 'lucide-react'; // For the delete icon
+import { timeFormat } from '@/lib/utils';
+import { X } from 'lucide-react';
+import { CountryObject, Seller as SellerObject} from '@/lib/object';
+import SellerForm from '@/components/car/settings/seller/sellerForm';
 
-// Define the type for a single seller item, matching the transformed data from SellerService
-interface SellerItem {
-    id: number;
-    seller_name: string;
-    email: string;
-    phone: string;
-    address: string;
-    country: string;
-    created_at: string;
-    updated_at: string;
-}
-
-// Define the props for the seller component
 interface SellerProps {
-    sellers: SellerItem[]; // Array of seller items passed from backend
+    sellers: SellerObject[]; 
+    countries: CountryObject[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -35,8 +24,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Seller({ sellers }: SellerProps) {
-
+export default function Seller({ sellers,countries }: SellerProps) {
     function handleDelete(id: number) {
         if (!window.confirm('Are you sure you want to delete this seller?')) return;
 
@@ -48,7 +36,7 @@ export default function Seller({ sellers }: SellerProps) {
             onError: (errors) => {
                 console.error('Error deleting seller:', errors);
                 alert('Failed to delete seller. Please try again.'); // Basic error feedback
-            }
+            },
         });
     }
 
@@ -60,14 +48,13 @@ export default function Seller({ sellers }: SellerProps) {
                 <div className="space-y-6">
                     <HeadingSmall title="Car seller settings" description="Add new, update, and delete car sellers" />
 
-                    <Create />
+                    <SellerForm countries={countries} />
 
                     <Table>
                         <TableCaption>A list of car sellers.</TableCaption>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Seller Name</TableHead>
-                                <TableHead>Email</TableHead>
                                 <TableHead>Phone</TableHead>
                                 <TableHead>Address</TableHead>
                                 <TableHead>Country</TableHead>
@@ -81,7 +68,6 @@ export default function Seller({ sellers }: SellerProps) {
                                 sellers.map((seller) => (
                                     <TableRow key={seller.id}>
                                         <TableCell className="font-medium">{seller.seller_name}</TableCell>
-                                        <TableCell>{seller.email}</TableCell>
                                         <TableCell>{seller.phone}</TableCell>
                                         <TableCell>{seller.address}</TableCell>
                                         <TableCell>{seller.country}</TableCell>
@@ -89,13 +75,8 @@ export default function Seller({ sellers }: SellerProps) {
                                         <TableCell>{timeFormat(seller.updated_at)}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end space-x-2">
-                                                <Update seller={seller} /> 
-                                                <Button
-                                                    className='ml-2'
-                                                    size="icon"
-                                                    variant="destructive"
-                                                    onClick={() => handleDelete(seller.id)}
-                                                >
+                                                <SellerForm countries={countries} seller={seller} />
+                                                <Button className="ml-2" size="icon" variant="destructive" onClick={() => handleDelete(seller.id)}>
                                                     <X className="h-4 w-4" />
                                                 </Button>
                                             </div>

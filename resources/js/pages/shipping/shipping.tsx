@@ -20,7 +20,6 @@ export default function Shipping() {
             <Layout>
                 <div className="space-y-6">
                     <HeadingSmall title="Shippings parametter" description="Car Shipping countries, ports and prices" />
-                   
                 </div>
             </Layout>
         </AppLayout>

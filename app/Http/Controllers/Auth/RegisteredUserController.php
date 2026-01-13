@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+// use App\Classes\Services\UserService;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -12,9 +13,15 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\Permission\Models\Role;
 
 class RegisteredUserController extends Controller
 {
+    public function __construct()
+    {
+        // $this->userService = $userService;
+    }
+
     /**
      * Show the registration page.
      */
@@ -30,10 +37,12 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'user_type' => 'required|string|in:seller,simple_user',
         ]);
 
         $user = User::create([
@@ -41,11 +50,11 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-
-        event(new Registered($user));
-
-        Auth::login($user);
-
+    if (Role::where('name', 'admin')->exists()) {
+        $user->assignRole('admin');
+    }
+    event(new Registered($user));
+    Auth::login($user);
         return to_route('dashboard');
     }
 }

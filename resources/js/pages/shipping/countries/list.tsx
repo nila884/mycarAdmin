@@ -1,121 +1,85 @@
-// src/pages/car/settings/country.tsx
-
-import { Head, router } from '@inertiajs/react';
+import { Head} from '@inertiajs/react';
 import HeadingSmall from '@/components/heading-small';
-import { type BreadcrumbItem } from '@/types';
-// You will need to create these components:
 import AppLayout from '@/layouts/app-layout';
 import ShippingLayout from '@/layouts/shipping/layout';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { timeFormat } from '@/lib/utils';
-import { X } from 'lucide-react';
 import CountryForm from '@/components/shipping/country/countryForm';
+import { CountryObject, PortObject } from '@/lib/object';
+import ManageGateways from '@/components/shipping/country/manageGateway';
+import ManageCities from '@/components/shipping/country/manageCity';
 
-
-export interface CountryItem {
-    id: number;
-    country_name: string; 
-    code: string;
-    prefix: string;
-    import_regulation_information:string;
-    currency: string;
-    flags: string | null; 
-    created_at: string;
-    updated_at: string;
-}
-
-interface CountryProps {
+interface Props {
     countries: { 
-        data: CountryItem[];
+      data: CountryObject[] ,
     };
+    ports:  PortObject[];
+    
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Car brand settings',
-        href: '/shipping/countries/list',
-    },
-];
-
-export default function CountryIndex({ countries }: CountryProps) {
-  
-  function handleDelete(id: number) {
-    if (!window.confirm('Are you sure you want to delete this country? This will also delete associated ports and shipping costs.')) return;
-
-    router.delete(`/shipping/countries/${id}`, {
-      preserveScroll: true,
-      onSuccess: () => {
-
-      },
-    });
-  }
+export default function CountryIndex({ countries,ports }: Props) {
+  // const handleDelete = (id: number) => {
+  //   if (confirm('Are you sure? This will delete associated ports and rates.')) {
+  //     router.delete(route('country.destroy', id));
+  //   }
+  // };
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppLayout>
+      <Head title="Country Settings" />
       <ShippingLayout>
-        <Head title="Country Settings" />
-        <HeadingSmall title="Country Management" />
-        
-        <CountryForm/>
-        <div className="flex justify-end mb-4">
-          {/* You need to create this component in components/car/settings/country/create.tsx */}
-         
+        <div className="flex justify-between items-center mb-6">
+            <HeadingSmall title="Country Management" />
+            <CountryForm />
         </div>
 
-        <div className="rounded-md border">
+        <div className="rounded-md border bg-white overflow-hidden">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-slate-50">
               <TableRow>
                 <TableHead className="w-[80px]">Flag</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Prefix</TableHead>
+                <TableHead>Country Name</TableHead>
+                <TableHead>ISO Code</TableHead>
                 <TableHead>Currency</TableHead>
                 <TableHead>Created At</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-right px-6">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {countries.data.length > 0 ? (
                 countries.data.map((country) => (
-                  <TableRow key={country.id}>
+                  <TableRow key={country.id} className="hover:bg-slate-50/50">
                     <TableCell>
                       {country.flags ? (
-                        <img
-                          src={country.flags}
-                          alt={`${country.country_name} Flag`}
-                          className="w-10 h-7 object-cover rounded shadow"
-                        />
+                        <img src={country.flags} alt="flag" className="w-10 h-7 object-cover rounded shadow-sm border" />
                       ) : (
-                        <span className="text-gray-400">N/A</span>
+                        <div className="w-10 h-7 bg-slate-100 rounded flex items-center justify-center text-[10px] text-slate-400">N/A</div>
                       )}
                     </TableCell>
-                    <TableCell className="font-medium">{country.country_name}</TableCell>
-                    <TableCell>{country.code}</TableCell>
-                    <TableCell>{country.prefix}</TableCell>
+                    <TableCell className="font-semibold text-slate-700">{country.country_name}</TableCell>
+                    <TableCell className="text-slate-500 font-mono text-xs">{country.code}</TableCell>
                     <TableCell>{country.currency}</TableCell>
-                    <TableCell>{timeFormat(country.created_at)}</TableCell>
-                    <TableCell className="text-right">
-                      {/* You need to create this component */}
-                      <CountryForm country={country} />
-                      <Button className='ml-2' size="icon" variant="destructive" onClick={() => handleDelete(country.id)}>
-                        <X/>
-                      </Button>
-                    </TableCell>
+                    <TableCell className="text-slate-400 text-xs">{country.created_at}</TableCell>
+                          <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                  {/* New City Management Button */}
+                                  <ManageCities country={country} />
+                                  
+                                  {/* Existing Gateway Management */}
+                                  <ManageGateways country={country} ports={ports} />
+                                  
+                                  {/* Other actions (Edit/Delete) */}
+                              </div>
+                          </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center">
-                    No countries found.
-                  </TableCell>
+                  <TableCell colSpan={6} className="h-24 text-center text-slate-500">No countries found.</TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </div>
-        {/* Pagination logic here if needed */}
       </ShippingLayout>
     </AppLayout>
   );

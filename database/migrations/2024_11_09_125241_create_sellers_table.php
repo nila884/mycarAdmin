@@ -14,10 +14,19 @@ return new class extends Migration
         Schema::create('sellers', function (Blueprint $table) {
             $table->id();
             $table->string('seller_name');
-            $table->string('phone');
-            $table->string('email')->unique();
+            $table->string('phone')->nullable();
+            // $table->string('email')->nullable();
+            // $table->foreignId('user_id')
+            //     ->constrained('users')
+            //     ->onDelete('cascade')
+            //     ->unique()
+            //     ->nulable();
+            
+            $table->string('avatar')->nullable();
+            $table->text('description')->nullable();
             $table->string('country');
             $table->string('address');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

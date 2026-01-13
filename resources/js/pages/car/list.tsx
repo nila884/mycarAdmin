@@ -1,41 +1,67 @@
-// @/pages/car/list.tsx
-import AppLayout from "@/layouts/app-layout";
-import { columns } from "@/components/car/columns"; // Import Car type
-import { DataTable } from "@/components/car/data-table";
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react'; // Import Link from Inertia.js
-import { Button } from "@/components/ui/button"; // Assuming shadcn/ui Button
-import { Car } from "@/lib/object";
+import AppLayout from "@/layouts/app-layout"
+import { columns } from "@/components/car/columns"
+import { DataTable, DataTableFilterBag } from "@/components/car/data-table"
+import { Head, router } from "@inertiajs/react"
+import { Button } from "@/components/ui/button"
+import { Link } from "@inertiajs/react"
+import { CarDetailData } from "@/lib/object"
 
-// Assume `cars` data is passed as a prop from Inertia backend
-interface CarListPageProps {
-  cars: {
-    data: Car[]; // Inertia paginated data
-    links: any; // Pagination links
-    meta: any; // Pagination meta
-  };
+// 1. Define the interface for the Paginated Laravel Response
+interface PaginatedCars {
+    data: CarDetailData[];
+    current_page: number;
+    per_page: number;
+    last_page: number;
+    total: number;
 }
 
-export default function List({ cars }: CarListPageProps) { // Destructure cars prop
+// 2. Define the props for the Page component
+interface ListProps {
+    cars: PaginatedCars;
+    filters:DataTableFilterBag ;
+}
 
-  const breadcrumbs: BreadcrumbItem[] = [
-    {
-      title: 'Cars listings',
-      href: route('car.index'),
-    },
-  ];
+export default function List({ cars, filters }: ListProps) {
+  const paginationData = {
+    pageIndex: cars.current_page - 1,
+    pageSize: cars.per_page,
+    pageCount: cars.last_page,
+  }
+
+  const handlePageChange = (page: number, pageSize: number) => {
+    const url = new URL(window.location.href)
+    const params = Object.fromEntries(url.searchParams.entries())
+
+    params.page = String(page)
+    params.per_page = String(pageSize)
+
+    router.get(route("car.index"), params, {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
+    })
+  }
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppLayout>
       <Head title="Cars Listings" />
+
       <div className="container mx-auto py-10">
-        <div className="flex justify-end mb-4">
-          <Link href={route('car.create')}> {/* Link to the create car page */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold tracking-tight">Vehicle Inventory</h2>
+          <Link href={route("car.create")}>
             <Button>Add New Car</Button>
           </Link>
         </div>
-        <DataTable columns={columns} data={cars.data} /> {/* Pass the cars.data to DataTable */}
+
+        <DataTable
+          columns={columns}
+          data={cars.data}
+          serverPagination={paginationData}
+          filters={filters}
+          onServerPageChange={handlePageChange}
+        />
       </div>
     </AppLayout>
-  );
+  )
 }

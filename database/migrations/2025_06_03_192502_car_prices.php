@@ -19,6 +19,21 @@ return new class extends Migration
     $table->decimal('discount', 10, 2)->nullable();
     $table->enum('discount_type', ['amount', 'percent'])->nullable();
     $table->boolean('is_current')->default(true);
+
+    $table->index(['car_id', 'is_current']);
+    $table->index(['is_current', 'discount']);
+    $table->index('price');
+        $table->decimal('final_price', 10, 2)
+        ->storedAs("
+            CASE
+                WHEN discount_type = 'percent'
+                    THEN price - (price * discount / 100)
+                WHEN discount_type = 'amount'
+                    THEN price - discount
+                ELSE price
+            END
+        ");
+
     $table->timestamps();
 });
     }

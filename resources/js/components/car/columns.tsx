@@ -1,133 +1,125 @@
 // @/components/car/columns.tsx
-import { ColumnDef } from "@tanstack/react-table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { DataTableColumnHeader } from "@/components/data-table-column-header";
+import { DataTableColumnHeader } from '@/components/data-table-column-header';
+import { Button } from '@/components/ui/button'; // Assuming shadcn/ui Button
+import { Checkbox } from '@/components/ui/checkbox';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { CarDetailData } from '@/lib/object';
 import { Link, router } from '@inertiajs/react'; // Import Link and router from Inertia.js
-import { Button } from "@/components/ui/button"; // Assuming shadcn/ui Button
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react"; // For the action ellipsis icon
-import{Car} from '@/lib/object'
+import { ColumnDef } from '@tanstack/react-table';
+import { MoreHorizontal } from 'lucide-react'; // For the action ellipsis icon
 
 // Define the Car type based on your Car.php and create-form.tsx
 // I've included most fields from create-form.tsx and some from Car.php
 
-
-export const columns: ColumnDef<Car>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "brand_name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Brand" />
-    ),
-  },
-  {
-    accessorKey: "model_name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Model" />
-    ),
-  },
-  {
-    accessorKey: "price",
-    header: () => <div className="text-right">Price</div>,
-    cell: ({ row }) => {
-      const price = parseFloat(row.getValue("price"));
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(price);
-
-      return <div className="text-right font-medium">{formatted}</div>;
+export const columns: ColumnDef<CarDetailData>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            />
+        ),
+        cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} />,
+        enableSorting: false,
+        enableHiding: false,
     },
-  },
-  {
-    accessorKey: "status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
-    ),
-  },
-  {
-    accessorKey: "publication_status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Publication Status" />
-    ),
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const car = row.original;
 
-      const handleDelete = () => {
-        if (confirm("Are you sure you want to delete this car? This action cannot be undone.")) {
-          router.delete(route('car.destroy', car.id), {
-            onSuccess: () => {
-              console.log("Car deleted successfully!");
-            },
-            onError: (errors) => {
-              console.error("Error deleting car:", errors);
-              alert("Failed to delete car. Please try again.");
-            }
-          });
-        }
-      };
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[160px]">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem asChild>
-              <Link href={route('car.show', car.id)}>
-                Details
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href={route('car.edit', car.id)}>
-                Edit
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleDelete} className="text-red-600">
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+    {
+        id: 'brand',
+        accessorKey: 'version.car_model.brand.brand_name',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Brand" />,
     },
-  },
+
+    {
+        id: 'model',
+        accessorKey: 'version.car_model.model_name',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Model" />,
+    },
+
+    {
+        id: 'price',
+        accessorKey: 'price.final_price',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Price" />,
+        cell: ({ getValue }) => {
+            const amount = getValue<number>();
+            if (!amount) return <div className="text-right">N/A</div>;
+
+            return (
+                <div className="text-center font-medium">
+                    {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                    }).format(amount)}
+                </div>
+            );
+        },
+    },
+
+    {
+        id: 'status',
+        accessorKey: 'spect.status',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+        cell: ({ getValue }) => <div className="text-center font-medium">{getValue<number>() === 1 ? 'New' : 'Used'}</div>,
+    },
+
+    {
+        id: 'publication_status',
+        accessorKey: 'publication_status',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Publication Status" />,
+    },
+
+    {
+        id: 'selling_status',
+        accessorKey: 'car_selling_status',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Selling Status" />,
+    },
+
+    {
+        id: 'created_at',
+        accessorKey: 'created_at',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
+    },
+
+    {
+        id: 'updated_at',
+        accessorKey: 'updated_at',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Last update" />,
+    },
+
+    {
+        id: 'actions',
+        enableSorting: false,
+        cell: ({ row }) => {
+            const car = row.original;
+
+            const handleDelete = () => {
+                if (!confirm('Are you sure you want to delete this car?')) return;
+
+                router.delete(route('car.destroy', car.id));
+            };
+
+            return (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                            <Link href={route('car.show', car.id)}>Details</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link href={route('car.edit', car.id)}>Edit</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+                            Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            );
+        },
+    },
 ];
