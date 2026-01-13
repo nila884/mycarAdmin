@@ -35,3 +35,4 @@ if (! $this->discount || ! $this->discount_type) {
     return round(max(0, $finalPrice), 0);
     }
 }
+
