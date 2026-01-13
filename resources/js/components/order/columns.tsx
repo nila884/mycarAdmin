@@ -3,7 +3,6 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Order } from '@/lib/object';
 import { Badge } from '@/components/ui/badge';
-import { DataTableRowActions } from './data-table-row-action';
 
 export const columns: ColumnDef<Order>[] = [
     {
@@ -55,8 +54,8 @@ export const columns: ColumnDef<Order>[] = [
         header: 'Date',
         accessorFn: (row) => row.dates.created_at,
     },
-    {
-        id: 'actions',
-        cell: ({ row }) => <DataTableRowActions row={row} />,
-    },
+    // {
+    //     id: 'actions',
+    //     cell: ({ row }) => <DataTableRowActions row={row} />,
+    // },
 ];
