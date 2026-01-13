@@ -238,6 +238,31 @@ public function scopeManufacturedYearBetween(
 }
 
 
+public function scopeWithFeatures($query, $featureIds, bool $matchAll = false)
+{
+    if (is_string($featureIds)) {
+        $featureIds = explode(',', $featureIds);
+    }
+
+    if (empty($featureIds)) {
+        return $query;
+    }
+
+    if ($matchAll) {
+        return $query->whereHas(
+            'features',
+            fn ($q) => $q->whereIn('features.id', $featureIds),
+            '=',
+            count($featureIds)
+        );
+    }
+
+    return $query->whereHas('features', function ($q) use ($featureIds) {
+        $q->whereIn('features.id', $featureIds);
+    });
+}
+
+
     /* ==========================
      | SORTING
      ========================== */

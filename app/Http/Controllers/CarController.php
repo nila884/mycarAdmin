@@ -242,6 +242,11 @@ public function carsSearch(Request $request)
             $request->year_max
         )
     )
+        ->when(
+            $request->filled('features'),
+            fn ($q) => $q->withFeatures($request->features)
+    )
+
         ->sort($request->sort)
         ->select('cars.*')
         ->paginate(10);
