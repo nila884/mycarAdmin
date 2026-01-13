@@ -1,7 +1,5 @@
 import AppLayout from "@/layouts/app-layout"
 import { Head, router } from "@inertiajs/react"
-import { Button } from "@/components/ui/button"
-import { Link } from "@inertiajs/react"
 import { Order } from "@/lib/object"
 import { DataTable, DataTableFilterBag } from "@/components/order/data-table"
 import { columns } from "@/components/order/columns"
