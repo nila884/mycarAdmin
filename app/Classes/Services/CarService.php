@@ -235,7 +235,7 @@ private function verifyProfitMargin($costPrice, $minMargin, $price, $discount, $
                 $imageName = time().'_'.uniqid().'.'.$imageFile->getClientOriginalExtension();
                 $path = $imageFile->storeAs('cars', $imageName, 'public');
                 $car->images()->create([
-                    'image_path' => Storage::url($path),
+                    'image_path' => $path,
                     'is_main' => true, // Mark as main image
                 ]);
             }
@@ -244,7 +244,7 @@ private function verifyProfitMargin($costPrice, $minMargin, $price, $discount, $
                     $imageName = time().'_'.uniqid().'.'.$imageFile->getClientOriginalExtension();
                     $path = $imageFile->storeAs('cars', $imageName, 'public');
                     $car->images()->create([
-                        'image_path' => Storage::url($path),
+                        'image_path' => $path,
                         'is_main' => false, // Mark as additional image
                     ]);
                 }
@@ -355,7 +355,7 @@ private function verifyProfitMargin($costPrice, $minMargin, $price, $discount, $
                 $imageName = time().'_'.uniqid().'.'.$imageFile->getClientOriginalExtension();
                 $path = $imageFile->storeAs('cars', $imageName, 'public');
                 $car->images()->create([
-                    'image_path' => Storage::url($path),
+                    'image_path' => $path,
                     'is_main' => true,
                 ]);
             } elseif ($request->input('clear_main_image')) { // Frontend sends a flag to clear main image
@@ -385,7 +385,7 @@ private function verifyProfitMargin($costPrice, $minMargin, $price, $discount, $
                     $imageName = time().'_'.uniqid().'.'.$imageFile->getClientOriginalExtension();
                     $path = $imageFile->storeAs('cars', $imageName, 'public');
                     $car->images()->create([
-                        'image_path' => Storage::url($path),
+                        'image_path' => $path,
                         'is_main' => false,
                     ]);
                 }
