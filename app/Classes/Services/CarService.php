@@ -65,6 +65,7 @@ private function verifyProfitMargin($costPrice, $minMargin, $price, $discount, $
             'seller',
             'features',
             'images',
+            'imageMain',
             'originCountry',
             'currentPrice' => fn ($q) => $q->where('is_current', true),
         ])
@@ -160,7 +161,7 @@ private function verifyProfitMargin($costPrice, $minMargin, $price, $discount, $
 
     public function searchByBrand(){
         $query = Car::query();
-        $query->with(['version.carModel.brand', 'category', 'fuelType',  'seller', 'images', 'features', 'currentPrice']);
+        $query->with(['version.carModel.brand', 'category', 'fuelType',  'seller', 'images','imageMain' ,'features', 'currentPrice']);
         $query->whereHas('version.carModel.brand', function ($q) {
             $q->where('brand_name', 'like', '%' . request('search') . '%');
         });
@@ -274,7 +275,7 @@ private function verifyProfitMargin($costPrice, $minMargin, $price, $discount, $
     public function read(int $id)
     {
 
-        $car = Car::with(['version.carModel.brand', 'category','exteriorColor','interiorColor', 'originCountry','fuelType', 'seller', 'features', 'images','currentPrice' => function ($query) {
+        $car = Car::with(['version.carModel.brand', 'category','exteriorColor','interiorColor', 'originCountry','fuelType', 'seller', 'features','imageMain', 'images','currentPrice' => function ($query) {
             $query->where('is_current', true);}])->find($id);
         if (! $car) {
             return null;

@@ -16,9 +16,7 @@ class ImageResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'url' => $this->image_path
-                ? asset('storage/' . $this->image_path)
-                : null,
+            'image_path' => $this->image_path ? asset('storage/' . $this->image_path): null,
             'is_main' => $this->is_main,
         ];
     }

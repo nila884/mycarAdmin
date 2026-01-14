@@ -34,23 +34,23 @@ class DatabaseSeeder extends Seeder
             FeaturesSeeder::class,
         ]);
         $imagesCars = collect([
-     '/storage/cars/1765592641_693cce41e85ad.jpg',
-'/storage/cars/1765592641_693cce41e953a.jpg',
-'/storage/cars/1765592641_693cce41e8885.jpg',
-'/storage/cars/1765592641_693cce41e9206.jpg',
-'/storage/cars/1765592678_693cce666988d.jpg',
-'/storage/cars/1765931485_6941f9dd04c1c.jpeg',
-'/storage/cars/1765931485_6941f9dd03432.jpeg',
-'/storage/cars/1765931485_6941f9dd04292.jpeg',
-'/storage/cars/1765931485_6941f9dd04590.jpeg',
-'/storage/cars/1765931485_6941f9dd04912.jpeg',
-'/storage/cars/1755117889_689cf94123792.jpg',
+'cars/1765592641_693cce41e85ad.jpg',
+'cars/1765592641_693cce41e953a.jpg',
+'cars/1765592641_693cce41e8885.jpg',
+'cars/1765592641_693cce41e9206.jpg',
+'cars/1765592678_693cce666988d.jpg',
+'cars/1765931485_6941f9dd04c1c.jpeg',
+'cars/1765931485_6941f9dd03432.jpeg',
+'cars/1765931485_6941f9dd04292.jpeg',
+'cars/1765931485_6941f9dd04590.jpeg',
+'cars/1765931485_6941f9dd04912.jpeg',
+'cars/1755117889_689cf94123792.jpg',
 
 
         ]);
         $logo = collect([
-            '/storage/brand_logos/1765592745_ford.png',
-            '/storage/brand_logos/1765592782_mazda.jpg',
+            'brand_logos/1765592745_ford.png',
+            'brand_logos/1765592782_mazda.jpg',
         ]);
 
         $brands = Brand::factory(5)->create([

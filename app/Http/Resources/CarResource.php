@@ -17,8 +17,8 @@ class CarResource extends JsonResource
         return [
             'id' => $this->id,
             'location' => $this->location,
-            'image_main' => new ImageResource($this->whenLoaded('images')->firstWhere('is_main', true)),
-            'price' => new CarPriceResource($this->whenLoaded('currentPrice')),
+            'image_main' =>  ImageResource::make($this->whenLoaded('imageMain')),
+            'price' => CarPriceResource::make($this->whenLoaded('currentPrice')),
             'spect' => [
                 'engine_code' => $this->engine_code,
                 'engine_size' => $this->engine_size,
