@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Classes\Services\colorService;
+use App\Classes\Services\ColorService;
 use App\Models\color;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
