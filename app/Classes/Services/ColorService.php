@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator as ValidatorReturn;
 
-class colorService
+class ColorService
 {
     public function Index()
     {

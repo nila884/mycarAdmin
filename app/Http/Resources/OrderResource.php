@@ -9,14 +9,13 @@ class OrderResource extends JsonResource
     public function toArray(Request $request): array
     {
 
-        
         return [
             'id' => $this->id,
             'order_number' => $this->order_number,
             'status' => $this->status, 
             'vehicle' => [
                 'id' => $this->car->id ?? null,
-                'name' => ($this->car?->version?->carModel?->brand?->name ?? 'N/A') . ' ' . ($this->car?->version?->carModel?->name ?? ''),
+                'name' => ($this->car?->version?->carModel?->brand?->brand_name ?? 'N/A') . ' ' . ($this->car?->version?->carModel?->model_name ?? ''),
                 'chassis_number' => $this->car?->chassis_number ?? 'N/A', 
                 'transmission' => $this->car?->transmission ?? 'N/A',
                 'color' => $this->car?->exteriorColor?->name ?? 'N/A',

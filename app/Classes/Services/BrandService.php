@@ -14,16 +14,15 @@ Class BrandService
     public function Index()
     {
         $brands = Brand::all();
-        $brands->map(function ($brand) {
+       return $brands->map(function ($brand) {
             return [
                 'id' => $brand->id,
                 'brand_name' => $brand->brand_name,
-                'logo' => $brand->logo, // Assuming logo is a string path or URL
+                'logo' => asset('storage/' . $brand->logo),// Assuming logo is a string path or URL
                 'created_at' => $brand->created_at->format('Y-m-d'),
                 'updated_at' => $brand->updated_at->format('Y-m-d'),
             ];
         });
-        return $brands;
     }
 
     public function Create(Request $request)

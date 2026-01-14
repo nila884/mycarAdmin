@@ -6,6 +6,7 @@ use App\Classes\Services\OrderService;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class OrderController extends Controller
 {
@@ -77,8 +78,9 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-      
-        return response()->json(['orders' => $this->orderService->getPaginatedOrders($request)]);
+              return Inertia::render('order/list', [
+            'orders' => $this->orderService->getPaginatedOrders($request)
+        ]);
     }
 
     /**

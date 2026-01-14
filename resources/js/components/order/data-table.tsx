@@ -1,6 +1,7 @@
-import { DataTablePagination } from '@/components/data-table-pagination';
+'use client';
+
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DataTableToolbar } from '@/components/data-table-toolbar'; // Specific order toolbar
 import { router } from '@inertiajs/react';
 import { 
     ColumnDef, 
@@ -10,6 +11,11 @@ import {
     useReactTable 
 } from '@tanstack/react-table';
 import React from 'react';
+import { DataTableToolbar } from './data-table-toolbar';
+import { DataTablePagination } from './data-table-pagination';
+
+// 1. Define a shared filter type that both components can agree on
+export type DataTableFilterBag = Record<string, string | number | boolean | undefined>;
 
 interface DataTableProps<TData> {
     columns: ColumnDef<TData>[];
@@ -20,22 +26,17 @@ interface DataTableProps<TData> {
         pageCount: number;
     };
     onServerPageChange: (page: number, pageSize: number) => void;
-    filters: {
-        sort?: string;
-        direction?: string;
-        search?: string;
-        status?: string; // Order specific filter
-        [key: string]: unknown;
-    };
+    filters: DataTableFilterBag; // Replaces 'any' and matches the Toolbar
 }
 
-export function OrderDataTable<TData>({
+export function DataTable<TData>({
     columns,
     data,
     serverPagination,
     onServerPageChange,
     filters,
 }: DataTableProps<TData>) {
+    // Sync sorting state with URL filters
     const [sorting, setSorting] = React.useState<SortingState>(
         filters?.sort ? [{ id: String(filters.sort), desc: filters.direction === 'desc' }] : []
     );
@@ -50,23 +51,24 @@ export function OrderDataTable<TData>({
         pageCount: serverPagination.pageCount,
 
         onSortingChange: (updater) => {
-            const nextSorting = typeof updater === 'function' ? updater(sorting) : updater;
+            const nextSorting = typeof updater === "function" ? updater(sorting) : updater;
             setSorting(nextSorting);
 
             const url = new URL(window.location.href);
             const params = Object.fromEntries(url.searchParams.entries());
 
             if (nextSorting.length) {
+                // Laravel friendly sorting params
                 params.sort = nextSorting[0].id;
                 params.direction = nextSorting[0].desc ? 'desc' : 'asc';
-                params.page = '1';
+                params.page = "1";
             } else {
                 delete params.sort;
                 delete params.direction;
             }
 
-            // Points to the order index route
-            router.get(route('order.index'), params, {
+            // Using route().current() makes this component reusable across pages
+            router.get(route(route().current() ?? 'order.index'), params, {
                 preserveState: true,
                 preserveScroll: true,
                 replace: true,
@@ -74,12 +76,12 @@ export function OrderDataTable<TData>({
         },
 
         onPaginationChange: (updater) => {
-            const next = typeof updater === 'function'
-                    ? updater({
-                          pageIndex: serverPagination.pageIndex,
-                          pageSize: serverPagination.pageSize,
-                      })
-                    : updater;
+            const next = typeof updater === "function"
+                ? updater({
+                      pageIndex: serverPagination.pageIndex,
+                      pageSize: serverPagination.pageSize,
+                  })
+                : updater;
 
             onServerPageChange(next.pageIndex + 1, next.pageSize);
         },
@@ -95,18 +97,18 @@ export function OrderDataTable<TData>({
 
     return (
         <div className="space-y-4">
-            {/* Using the Order-specific toolbar we discussed */}
+            {/* 2. Passing <TData> ensures the toolbar and table share the same data type */}
             <DataTableToolbar table={table} filters={filters} />
 
             <div className="rounded-md border bg-white shadow-sm overflow-hidden">
                 <Table>
                     <TableHeader className="bg-slate-50">
-                        {table.getHeaderGroups().map((headerGroup) => (
+                        {table.getHeaderGroups().map(headerGroup => (
                             <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} className="text-slate-700 font-semibold px-4 py-3">
-                                        {header.isPlaceholder 
-                                            ? null 
+                                {headerGroup.headers.map(header => (
+                                    <TableHead key={header.id} className="text-slate-700 font-semibold">
+                                        {header.isPlaceholder
+                                            ? null
                                             : flexRender(header.column.columnDef.header, header.getContext())}
                                     </TableHead>
                                 ))}
@@ -116,10 +118,10 @@ export function OrderDataTable<TData>({
 
                     <TableBody>
                         {table.getRowModel().rows.length > 0 ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} className="hover:bg-slate-50/50 transition-colors">
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="px-4 py-3">
+                            table.getRowModel().rows.map(row => (
+                                <TableRow key={row.id} className="hover:bg-slate-50/50">
+                                    {row.getVisibleCells().map(cell => (
+                                        <TableCell key={cell.id}>
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
@@ -127,8 +129,8 @@ export function OrderDataTable<TData>({
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-32 text-center text-slate-500 font-medium">
-                                    No orders found matching your criteria.
+                                <TableCell colSpan={columns.length} className="h-24 text-center text-slate-500">
+                                    No results found.
                                 </TableCell>
                             </TableRow>
                         )}

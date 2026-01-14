@@ -14,10 +14,13 @@ class BrandResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        dd($this);
          return [
             'id' => $this->id,
             'name' => $this->brand_name,
-            'logo_url' => $this->logo, // Assuming the 'logo' column already holds the full URL
+            'logo_url' => $this->logo
+                ? asset('storage/' . $this->logo)
+                : null,
         ];
     }
 }
