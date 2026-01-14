@@ -45,7 +45,7 @@ class DatabaseSeeder extends Seeder
 'cars/1768411830_6967d2b6334b5.jpg',
         ]);
         $logo = collect([
-            'brand_logos/1765592745_ford.png',
+            'brand_logos/1768413589_test.png',
             'brand_logos/1765592782_mazda.jpg',
         ]);
 
