@@ -49,7 +49,7 @@ class FeatureService
             'feature_name' => $name,
             'description' => $description,
             'is_main' => $request->is_main,
-            'icon' => Storage::url($iconPath),
+            'icon' =>$iconPath,
         ]);
     }
 

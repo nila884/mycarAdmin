@@ -69,7 +69,7 @@ Class BrandService
 
         $brand->update([
             "brand_name" => $name,
-            "logo" => Storage::url($logoPath) // Save the updated relative path (or null)
+            "logo" => $logoPath// Save the updated relative path (or null)
         ]);
 
         return $brand;
