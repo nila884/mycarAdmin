@@ -55,7 +55,7 @@ class CountryService
                 $imageFile = $request->file('flags');
                 $imageName = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
                 $path = $imageFile->storeAs('flags', $imageName,'public');
-            $data['flags'] = Storage::url($path); 
+            $data['flags'] =$path; 
         }
 
         return Country::create($data);

@@ -60,7 +60,7 @@ Class BrandService
             $fileName = time() . '_' . Str::slug($name) . '.' . $file->getClientOriginalExtension();
             // Store the new file and get its relative path
             $logoPath = $file->storeAs('brand_logos', $fileName, 'public');
-        } elseif ($request->input('clear_logo')) { // Frontend sends 'clear_logo' if user wants to remove image
+        } elseif ($request->input('clear_logo')) { 
             if ($brand->logo && Storage::disk('public')->exists($brand->logo)) {
                 Storage::disk('public')->delete($brand->logo);
             }
@@ -69,7 +69,7 @@ Class BrandService
 
         $brand->update([
             "brand_name" => $name,
-            "logo" => Storage::url($logoPath) // Save the updated relative path (or null)
+            "logo" => $logoPath// Save the updated relative path (or null)
         ]);
 
         return $brand;
