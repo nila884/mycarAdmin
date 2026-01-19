@@ -62,7 +62,7 @@ return new class extends Migration
                     $table->index('status');
             $table->decimal('cost_price', 12, 2)->nullable();
             $table->decimal('min_profit_margin', 10, 2)->default(0);
-
+            $table->unsignedBigInteger('views')->default(0);
             $table->softDeletes();
             $table->timestamps();
 
