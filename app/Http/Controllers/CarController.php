@@ -249,7 +249,7 @@ public function carsSearch(Request $request)
 
         ->sort($request->sort)
         ->select('cars.*')
-        ->paginate(10);
+        ->paginate(5);
 
     return CarListingResource::collection($cars);
 }
@@ -417,7 +417,7 @@ public function carsSearch(Request $request)
         // Use 'with' to eagerly load the nested relationships to avoid N+1 issues
         $query->with(['version.carModel.brand', 'imageMain',  'currentPrice']);
 
-        $cars = $query->take(4)->get();
+        $cars = $query->take(8)->get();
         if ($cars->isEmpty()) {
             return response()->json(
                 [
