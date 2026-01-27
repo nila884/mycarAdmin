@@ -36,7 +36,7 @@ type CarForm = {
     mileage: number | null;
     chassis_number: string;
     registration_year: number | null;
-    manufacture_year: number | null;
+    manifactured_year: number | null;
     status: string;
     transmission: string;
     car_selling_status: string;
@@ -93,7 +93,7 @@ const getInitialFormData = (car?: CarDetailData): CarForm => {
         mileage: car?.spect.mileage || null,
         chassis_number: car?.spect.chassis_number || '',
         registration_year: car?.spect.registration_year || null,
-        manufacture_year: car?.spect.manufacture_year || null,
+        manifactured_year: car?.spect.manifactured_year || null,
         status: car?.spect.status || '',
         cost_price: car?.cost_price || null,
         min_profit_margin: car?.min_profit_margin || null,
@@ -907,16 +907,16 @@ const CreateCarForm = ({ brands, carModels, categories, versions, features, fuel
 
                     {/* Manufacture Year Input */}
                     <div className="grid gap-2">
-                        <Label htmlFor="manufacture_year">Manufacture Year</Label>
+                        <Label htmlFor="manifactured_year">Manufacture Year</Label>
                         <Input
-                            id="manufacture_year"
+                            id="manifactured_year"
                             placeholder="Manufacture Year"
                             type="number"
-                            value={data.manufacture_year !== null ? data.manufacture_year : ''}
-                            onChange={(e) => setData('manufacture_year', e.target.value === '' ? null : Number(e.target.value))}
+                            value={data.manifactured_year !== null ? data.manifactured_year : ''}
+                            onChange={(e) => setData('manifactured_year', e.target.value === '' ? null : Number(e.target.value))}
                             disabled={processing}
                         />
-                        <InputError message={errors.manufacture_year} className="mt-2" />
+                        <InputError message={errors.manifactured_year} className="mt-2" />
                     </div>
 
                     {/* M^3 Input */}

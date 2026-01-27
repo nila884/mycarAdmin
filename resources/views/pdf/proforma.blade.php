@@ -104,7 +104,7 @@
                 <td>
                     <strong>{{ strtoupper($order->car->version->carModel->brand->name) }} {{ strtoupper($order->car->version->carModel->name) }}</strong><br>
                     CHASSIS: {{ $order->car->chassis_number }}<br>
-                    COLOR: {{ $order->car->exteriorColor->name }} | YEAR: {{ $order->car->manufacture_year ?? 'N/A' }}
+                    COLOR: {{ $order->car->exteriorColor->name }} | YEAR: {{ $order->car->manifactured_year ?? 'N/A' }}
                 </td>
                 <td>1 UNIT</td>
                 <td>US$ {{ number_format($order->fob_price, 2) }}</td>

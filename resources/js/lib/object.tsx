@@ -15,7 +15,7 @@ export interface Dimensions {
 //     mileage: number | null;
 //     chassis_number: string;
 //     registration_year: string | null;
-//     manufacture_year: string | null;
+//     manifactured_year: string | null;
 //     color: string;
 //     status: boolean | null;
 //     transmission: 'automatic' | 'manual' | undefined;
@@ -52,7 +52,7 @@ export interface Dimensions {
 //     mileage: number;
 //     chassis_number: string;
 //     registration_year: string | null;
-//     manufacture_year: string | null;
+//     manifactured_year: string | null;
 //     steering: string|null;
 //     price: number;
 //     promo: number;
@@ -102,7 +102,7 @@ export interface CarDetailData {
     spect: {
         chassis_number: string;
         registration_year: number;
-        manufacture_year: number;
+        manifactured_year: number;
         color: string;
         mileage: number;
         transmission: string;

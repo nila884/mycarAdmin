@@ -28,22 +28,27 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
 
+   
         $this->call([
             InitSeeder::class,
             ShippingLogisticSeeder::class,
             FeaturesSeeder::class,
         ]);
-        $imagesCars = collect([
-'cars/1768411593_6967d1c9a22a4.jpeg',
-'cars/1768411593_6967d1c9a28ca.jpeg',
-'cars/1768411593_6967d1c9a2c2f.jpeg',
-'cars/1768411593_6967d1c9a2fe3.jpg',
-'cars/1768411593_6967d1c9a33aa.jpg',
-'cars/1768411830_6967d2b6325eb.jpg',
-'cars/1768411830_6967d2b632cd4.jpg',
-'cars/1768411830_6967d2b6330be.jpg',
-'cars/1768411830_6967d2b6334b5.jpg',
-        ]);
+$imagesCars = collect([
+    'cars/1753729176_6887c898dafe8.jpg',
+    'cars/1765592641_693cce41e8bcd.jpg',
+    'cars/1765592641_693cce41e8ef1.jpg',
+    'cars/1765592641_693cce41e85ad.jpg',
+    'cars/1765592641_693cce41e953a.jpg',
+    'cars/1765592641_693cce41e8885.jpg',
+    'cars/1765592641_693cce41e9206.jpg',
+    'cars/1765592678_693cce666988d.jpg',
+    'cars/1765931485_6941f9dd04c1c.jpeg',
+    'cars/1765931485_6941f9dd03432.jpeg',
+    'cars/1765931485_6941f9dd04292.jpeg',
+    'cars/1765931485_6941f9dd04590.jpeg',
+    'cars/1765931485_6941f9dd04912.jpeg',
+]);
         $logo = collect([
             'brand_logos/1768413589_test.png',
             'brand_logos/1765592782_mazda.jpg',

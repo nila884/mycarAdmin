@@ -22,7 +22,7 @@ class CarListingResource extends JsonResource
             'price' => new CarPriceResource($this->whenLoaded('currentPrice')),
             'spect' => [
 
-                'manufacture_year' => $this->manufacture_year,
+                'manifactured_year' => $this->manifactured_year,
                 'mileage' => $this->mileage,
 
             ],

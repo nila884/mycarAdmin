@@ -21,7 +21,7 @@ class Car extends Model
         'mileage',
         'chassis_number',
         'registration_year',
-        'manufacture_year',
+        'manifactured_year',
         'car_selling_status',
         'weight',
         'status',
@@ -227,11 +227,11 @@ public function scopeManufacturedYearBetween(
     $max
 ): Builder {
     if ($min) {
-        $q->where('manufactured_year', '>=', $min);
+        $q->where('manifactured_year', '>=', $min);
     }
 
     if ($max) {
-        $q->where('manufactured_year', '<=', $max);
+        $q->where('manifactured_year', '<=', $max);
     }
 
     return $q;
@@ -282,9 +282,8 @@ public function scopeWithFeatures($query, $featureIds, bool $matchAll = false)
 
             'mileage_asc' => $q->orderBy('mileage', 'asc'),
             'mileage_desc' => $q->orderBy('mileage', 'desc'),
-            'year_asc' => $q->orderBy('manufacture_year', 'asc'),
-            'year_desc' => $q->orderBy('manufacture_year', 'desc'),
-
+            'year_asc' => $q->orderBy('manifactured_year', 'asc'),
+            'year_desc' => $q->orderBy('manifactured_year', 'desc'),
             default => $q->latest('cars.created_at'),
         };
     }

@@ -47,7 +47,7 @@ class CarFactory extends Factory
         'cost_price' => $this->faker->randomFloat(2, 5000, 6000),        
         'min_profit_margin' => $this->faker->randomFloat(2, 100, 200),
         'seating_capacity' => 5,
-        'manufacture_year'=> $this->faker->year(max:'now'),
+        'manifactured_year'=> $this->faker->year(max:'now'),
         'doors' => 4,
         'location' => $this->faker->city(),
             'dimensions' => $dimensions = [

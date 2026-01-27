@@ -28,7 +28,7 @@ class CarResource extends JsonResource
                 'weight' => $this->weight,
                 'chassis_number' => $this->chassis_number,
                 'registration_year' => $this->registration_year,
-                'manufacture_year' => $this->manufacture_year,
+                'manifactured_year' => $this->manifactured_year,
                 'color' => $this->color,
                 'mileage' => $this->mileage,
                 'transmission' => $this->transmission,

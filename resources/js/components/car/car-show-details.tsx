@@ -84,7 +84,7 @@ const CarShowDetails: React.FC<CarShowDetailsProps> = ({ car }) => {
                                     <strong>Registration Year:</strong> {car.spect.registration_year}
                                 </li>
                                 <li>
-                                    <strong>Manufacture Year:</strong> {car.spect.manufacture_year}
+                                    <strong>Manufacture Year:</strong> {car.spect.manifactured_year}
                                 </li>
                                 <li>
                                     <strong>Weight:</strong> {car.spect.weight} KG

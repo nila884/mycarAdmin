@@ -21,7 +21,7 @@ return new class extends Migration
             $table->unsignedInteger('mileage');
             $table->string('chassis_number');
             $table->year('registration_year')->nullable();
-            $table->year('manufacture_year')->nullable();
+            $table->year('manifactured_year')->nullable();
             $table->string('image')->nullable();
             $table->unsignedInteger('weight');
             $table->enum('status', ['new', 'used',]);

@@ -201,7 +201,7 @@ private function verifyProfitMargin($costPrice, $minMargin, $price, $discount, $
                 'origin_country_id'=> $request->origin_country_id,
                 'chassis_number' => trim(htmlspecialchars($request->chassis_number)),
                 'registration_year' => $request->registration_year,
-                'manufacture_year' => $request->manufacture_year,
+                'manifactured_year' => $request->manifactured_year,
                 'interior_color_id' => $request->interior_color_id,
                 'exterior_color_id' => $request->exterior_color_id,
                 'weight' => $request->weight,
@@ -309,7 +309,7 @@ private function verifyProfitMargin($costPrice, $minMargin, $price, $discount, $
                 'mileage' => $request->mileage,
                 'chassis_number' => trim(htmlspecialchars($request->chassis_number)),
                 'registration_year' => $request->registration_year,
-                'manufacture_year' => $request->manufacture_year,
+                'manifactured_year' => $request->manifactured_year,
                 'exterior_color_id' => $request->exterior_color_id,
                 'interior_color_id' => $request->interior_color_id,
                 'cost_price' => $request->cost_price,
@@ -460,7 +460,7 @@ private function verifyProfitMargin($costPrice, $minMargin, $price, $discount, $
                 'min:1900',
                 'max:'.($currentYear + 1),
                 function ($attribute, $value, $fail) use ($request) {
-                    $manufactureYear = $request->input('manufacture_year');
+                    $manufactureYear = $request->input('manifactured_year');
                     if (! is_null($value) && ! is_null($manufactureYear)) {
                         if ((int) $value < (int) $manufactureYear) {
                             $fail('The registration year cannot be before the manufacture year.');
@@ -468,7 +468,7 @@ private function verifyProfitMargin($costPrice, $minMargin, $price, $discount, $
                     }
                 },
             ],
-            'manufacture_year' => ['nullable', 'numeric', 'min:1900', 'digits:4', 'max:'.$currentYear],
+            'manifactured_year' => ['nullable', 'numeric', 'min:1900', 'digits:4', 'max:'.$currentYear],
             'price' => ['required', 'numeric', 'min:0'], 
             'discount_type' => ['nullable', 'required_with:discount_type', 'in:amount,percent'],
             'weight' => ['nullable', 'numeric', 'min:0', 'max:10000'],

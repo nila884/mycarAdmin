@@ -110,7 +110,7 @@ class CarFilterController extends Controller
         // NEW: Manufactured Year
     protected function manufacturedYearRange()
     {
-        $year = Car::selectRaw('MIN(manufacture_year) as min, MAX(manufacture_year) as max')
+        $year = Car::selectRaw('MIN(manifactured_year) as min, MAX(manifactured_year) as max')
             ->first();
 
         return [
@@ -136,9 +136,11 @@ class CarFilterController extends Controller
     protected function sortOptions()
     {
         return [
-            ['value' => 'latest', 'label' => 'Newest'],
+            // ['value' => 'latest', 'label' => 'Newest'],
             ['value' => 'price_asc', 'label' => 'Price: Low → High'],
             ['value' => 'price_desc', 'label' => 'Price: High → Low'],
+            ['value' => 'year_asc', 'label' => 'manifactured year: Low → High'],
+            ['value' => 'year_desc', 'label' => 'manifactured year: High → Low'],
             ['value' => 'mileage_asc', 'label' => 'Mileage: Low → High'],
             ['value' => 'mileage_desc', 'label' => 'Mileage: High → Low'],
         ];
