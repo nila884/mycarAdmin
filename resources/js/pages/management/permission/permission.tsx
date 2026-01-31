@@ -41,20 +41,17 @@ interface PermissionProps {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Permission settings',
-        href: '/management/permission/list',
+        href: 'management.permissions',
     },
 ];
 
 // Update the component to accept props
 export default function Permission({ permissions, actions, modules }: PermissionProps) {
     // Destructure permissions from props
-
-    console.log(permissions);
-
     function handleDelete(id: number) {
         if (!window.confirm('Are you sure you want to delete this permission? ' + id)) return;
 
-        router.delete(`/management/permission/${id}`, {
+        router.delete(route('management.permissions.destroy',id), {
             preserveScroll: true,
             onSuccess: () => {
                 // optional: toast or reload logic
@@ -114,7 +111,27 @@ export default function Permission({ permissions, actions, modules }: Permission
                                 )}
                             </TableBody>
                         </Table>
+
                     </div>
+                    {permissions.links && permissions.links.length > 3 && (
+                        <div className="mt-4 flex justify-center">
+                            <nav className="flex rounded-md shadow" aria-label="Pagination">
+                                {permissions.links.map((link, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => link.url && router.get(link.url)}
+                                        disabled={!link.url}
+                                        className={`relative inline-flex items-center border px-4 py-2 text-sm font-medium ${
+                                            link.active
+                                                ? 'z-10 border-indigo-500 bg-indigo-50 text-indigo-600'
+                                                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                                        } ${index === 0 ? 'rounded-l-md' : ''} ${index === permissions.links.length - 1 ? 'rounded-r-md' : ''} `}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                    />
+                                ))}
+                            </nav>
+                        </div>
+                    )}
                 </div>
             </Layout>
         </AppLayout>

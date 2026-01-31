@@ -29,7 +29,7 @@ const RoleForm: React.FC<RoleFormProps> = ({ role, permissions }) => {
     const [open, setOpen] = useState(false);
     const isUpdate = !!role;
     const title = isUpdate ? `Update ${role?.name}` : 'Create New Role';
-    const routeName = isUpdate ? 'role.update' : 'role.store';
+    const routeName = isUpdate ? 'management.roles.update' : 'management.roles.store';
     const submitText = isUpdate ? 'Update Role' : 'Create Role';
 
     // CRITICAL: Initialize data with existing permissions if updating

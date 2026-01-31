@@ -18,7 +18,7 @@ interface PortProps {
 export default function PortIndex({ ports, countries }: PortProps) {
     function handleDelete(id: number) {
         if (!window.confirm('Are you sure you want to delete this port? This will also delete associated shipping cost records.')) return;
-        router.delete(`/shipping/ports/${id}`, { preserveScroll: true });
+        router.delete(route('shipping.port.destroy',id), { preserveScroll: true });
     }
 
     return (

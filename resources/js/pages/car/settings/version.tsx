@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import CarSettingLayout from '@/layouts/car/settings/layout';
-import { timeFormat } from '@/lib/utils';
+import { cn, timeFormat } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { Trash2, Calendar, CarFront } from 'lucide-react';
@@ -34,24 +34,36 @@ export interface VersionItem {
 }
 
 interface VersionProps {
-    versions: {
+versions: {
         data: VersionItem[];
-        links: Array<{ url: string | null; label: string; active: boolean }>;
+        meta: { // Pagination stats live here
+            current_page: number;
+            last_page: number;
+            from: number;
+            to: number;
+            total: number;
+            links: Array<{
+                url: string | null;
+                label: string;
+                active: boolean;
+            }>;
+        };
     };
     carModels: CarModelItem[];
     brands: BrandItem[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Car settings', href: '/car/settings/brand' },
-    { title: 'Versions', href: '/car/settings/version' },
+    { title: 'Car settings', href: 'car.settings.brand' },
+    { title: 'Versions', href: 'car.settings.version' },
 ];
 
 export default function Version({ versions, carModels, brands }: VersionProps) {
     
+         
     const handleDelete = (id: number) => {
         if (!confirm('Are you sure? This action cannot be undone.')) return;
-        router.delete(route('carversion.destroy', id), { preserveScroll: true });
+        router.delete(route('car.settings.version.destroy', id), { preserveScroll: true });
     };
 
     return (
@@ -147,26 +159,40 @@ export default function Version({ versions, carModels, brands }: VersionProps) {
                     </Card>
 
                     {/* Pagination - Cleaned up styling */}
-                    {versions.links && versions.links.length > 3 && (
-                        <div className="flex justify-center pt-4">
-                            <nav className="inline-flex -space-x-px rounded-md shadow-sm">
-                                {versions.links.map((link, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => link.url && router.get(link.url)}
-                                        disabled={!link.url || link.active}
-                                        className={`px-4 py-2 text-sm font-medium transition-colors border first:rounded-l-md last:rounded-r-md 
-                                            ${link.active 
-                                                ? 'bg-primary text-primary-foreground border-primary z-10' 
-                                                : 'bg-background text-muted-foreground hover:bg-muted border-input'
-                                            } ${!link.url && 'opacity-50 cursor-not-allowed'}`}
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
-                                    />
-                                ))}
-                            </nav>
+                   {/* 2. Fixed Pagination Logic */}
+                    {versions.meta && versions.meta.last_page > 1 && (
+                        <div className="flex items-center justify-between border-t border-border px-4 py-4 mt-4">
+                            <div className="flex flex-1 items-center justify-between">
+                                <p className="text-sm text-muted-foreground">
+                                    Showing <span className="font-medium">{versions.meta.from}</span> to{' '}
+                                    <span className="font-medium">{versions.meta.to}</span> of{' '}
+                                    <span className="font-medium">{versions.meta.total}</span> results
+                                </p>
+                                
+                                <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm bg-background">
+                                    {versions.meta.links.map((link, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => link.url && router.get(link.url)}
+                                            disabled={!link.url || link.active}
+                                            className={cn(
+                                                "relative inline-flex items-center px-4 py-2 text-sm font-semibold transition-all",
+                                                link.active 
+                                                    ? "z-10 bg-primary text-primary-foreground ring-1 ring-primary" 
+                                                    : "text-foreground ring-1 ring-inset ring-border hover:bg-muted",
+                                                !link.url && "opacity-50 cursor-not-allowed",
+                                                index === 0 && "rounded-l-md",
+                                                index === versions.meta.links.length - 1 && "rounded-r-md"
+                                            )}
+                                            dangerouslySetInnerHTML={{ __html: link.label }}
+                                        />
+                                    ))}
+                                </nav>
+                            </div>
                         </div>
                     )}
                 </div>
+                <h4>test</h4>
             </CarSettingLayout>
         </AppLayout>
     );

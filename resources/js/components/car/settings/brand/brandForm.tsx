@@ -94,7 +94,7 @@ const BrandForm: React.FC<Props> = ({ brand }) => {
             return;
         }
 
-        post(route(isUpdate ? 'carbrand.update' : 'carbrand.store', brand?.id), { 
+        post(route(isUpdate ? 'car.settings.brand.update' : 'car.settings.brand.store', brand?.id), { 
             forceFormData: true, 
             onSuccess: () => setOpen(false) 
         });

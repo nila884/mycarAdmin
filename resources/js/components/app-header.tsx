@@ -18,7 +18,7 @@ import AppLogoIcon from './app-logo-icon';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: '/dashboard',
+        href: 'dashboard',
         icon: LayoutGrid,
     },
 ];
@@ -26,12 +26,12 @@ const mainNavItems: NavItem[] = [
 const rightNavItems: NavItem[] = [
     {
         title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
+        href: '#',
         icon: Folder,
     },
     {
         title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
+        href: '#',
         icon: BookOpen,
     },
 ];
@@ -94,7 +94,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                         </Sheet>
                     </div>
 
-                    <Link href="/dashboard" prefetch className="flex items-center space-x-2">
+                    <Link href={route('dashboard')} prefetch className="flex items-center space-x-2">
                         <AppLogo />
                     </Link>
 
@@ -105,7 +105,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 {mainNavItems.map((item, index) => (
                                     <NavigationMenuItem key={index} className="relative flex h-full items-center">
                                         <Link
-                                            href={item.href}
+                                            href={route(item.href)}
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
                                                 page.url === item.href && activeItemStyles,

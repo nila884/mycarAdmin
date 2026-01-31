@@ -117,7 +117,7 @@ const FeatureForm: React.FC<FeatureFormProps> = ({ feature }) => {
             return;
         }
         
-        const url = isUpdate ? route('carfeature.update', feature.id) : route('carfeature.store');
+        const url = isUpdate ? route('car.settings.feature.update', feature.id) : route('car.settings.feature.store');
 
         post(url, {
             forceFormData: true,

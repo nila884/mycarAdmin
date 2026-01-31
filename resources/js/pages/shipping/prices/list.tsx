@@ -17,7 +17,7 @@ interface Props {
 export default function ShippingRateList({ shipping_rates, countries, ports }: Props) {
     const handleDelete = (id: number) => {
         if (confirm('Delete this shipping route?')) {
-            router.delete(route('shipping-rates.destroy', id));
+            router.delete(route('shipping.shipping-rates.destroy', id));
         }
     };
 

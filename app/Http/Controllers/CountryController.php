@@ -40,7 +40,7 @@ class CountryController extends Controller
             throw new ValidationException($validator);
         }
         $this->countryService->Create($request);
-        return redirect()->route('country.index')->with('success', 'Country created successfully!');
+        return redirect()->back()->with('success', 'Country created successfully!');
     }
 
     public function update(Request $request, Country $country)
@@ -51,7 +51,7 @@ class CountryController extends Controller
             throw new ValidationException($validator);
         }
         $this->countryService->Update($request, $country);
-        return redirect()->route('country.index')->with('success', 'Country updated successfully!');
+        return redirect()->back()->with('success', 'Country updated successfully!');
     }
 
     public function destroy(Country $country)

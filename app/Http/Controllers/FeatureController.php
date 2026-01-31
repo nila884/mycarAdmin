@@ -44,7 +44,7 @@ class FeatureController extends Controller
 
         try {
             $this->featureService->Create($request);
-            return redirect()->route('carfeature.index')->with('success', 'Car feature created successfully!');
+            return redirect()->back()->with('success', 'Car feature created successfully!');
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to create car feature. Please try again.']);
         }
@@ -63,7 +63,7 @@ class FeatureController extends Controller
 
         try {
             $this->featureService->update($request, $feature);
-            return redirect()->route('carfeature.index')->with('success', 'Car feature updated successfully!');
+            return redirect()->back()->with('success', 'Car feature updated successfully!');
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to update car feature. Please try again.']);
         }

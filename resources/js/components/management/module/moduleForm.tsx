@@ -25,7 +25,7 @@ interface ModuleFormProps {
 const ModuleForm: React.FC<ModuleFormProps> = ({ module }) => {
     const isUpdate = !!module;
     const title = isUpdate ? `Update ${module?.name}` : 'Create New module';
-    const routeName = isUpdate ? 'module.update' : 'module.store';
+    const routeName = isUpdate ? 'management.modules.update' : 'management.modules.store';
     const submitText = isUpdate ? 'Update module' : 'Create module';
 
     const [open, setOpen] = useState(false);

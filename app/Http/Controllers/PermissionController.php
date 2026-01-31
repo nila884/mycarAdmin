@@ -66,7 +66,7 @@ class PermissionController extends Controller
             'actions' => ['required', 'array', 'in:'.$actions],
         ]);
 
-        $permission = $this->permissionService->Create($request);
+        $this->permissionService->Create($request);
 
         return back()->with('success', 'Permission successfully created.');
     }
@@ -108,7 +108,7 @@ class PermissionController extends Controller
         $this->permissionService->Update($request, $permission);
 
         // 3. Return a general success message (since multiple permissions were affected)
-        return redirect()->route('permission.index')->with('success', 'Permissions for module successfully updated.');
+        return redirect()->back()->with('success', 'Permissions for module successfully updated.');
     }
 
     /**

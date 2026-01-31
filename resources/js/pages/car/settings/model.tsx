@@ -44,7 +44,7 @@ interface ModelProps {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Car model settings',
-        href: '/car/settings/model',
+        href: 'car.settings.model',
     },
 ];
 
@@ -54,7 +54,7 @@ export default function Model({ models, brands }: ModelProps) {
         if (!confirm('Are you sure you want to delete this car model?')) {
             return;
         }
-        router.delete(route('carmodel.destroy', id), {
+        router.delete(route('car.settings.model.destroy', id), {
             preserveScroll: true,
             onSuccess: () => {
                 // Optionally show a success message

@@ -10,40 +10,40 @@ import AppLogo from './app-logo';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: '/dashboard',
+        href: 'dashboard',
         icon: LayoutGrid,
     },
     {
         title: 'Oders',
-        href: '/order/list',
+        href: 'order.index',
         icon: Users,
     },
     {
         title: 'Users',
-        href: '/user/list',
+        href: 'user.index',
         icon: Users,
     },
 
     {
         title: 'Cars',
-        href: '/car/list',
+        href: 'car.index',
         icon: CarFront,
     },
 
     {
         title: 'Car settings',
-        href: '/car/settings',
+        href: 'carsettings',
         icon: Wrench,
     },
 
     {
         title: 'Shipping',
-        href: '/shipping',
+        href: 'shipping',
         icon: Wrench,
     },
     {
         title: 'Management',
-        href: '/management',
+        href: 'management',
         icon: Wrench,
     },
 ];
@@ -51,12 +51,12 @@ const mainNavItems: NavItem[] = [
 const footerNavItems: NavItem[] = [
     {
         title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
+        href: '#',
         icon: Folder,
     },
     {
         title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
+        href: '#',
         icon: BookOpen,
     },
 ];
@@ -68,7 +68,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
+                            <Link href={route('dashboard')} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

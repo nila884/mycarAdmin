@@ -55,11 +55,11 @@ const DeliveryTariffForm: React.FC<Props> = ({ tariff, countries, ports, agencie
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (isUpdate) {
-            patch(route('delivery-tariffs.update', tariff?.id?.toString() || ''), {
+            patch(route('shipping.delivery-tariffs.update', tariff?.id?.toString() || ''), {
                 onSuccess: () => setOpen(false),
             });
         } else {
-            post(route('delivery-tariffs.store'), {
+            post(route('shipping.delivery-tariffs.store'), {
                 onSuccess: () => {
                     setOpen(false);
                     reset();

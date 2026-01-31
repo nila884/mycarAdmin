@@ -25,7 +25,7 @@ interface FuelProps {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Car fuel settings',
-        href: '/car/settings/fuel',
+        href: 'car.settings.fuel',
     },
 ];
 
@@ -36,7 +36,7 @@ export default function fuel({ fuels }: FuelProps) {
     function handleDelete(id: number) {
         if (!window.confirm('Are you sure you want to delete this fuel?')) return;
 
-        router.delete(`/car/settings/fuel/${id}`, {
+        router.delete(route('car.settings.fuel.destroy',id), {
             preserveScroll: true,
             onSuccess: () => {},
         });

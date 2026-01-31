@@ -68,6 +68,7 @@ export default function CountryIndex({ countries,ports }: Props) {
                                   <ManageGateways country={country} ports={ports} />
                                   
                                   {/* Other actions (Edit/Delete) */}
+                                  
                               </div>
                           </TableCell>
                   </TableRow>

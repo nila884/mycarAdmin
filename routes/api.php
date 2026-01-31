@@ -20,7 +20,7 @@ use App\Http\Controllers\VersionController;
 use Illuminate\Support\Facades\Route;
 
 
-
+Route::prefix('v1')->group(function () {
 
 Route::get('brands', [BrandController::class, 'apiIndex'])->name('api.brands');
 Route::get('fuels', [FuelController::class, 'apiIndex'])->name('api.fuels');
@@ -77,4 +77,6 @@ Route::get('/client/favorites/objects', [FavoriteController::class, 'listObjects
 Route::post('/client/favorites/sync', [FavoriteController::class, 'sync']);
 
 Route::post('/client/logout', [ClientAuthController::class, 'logout']);
+});
+
 });

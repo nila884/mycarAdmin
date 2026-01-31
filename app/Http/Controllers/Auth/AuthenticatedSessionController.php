@@ -52,6 +52,6 @@ public function store(LoginRequest $request): RedirectResponse
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+       return redirect()->route('home');
     }
 }

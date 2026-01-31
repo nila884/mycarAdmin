@@ -50,7 +50,7 @@ public function store(Request $request)
 
     try {
         $this->versionService->Create($request);
-        return redirect()->route('carversion.index')->with('success', 'Car version created successfully!');
+        return redirect()->back()->with('success', 'Car version created successfully!');
     } catch (\Exception $e) {
         // Log the actual error for debugging in AWS CloudWatch
         Log::error("Version Creation Error: " . $e->getMessage());
@@ -72,7 +72,7 @@ public function store(Request $request)
 
         try {
             $this->versionService->update($request, $version);
-            return redirect()->route('carversion.index')->with('success', 'Car version updated successfully!');
+            return redirect()->back()->with('success', 'Car version updated successfully!');
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to update car version. Please try again.']);
         }

@@ -15,7 +15,7 @@ interface Props {
 export default function AgencyList({ agencies }: Props) {
     const handleDelete = (id: number) => {
         if (confirm('Are you sure you want to remove this agency? This may affect linked tariffs.')) {
-            router.delete(route('delivery-driver-agencies.destroy', id));
+            router.delete(route('shipping.delivery-driver-agency.destroy', id));
         }
     };
 

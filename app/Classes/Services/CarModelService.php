@@ -76,7 +76,7 @@ public function update(Request $request, carModel $carModel): carModel
         });
     }
 
-    public function DataValidation(Request $request, String $method, carModel|bool $carModel = null): ValidatorReturn|null
+    public function  DataValidation(Request $request, String $method, carModel|bool $carModel = null): ValidatorReturn|null
     {
         switch (strtolower($method)) {
             case 'post':

@@ -27,7 +27,7 @@ interface CategoryProps {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Car category settings',
-        href: '/car/settings/category',
+        href: 'car.settings.category',
     },
 ];
 
@@ -38,7 +38,7 @@ export default function category({ categories }: CategoryProps) {
     function handleDelete(id: number) {
         if (!window.confirm('Are you sure you want to delete this category?')) return;
 
-        router.delete(`/car/settings/category/${id}`, {
+        router.delete(route('car.settings.category.destroy', id), {
             preserveScroll: true,
             onSuccess: () => {
                 // optional: toast or reload logic

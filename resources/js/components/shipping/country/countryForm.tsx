@@ -58,7 +58,7 @@ const CountryForm: React.FC<Props> = ({ country }) => {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        const url = isUpdate ? route('country.update', country.id) : route('country.store');
+        const url = isUpdate ? route('shipping.country.update', country.id) : route('shipping.country.store');
 
         post(url, {
             forceFormData: true,

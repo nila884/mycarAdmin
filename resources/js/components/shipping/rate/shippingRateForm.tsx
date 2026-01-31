@@ -45,9 +45,9 @@ const ShippingRateForm: React.FC<Props> = ({ rate, countries, ports }) => {
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         if (isUpdate) {
-            patch(route('shipping-rates.update', rate.id));
+            patch(route('shipping.shipping-rates.update', rate.id));
         } else {
-            post(route('shipping-rates.store'), { onSuccess: () => reset() });
+            post(route('shipping.shipping-rates.store'), { onSuccess: () => reset() });
         }
     };
 

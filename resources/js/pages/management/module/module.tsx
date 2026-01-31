@@ -48,7 +48,7 @@ export default function module({ modules }: ModuleProps) {
     function handleDelete(id: number) {
         if (!window.confirm('Are you sure you want to delete this module?')) return;
 
-        router.delete(`/management/module/${id}`, {
+        router.delete(route('management.modules.destroy',id), {
             preserveScroll: true,
             onSuccess: () => {
                 // optional: toast or reload logic

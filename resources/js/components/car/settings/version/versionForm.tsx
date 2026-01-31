@@ -27,7 +27,7 @@ interface Props {
 }
 
 const VersionForm: React.FC<Props> = ({ version, carModels, brands }) => {
-    console.log(carModels);
+
     
     const isUpdate = !!version;
     const [open, setOpen] = useState(false);
@@ -71,7 +71,7 @@ const VersionForm: React.FC<Props> = ({ version, carModels, brands }) => {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route(isUpdate ? 'carversion.update' : 'carversion.store', version?.id), {
+        post(route(isUpdate ? 'car.settings.version.update' : 'car.settings.version.store', version?.id), {
             onSuccess: () => setOpen(false),
         });
     };

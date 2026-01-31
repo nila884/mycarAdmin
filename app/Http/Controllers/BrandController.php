@@ -43,7 +43,7 @@ class BrandController extends Controller
 
     try {
         $this->brandService->Create($request);
-        return redirect()->route('carbrand.index')
+        return redirect()->route('car.settings.brand')
                          ->with('success', 'Brand created successfully!');
     } catch (\Exception $e) {
         // Log the error for AWS debugging, don't use dd() in production
@@ -63,7 +63,7 @@ class BrandController extends Controller
         }
         try {
             $this->brandService->Update($request, $brand);
-            return redirect()->route('carbrand.index')
+            return redirect()->route('car.settings.brand')
                              ->with('success', 'Brand updated successfully!');
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to update brand. Please try again.']);

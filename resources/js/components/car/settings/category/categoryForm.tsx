@@ -36,7 +36,7 @@ export default function CategoryForm({ category }: { category?: CategoryItem }) 
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(isUpdate ? route('carcategory.update', category!.id) : route('carcategory.store'), { onSuccess: () => setOpen(false) });
+        post(isUpdate ? route('car.settings.category.update', category!.id) : route('car.settings.category.store'), { onSuccess: () => setOpen(false) });
     };
 
     return (

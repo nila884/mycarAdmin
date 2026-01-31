@@ -16,7 +16,7 @@ const AgencyForm: React.FC<Props> = ({ agency }) => {
     const isUpdate = !!agency;
     const [open, setOpen] = useState(false);
 
-    const { data, setData, post, put, processing, errors, reset } = useForm({
+    const { data, setData, post, patch, processing, errors, reset } = useForm({
         name: agency?.name || '',
         business_registration_number: agency?.business_registration_number || '',
         tax_identification_number: agency?.tax_identification_number || '',
@@ -31,14 +31,14 @@ const AgencyForm: React.FC<Props> = ({ agency }) => {
         e.preventDefault();
 
         // Check your artisan route:list for the exact Name column value
-        if (isUpdate) {
+        if (isUpdate &&agency.id) {
             // Use PUT for updates (use the existing `put` from useForm)
-            put(route('delivery-driver-agency.update', agency?.id ?? undefined), {
+            patch(route('shipping.delivery-driver-agency.update', agency.id), {
                 onSuccess: () => setOpen(false),
             });
         } else {
             // Ensure this matches the Name of the POST shipping/agencies route
-            post(route('delivery-driver-agency.store'), {
+            post(route('shipping.delivery-driver-agency.store'), {
                 onSuccess: () => {
                     setOpen(false);
                     reset();

@@ -14,6 +14,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+    'admin_path' => env('ADMIN_SECRET_PATH', 'admin-default'),
 
     /*
     |--------------------------------------------------------------------------

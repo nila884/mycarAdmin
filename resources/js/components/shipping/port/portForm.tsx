@@ -40,7 +40,7 @@ const PortForm: React.FC<PortFormProps> = ({ port, countries }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const routeName = isUpdate ? 'port.update' : 'port.store';
+        const routeName = isUpdate ? 'shipping.port.update' : 'shipping.port.store';
         const routeParams = isUpdate ? [port!.id] : [];
 
         post(route(routeName, ...routeParams), {

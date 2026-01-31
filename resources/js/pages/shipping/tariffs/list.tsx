@@ -19,7 +19,7 @@ export default function DeliveryTariffList({ delivery_tariffs, countries, ports,
         if (id == null) return;
         const parsedId = typeof id === 'string' ? Number(id) : id;
         if (confirm('Are you sure you want to delete this delivery tariff?')) {
-            router.delete(route('delivery-tariffs.destroy', parsedId));
+            router.delete(route('shipping.delivery-tariffs.destroy', parsedId));
         }
     };
 

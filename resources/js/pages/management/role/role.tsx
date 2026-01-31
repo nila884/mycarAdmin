@@ -42,20 +42,17 @@ interface RoleProps {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Role settings',
-        href: '/management/role/list',
+        href: 'management.roles',
     },
 ];
 
 // Update the component to accept props
 export default function role({ roles, permissions }: RoleProps) {
-    // Destructure roles from props
-
-    console.log(roles.data);
 
     function handleDelete(id: number) {
         if (!window.confirm('Are you sure you want to delete this role?')) return;
 
-        router.delete(`/management/role/${id}`, {
+        router.delete(route('management.roles.destroy',id), {
             preserveScroll: true,
             onSuccess: () => {
                 // optional: toast or reload logic

@@ -49,10 +49,9 @@ class ModuleController extends Controller
             throw new ValidationException($validator);
         }
         try {
-            return $this->moduleService->Create($request);
+            $this->moduleService->Create($request);
             // return
-            // return redirect()->route('module.index')
-            //     ->with('success', 'Module created successfully!');
+            return redirect()->back()->with('success', 'Module created successfully!');
         } catch (\Exception $e) {
             // return back()->withErrors(['general' => 'Failed to create brand. Please try again.']);
             return [
@@ -62,38 +61,19 @@ class ModuleController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Module $module)
     {
-        $validator = $request->validate([
-
-            'name' => ['required', Rule::unique('modules', 'name')->ignore($module->id)],
-        ]);
-        // if ($validator->fails()) {
-        //     throw new ValidationException($validator);
-        // }
+        $validator = $this->moduleService->DataValidation($request, 'patch', $module);
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
         try {
-            return $this->moduleService->Update($request, $module);
-            // return redirect()->route('module.index')
-            //     ->with('success', 'Module updated successfully!');
+            $this->moduleService->Update($request, $module);
+            return redirect()->back()->with('success', 'Module updated successfully!');
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to update brand. Please try again.']);
         }
@@ -106,9 +86,9 @@ class ModuleController extends Controller
     {
 
         try {
-            return $this->moduleService->Delete($module);
+            $this->moduleService->Delete($module);
 
-            return redirect()->route('module.index')
+            return redirect()->back()
                 ->with('success', 'Module deleted successfully!');
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to delete brand. Please try again.']);

@@ -40,7 +40,7 @@ interface FeatureProps {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Car Feature settings',
-        href: '/car/settings/feature',
+        href: 'car.settings.feature',
     },
 ];
 
@@ -48,7 +48,7 @@ export default function Feature({ features }: FeatureProps) {
     function handleDelete(id: number) {
         if (!window.confirm('Are you sure you want to delete this feature?')) return;
 
-        router.delete(route('carfeature.destroy', id), {
+        router.delete(route('car.settings.feature.destroy', id), {
             preserveScroll: true,
             onSuccess: () => {
                 // optional: toast or reload logic

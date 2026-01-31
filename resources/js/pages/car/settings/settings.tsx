@@ -8,7 +8,7 @@ import CarSettingLayout from '@/layouts/car/settings/layout';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Car settings',
-        href: '/car/settings',
+        href: 'carsettings',
     },
 ];
 

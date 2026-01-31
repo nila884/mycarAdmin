@@ -103,7 +103,7 @@ const SellerForm: React.FC<SellerFormProps> = ({ seller, countries }) => {
             return;
         }
 
-        const url = isUpdate ? route('carseller.update', seller.id) : route('carseller.store');
+        const url = isUpdate ? route('car.settings.seller.update', seller.id) : route('car.settings.seller.store');
         
         post(url, {
             forceFormData: true,

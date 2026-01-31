@@ -25,7 +25,7 @@ interface brandProps {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Car brand settings',
-        href: '/car/settings/brand',
+        href: 'car.settings.brand',
     },
 ];
 
@@ -36,7 +36,7 @@ export default function brand({ brands }: brandProps) {
     function handleDelete(id: number) {
         if (!window.confirm('Are you sure you want to delete this brand?')) return;
 
-        router.delete(`/car/settings/brand/${id}`, {
+        router.delete(route('car.settings.brand.destroy', id), {
             preserveScroll: true,
             onSuccess: () => {
                 // optional: toast or reload logic

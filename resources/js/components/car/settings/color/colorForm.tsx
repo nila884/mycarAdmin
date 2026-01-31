@@ -24,7 +24,7 @@ interface ColorFormProps {
 const ColorForm: React.FC<ColorFormProps> = ({ color }) => {
     const isUpdate = !!color;
     const title = isUpdate ? `Update ${color?.name}` : 'Create New Color';
-    const routeName = isUpdate ? 'color.update' : 'color.store';
+    const routeName = isUpdate ? 'car.settings.color.update' : 'car.settings.color.store';
     const submitText = isUpdate ? 'Update Color' : 'Create Color';
 
     const [open, setOpen] = useState(false);

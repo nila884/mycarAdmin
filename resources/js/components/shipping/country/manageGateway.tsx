@@ -41,7 +41,7 @@ const ManageGateways: React.FC<Props> = ({ country, ports }) => {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('country.gateways.update', country.id), {
+        post(route('shipping.country.gateways.update', country.id), {
             onSuccess: () => setOpen(false),
         });
     };

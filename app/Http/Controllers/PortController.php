@@ -34,7 +34,7 @@ class PortController extends Controller
             throw new ValidationException($validator);
         }
         $this->portService->Create($request);
-        return redirect()->route('port.index')->with('success', 'Port created successfully!');
+        return redirect()->back()->with('success', 'Port created successfully!');
     }
 
     public function update(Request $request, Port $port)
@@ -44,13 +44,13 @@ class PortController extends Controller
             throw new ValidationException($validator);
         }
         $this->portService->Update($request, $port);
-        return redirect()->route('port.index')->with('success', 'Port updated successfully!');
+        return redirect()->back()->with('success', 'Port updated successfully!');
     }
 
     public function destroy(Port $port)
     {
         $this->portService->Delete($port);
-        return redirect()->route('port.index')->with('success', 'Port deleted successfully!');
+        return redirect()->back()->with('success', 'Port deleted successfully!');
     }
 
     public function apiIndex(): JsonResponse

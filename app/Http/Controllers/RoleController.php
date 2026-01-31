@@ -8,6 +8,8 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Illuminate\Validation\ValidationException;
+
 
 class RoleController extends Controller
 {
@@ -49,20 +51,20 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-        $msg = ['permission.required' => 'Select 1 or more permissions'];
 
-        $data = $request->validate([
-            'name' => ['required', 'unique:roles,name'],
-            'permission' => ['required', 'array', 'exists:permissions,id'],
-        ], $msg);
-
-        // if ($data->fails()) {
-        //     return back()->withInput()->withErrors($data);
-        // }
-        $role = $this->roleService->Create($request);
-
-        return back()->with('success', 'Role successfully created.');
+        $validator = $this->roleService->DataValidation($request, 'post');
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+        try {
+            $this->roleService->Create($request);
+            return redirect()->back()->with('success', 'Role created successfully!');
+        } catch (\Exception $e) {
+            return [
+                'status' => false,
+                'msg' => 'Failed to create Role. Please try again.',
+            ];
+        }
     }
 
     /**
@@ -86,14 +88,16 @@ class RoleController extends Controller
      */
     public function update(Request $request, Role $role)
     {
-        $data = $request->validate([
-            'name' => ['required', Rule::unique('roles', 'name')->ignore($role->id)],
-            'permission' => ['required', 'array', 'exists:permissions,id'],
-        ]);
-
-        $role = $this->roleService->Update($request, $role);
-
-        return back()->with('success', "Role ($role->name) successfully updated.");
+        $validator = $this->roleService->DataValidation($request, 'patch', $role);
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+        try {
+            $this->roleService->Update($request, $role);
+            return redirect()->back()->with('success', 'Role updated successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['general' => 'Failed to update role. Please try again.']);
+        }
     }
 
     /**
@@ -101,9 +105,17 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
-        $name = $role->name;
-        $this->roleService->Delete($role);
+        // $name = $role->name;
+        // $this->roleService->Delete($role);
 
-        return back()->with('success', "Role ($role->name) successfully updated.");
+        // return back()->with('success', "Role ($role->name) successfully updated.");
+
+                try {
+            $this->roleService->Delete($role);
+            return redirect()->back()
+                ->with('success', 'Role deleted successfully!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['general' => 'Failed to delete role. Please try again.']);
+        }        
     }
 }

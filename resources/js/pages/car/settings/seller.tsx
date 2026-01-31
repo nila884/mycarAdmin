@@ -20,7 +20,7 @@ interface SellerProps {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Car seller settings',
-        href: '/car/settings/seller',
+        href: 'car.settings.seller',
     },
 ];
 
@@ -28,7 +28,7 @@ export default function Seller({ sellers,countries }: SellerProps) {
     function handleDelete(id: number) {
         if (!window.confirm('Are you sure you want to delete this seller?')) return;
 
-        router.delete(`/car/settings/seller/${id}`, {
+        router.delete(route('car.settings.seller.destroy',id), {
             preserveScroll: true,
             onSuccess: () => {
                 console.log('Seller deleted successfully!');

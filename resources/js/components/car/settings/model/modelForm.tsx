@@ -52,7 +52,7 @@ const ModelForm: React.FC<Props> = ({ model, brands }) => {
         e.preventDefault();
         
         // Convert brand_id back to number if needed by your Laravel backend
-        post(route(isUpdate ? 'carmodel.update' : 'carmodel.store', model?.id), {
+        post(route(isUpdate ? 'car.settings.model.update' : 'car.settings.model.store', model?.id), {
             onSuccess: () => setOpen(false),
         });
     };

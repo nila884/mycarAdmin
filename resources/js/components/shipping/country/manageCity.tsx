@@ -19,14 +19,14 @@ const ManageCities: React.FC<Props> = ({ country }) => {
 
     const handleAddCity = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('cities.store'), {
+        post(route('shipping.cities.store'), {
             onSuccess: () => reset('name'),
         });
     };
 
     const handleDeleteCity = (id: number) => {
         if (confirm('Are you sure you want to remove this city?')) {
-            router.delete(route('cities.destroy', id));
+            router.delete(route('shipping.cities.destroy', id));
         }
     };
 

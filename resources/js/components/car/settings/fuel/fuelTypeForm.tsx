@@ -35,11 +35,11 @@ const FuelForm = ({ fuel }: FuelFormProps) => {
         e.preventDefault();
 
         if (isUpdate) {
-            patch(route('carfuel.update', fuel.id), {
+            patch(route('car.settings.fuel.update', fuel.id), {
                 onSuccess: () => setOpen(false),
             });
         } else {
-            post(route('carfuel.store'), {
+            post(route('car.settings.fuel.store'), {
                 onSuccess: () => {
                     setOpen(false);
                     reset();

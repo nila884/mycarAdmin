@@ -49,10 +49,10 @@ const PermissionForm: React.FC<permissionFormProps> = ({ permission, actions, mo
     let routeName: string;
     let submitText: string;
     if (isUpdate) {
-        routeName = 'permission.update';
+        routeName = 'management.permissions.update';
         submitText = 'Update Permission';
     } else {
-        routeName = 'permission.store';
+        routeName = 'management.permissions.store';
         submitText = 'Create Permission';
     }
     const { data, setData, post, patch, processing, errors, reset } = useForm<PermissionInertiaForm>({

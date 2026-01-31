@@ -37,18 +37,17 @@ interface colorProps {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'color  settings',
-        href: '/management/color/list',
+        href: 'car.settings.color',
     },
 ];
 
 // Update the component to accept props
 export default function color({ colors }: colorProps) {
-    console.log(colors);
 
     function handleDelete(id: number) {
         if (!window.confirm('Are you sure you want to delete this color?')) return;
 
-        router.delete(route('color.destroy', id), {
+        router.delete(route('car.settings.color.destroy', id), {
             preserveScroll: true,
             onSuccess: () => {},
         });

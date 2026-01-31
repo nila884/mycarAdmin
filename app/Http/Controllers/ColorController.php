@@ -51,7 +51,7 @@ class colorController extends Controller
         try {
             $this->colorService->Create($request);
 
-            return redirect()->route('color.index')
+            return redirect()->back()
                 ->with('success', 'color created successfully!');
         } catch (\Exception $e) {
             // return back()->withErrors(['general' => 'Failed to create brand. Please try again.']);
@@ -93,7 +93,7 @@ class colorController extends Controller
         try {
             $this->colorService->Update($request, $color);
 
-            return redirect()->route('color.index')
+            return redirect()->back()
                 ->with('success', 'color updated successfully!');
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to update brand. Please try again.']);

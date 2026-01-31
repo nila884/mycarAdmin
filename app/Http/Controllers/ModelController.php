@@ -46,7 +46,7 @@ class ModelController extends Controller
         }
         try {
             $this->carModelService->create($request);
-            return redirect()->route('carmodel.index')->with('success', 'Car model created successfully!');
+            return redirect()->route('car.settings.model')->with('success', 'Car model created successfully!');
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to create car model. Please try again.']);
         }
@@ -65,7 +65,7 @@ class ModelController extends Controller
 
         try {
             $this->carModelService->update($request, $carModel);
-            return redirect()->route('carmodel.index')->with('success', 'Car model updated successfully!');
+            return redirect()->route('car.settings.model')->with('success', 'Car model updated successfully!');
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'Failed to update car model. Please try again.']);
         }

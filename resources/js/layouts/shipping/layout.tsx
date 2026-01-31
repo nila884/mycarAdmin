@@ -2,45 +2,45 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
-const sidebarNavItems: NavItem[] = [
+// Use Route Names from your web.php to automatically include the secret prefix
+const sidebarNavItems = [
     {
         title: 'Shipping Countries',
-        href: '/shipping/countries/list',
+        routeName: 'shipping.country',
         icon: null,
     },
     {
         title: 'Shipping Ports',
-        href: '/shipping/ports/list',
+        routeName: 'shipping.port',
         icon: null,
     },
     {
         title: 'Shipping Prices',
-        href: '/shipping/prices/list',
+        routeName: 'shipping.shipping-rates',
         icon: null,
     },
     {
         title: 'Delivery tariffs',
-        href: '/shipping/tariffs/list',
+        routeName: 'shipping.delivery-tariffs',
         icon: null,
     },
     {
         title: 'Delivery agencies',
-        href: '/shipping/agencies/list',
+        routeName: 'shipping.delivery-driver-agency',
         icon: null,
     },
 ];
 
 export default function Layout({ children }: PropsWithChildren) {
-    // When server-side rendering, we only render the layout on the client...
+    const { url } = usePage();
+
+    // Standard Inertia check for client-side rendering
     if (typeof window === 'undefined') {
         return null;
     }
-
-    const currentPath = window.location.pathname;
 
     return (
         <div className="px-4 py-6">
@@ -49,21 +49,29 @@ export default function Layout({ children }: PropsWithChildren) {
             <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
                 <aside className="w-full max-w-xl lg:w-48">
                     <nav className="flex flex-col space-y-1 space-x-0">
-                        {sidebarNavItems.map((item, index) => (
-                            <Button
-                                key={`${item.href}-${index}`}
-                                size="sm"
-                                variant="ghost"
-                                asChild
-                                className={cn('w-full justify-start', {
-                                    'bg-muted': currentPath === item.href,
-                                })}
-                            >
-                                <Link href={item.href} prefetch>
-                                    {item.title}
-                                </Link>
-                            </Button>
-                        ))}
+                        {sidebarNavItems.map((item, index) => {
+                            // Ziggy generates the URL including the secret prefix from your .env
+                            const href = route(item.routeName);
+                            
+                            // Check if current Inertia URL matches the link path
+                            const isActive = url.startsWith(new URL(href).pathname);
+
+                            return (
+                                <Button
+                                    key={`${item.routeName}-${index}`}
+                                    size="sm"
+                                    variant="ghost"
+                                    asChild
+                                    className={cn('w-full justify-start', {
+                                        'bg-muted': isActive,
+                                    })}
+                                >
+                                    <Link href={href} prefetch>
+                                        {item.title}
+                                    </Link>
+                                </Button>
+                            );
+                        })}
                     </nav>
                 </aside>
 
